@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.nolij.zume.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+	],
+	"client": [
+		"GameRendererMixin",
+		"MouseMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

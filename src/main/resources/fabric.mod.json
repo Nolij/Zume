@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "zume",
+	"version": "${version}",
+	"name": "Zume",
+	"description": "Simple Zoom mod by Nolij",
+	"authors": [
+		"Nolij (@xdMatthewbx#1337)"
+	],
+	"contact": {
+		"website": "https://github.com/Nolij/Zume",
+		"repo": "https://github.com/Nolij/Zume"
+	},
+	"license": "OSL-3.0",
+	"icon": "assets/zume/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.nolij.zume.Zume"
+		]
+	},
+	"mixins": [
+		"zume.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"fabric": "*"
+	}
+}
