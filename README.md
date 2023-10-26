@@ -6,6 +6,8 @@ By using this project in any form, you hereby give your "express assent" for the
 
 A simple zoom mod for Fabric.
 
+This mod adds a keybind which zooms in your FOV while it's held down, allowing you to see further away, and keybinds for increasing and decreasing the zoom level.
+
 # FAQ
 
 #### Q: What version is this for?
