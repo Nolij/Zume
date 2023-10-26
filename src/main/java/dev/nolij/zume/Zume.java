@@ -3,32 +3,45 @@ package dev.nolij.zume;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.math.MathHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Zume implements ClientModInitializer {
 	
-	private static final double maxFOV = 60D;
-	private static final double minFOV = 1D;
-	private static final double zoomDelta = 0.05D;
-	public static final double defaultZoom = 0.5D;
-	public static double zoom = defaultZoom;
+	public static final String MOD_ID = "zume";
+	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	private static final String CONFIG_FILE = MOD_ID + ".json5";
+	
+	public static ZumeConfig CONFIG;
+	
+	public static double zoom = -1D;
 	
 	public static double getFOV() {
-		return minFOV + ((maxFOV - minFOV) * zoom);
+		if (zoom == -1)
+			zoom = CONFIG.defaultZoom;
+		
+		return CONFIG.minFOV + ((CONFIG.maxFOV - CONFIG.minFOV) * zoom);
 	}
 	
 	@Override
 	public void onInitializeClient() {
+		CONFIG = ZumeConfig.fromFile(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE).toFile());
+		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
 		}
 		
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (!ZumeKeyBind.ZOOM.isPressed())
+				return;
+				
 			if (ZumeKeyBind.ZOOM_IN.wasPressed() || ZumeKeyBind.ZOOM_IN.isPressed())
-				zoom -= zoomDelta;
+				zoom -= CONFIG.zoomIncrement;
 			
 			if (ZumeKeyBind.ZOOM_OUT.wasPressed() || ZumeKeyBind.ZOOM_OUT.isPressed())
-				zoom += zoomDelta;
+				zoom += CONFIG.zoomIncrement;
 			
 			zoom = MathHelper.clamp(zoom, 0D, 1D);
 		});

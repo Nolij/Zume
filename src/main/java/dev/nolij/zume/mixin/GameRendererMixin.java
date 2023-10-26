@@ -18,8 +18,12 @@ public class GameRendererMixin {
 	@Inject(method = "getFov", at = @At("HEAD"), cancellable = true)
 	public void zume$getFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
 		if (!this.renderingPanorama && ZumeKeyBind.ZOOM.isPressed()) {
-			if (ZumeKeyBind.ZOOM.wasPressed())
-				Zume.zoom = Zume.defaultZoom;
+			if (ZumeKeyBind.ZOOM.wasPressed()) {
+				ZumeKeyBind.ZOOM_IN.flushPresses();
+				ZumeKeyBind.ZOOM_OUT.flushPresses();
+				if (Zume.CONFIG.resetOnPress)
+					Zume.zoom = Zume.CONFIG.defaultZoom;
+			}
 			
 			cir.setReturnValue(Zume.getFOV());
 		}
