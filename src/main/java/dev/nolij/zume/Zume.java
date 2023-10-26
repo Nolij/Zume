@@ -24,10 +24,10 @@ public class Zume implements ClientModInitializer {
 		}
 		
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (ZumeKeyBind.ZOOM_IN.isPressed())
+			if (ZumeKeyBind.ZOOM_IN.wasPressed() || ZumeKeyBind.ZOOM_IN.isPressed())
 				zoom -= zoomDelta;
 			
-			if (ZumeKeyBind.ZOOM_OUT.isPressed())
+			if (ZumeKeyBind.ZOOM_OUT.wasPressed() || ZumeKeyBind.ZOOM_OUT.isPressed())
 				zoom += zoomDelta;
 			
 			zoom = MathHelper.clamp(zoom, 0D, 1D);
