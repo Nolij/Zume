@@ -20,7 +20,7 @@ A: I'm used to Fabric, not Forge. Additionally use of Fabric is what makes this 
 
 #### Q: Where is the config?
 
-A: I've tried to make the first release as minimal as possible. I'll be adding config support in the future, for now, I've hard-coded everything to my preferences. I avoided using magic values though, so the developers among you should be able to easily change the values and build your own version. 
+A: You'll find the config at `.minecraft/config/zume.json5`. You need to re-launch the game after modifying it for your changes to apply. I plan to eventually add some way of reloading this config file and modifying it in game at some point in the future (potentially a UI, maybe some client-side commands), but for now this is what is supported.
 
 #### Q: What kind of weird license is this?
 
