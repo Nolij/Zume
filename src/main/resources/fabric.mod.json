@@ -22,7 +22,6 @@
 	"mixins": [
 		"zume.mixins.json"
 	],
-	"accessWidener": "zume.accesswidener",
 	"depends": {
 		"fabricloader": ">=${loader_version}",
 		"fabric": "*"

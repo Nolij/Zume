@@ -1,8 +1,10 @@
 package dev.nolij.zume.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import dev.nolij.zume.Zume;
 import net.minecraft.client.Mouse;
+import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import dev.nolij.zume.ZumeKeyBind;
@@ -37,6 +39,22 @@ public class MouseMixin {
 		}
 		
 		return original;
+	}
+	
+	@ModifyExpressionValue(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
+	public boolean onMouseScroll$isSpectator(boolean original) {
+		if (Zume.CONFIG.enableZoomScrolling && ZumeKeyBind.ZOOM.isPressed())
+			return false;
+		
+		return original;
+	}
+	
+	@WrapWithCondition(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;scrollInHotbar(D)V"))
+	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, double scrollAmount) {
+		if (Zume.CONFIG.enableZoomScrolling)
+			Zume.scrollDelta += (int) scrollAmount;
+		
+		return !(Zume.CONFIG.enableZoomScrolling && ZumeKeyBind.ZOOM.isPressed());
 	}
 	
 }

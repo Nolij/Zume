@@ -22,10 +22,6 @@ public enum ZumeKeyBind {
 		return value.wasPressed();
 	}
 	
-	public void flushPresses() {
-		value.timesPressed = 0;
-	}
-	
 	ZumeKeyBind(String translationKey, InputUtil.Type type, int code, String category) {
 		this.value = new KeyBinding(translationKey, type, code, category);
 	}
