@@ -6,8 +6,9 @@
 	"mixins": [
 	],
 	"client": [
+		"ControlsListWidgetMixin",
 		"GameRendererMixin",
-		"MouseMixin"
+		"MinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

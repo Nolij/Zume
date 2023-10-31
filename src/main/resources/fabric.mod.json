@@ -24,6 +24,6 @@
 	],
 	"depends": {
 		"fabricloader": ">=${loader_version}",
-		"fabric": "*"
+		"legacy-fabric-keybinding-api-v1-common": "*"
 	}
 }

@@ -1,5 +1,6 @@
 plugins {
     id "fabric-loom" version "1.4-SNAPSHOT"
+    id "legacy-looming" version "1.4-SNAPSHOT"
     id "maven-publish"
 }
 
@@ -11,15 +12,23 @@ repositories {
     maven { url "https://jitpack.io/" }
 }
 
+loom {
+    runs {
+        client {
+            programArgs "--userProperties", "{}"
+        }
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    mappings "net.legacyfabric:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    
+	modImplementation "net.legacyfabric.legacy-fabric-api:legacy-fabric-api:${project.fabric_api_version}"
+	
     include(implementation("blue.endless:jankson:${project.jankson_version}"))
-    
+	
     include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}")))
 }
 
