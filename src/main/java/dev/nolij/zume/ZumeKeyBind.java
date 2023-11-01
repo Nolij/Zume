@@ -18,10 +18,6 @@ public enum ZumeKeyBind {
 		return value.isPressed();
 	}
 	
-	public boolean wasPressed() {
-		return value.wasPressed();
-	}
-	
 	ZumeKeyBind(String translationKey, InputUtil.Type type, int code, String category) {
 		this.value = new KeyBinding(translationKey, type, code, category);
 	}

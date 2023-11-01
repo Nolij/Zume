@@ -17,7 +17,7 @@ public class Zume implements ClientModInitializer {
 	
 	@Override
 	public void onInitializeClient() {
-		CONFIG = ZumeConfig.fromFile(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE).toFile());
+		ZumeConfig.create(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE).toFile(), config -> CONFIG = config);
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);

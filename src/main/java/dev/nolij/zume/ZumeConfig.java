@@ -5,6 +5,7 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.annotation.NonnullByDefault;
 import blue.endless.jankson.api.SyntaxError;
+import dev.nolij.zume.util.FileWatcher;
 
 import java.io.*;
 
@@ -68,33 +69,55 @@ public class ZumeConfig {
 	
 	
 	private static final JsonGrammar JSON_GRAMMAR = JsonGrammar.JANKSON;
+	private static final Jankson JANKSON = Jankson.builder()
+		.allowBareRootObject()
+		.build();
 	
-	public static ZumeConfig fromFile(final File CONFIG_FILE) {
-		final Jankson JANKSON = Jankson.builder()
-			.allowBareRootObject()
-			.build();
+	@FunctionalInterface
+	public interface ConfigSetter {
+		void set(ZumeConfig config);
+	}
+	
+	private static ZumeConfig readFromFile(final File CONFIG_FILE) {
+		if (!CONFIG_FILE.exists())
+			return new ZumeConfig();
 		
-		ZumeConfig config;
-		
-		if (CONFIG_FILE.exists()) {
-			try {
-				config = JANKSON.fromJson(JANKSON.load(CONFIG_FILE), ZumeConfig.class);
-			} catch (IOException | SyntaxError e) {
-				Zume.LOGGER.error(e.toString());
-				config = new ZumeConfig();
-			}
-		} else {
-			config = new ZumeConfig();
+		try {
+			return JANKSON.fromJson(JANKSON.load(CONFIG_FILE), ZumeConfig.class);
+		} catch (IOException | SyntaxError e) {
+			Zume.LOGGER.error(e.toString());
+			return new ZumeConfig();
 		}
-		
+	}
+	
+	private void writeToFile(final File CONFIG_FILE) {
 		try (final FileWriter configWriter = new FileWriter(CONFIG_FILE)) {
-			JANKSON.toJson(config).toJson(configWriter, JSON_GRAMMAR, 0);
+			JANKSON.toJson(this).toJson(configWriter, JSON_GRAMMAR, 0);
 			configWriter.flush();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public static void create(final File CONFIG_FILE, ConfigSetter setter) {		
+		ZumeConfig config = readFromFile(CONFIG_FILE);
 		
-		return config;
+		// write new options and comment updates to disk
+		config.writeToFile(CONFIG_FILE);
+		
+		setter.set(config);
+		
+		try {
+			FileWatcher.onFileChange(CONFIG_FILE.toPath(), () -> {
+				Zume.LOGGER.info("Reloading config...");
+				
+				ZumeConfig newConfig = readFromFile(CONFIG_FILE);
+				
+				setter.set(newConfig);
+			});
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }
