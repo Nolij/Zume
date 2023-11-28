@@ -46,6 +46,18 @@ public class Zume implements ClientModInitializer {
 		return zoom;
 	}
 	
+	public static double getMouseSensitivity(double original) {
+		if (!ZumeKeyBind.ZOOM.isPressed())
+			return original;
+		
+		final double zoom = getZoom();
+		var result = original;
+		
+		result *= CONFIG.mouseSensitivityFloor + (zoom * (1 - CONFIG.mouseSensitivityFloor));
+		
+		return result;
+	}
+	
 	public static double getFOV() {
 		var zoom = getZoom();
 		

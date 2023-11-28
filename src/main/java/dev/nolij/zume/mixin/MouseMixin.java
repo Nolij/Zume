@@ -24,21 +24,13 @@ public class MouseMixin {
 	@SuppressWarnings("unchecked")
 	@ModifyExpressionValue(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;", ordinal = 0), require = 0)
 	public <T> T zume$updateMouse$getMouseSensitivity$getValue(T original) {
-		if (!Zume.CONFIG.enableCinematicZoom && ZumeKeyBind.ZOOM.isPressed()) {
-			return (T) (Object) (((Double) original) * Zume.CONFIG.mouseSensitivityMultiplier);
-		}
-		
-		return original;
+		return (T) (Object) Zume.getMouseSensitivity((Double) original);
 	}
 	
 	@SuppressWarnings("MixinAnnotationTarget")
 	@ModifyExpressionValue(method = "updateMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/class_315;field_1843:D", remap = false), require = 0)
 	public double zume$updateMouse$mouseSensitivity(double original) {
-		if (!Zume.CONFIG.enableCinematicZoom && ZumeKeyBind.ZOOM.isPressed()) {
-			return original * Zume.CONFIG.mouseSensitivityMultiplier;
-		}
-		
-		return original;
+		return Zume.getMouseSensitivity(original);
 	}
 	
 	@ModifyExpressionValue(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))

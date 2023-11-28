@@ -19,10 +19,10 @@ public class ZumeConfig {
 	public boolean enableCinematicZoom = true;
 	
 	@Comment("""
-		\nMouse Sensitivity will be multiplied by this value while zooming (use `1.0` for no effect).
-		Only applies if `enableCinematicZoom` is set to `false`.
-		DEFAULT: `0.3`""")
-	public double mouseSensitivityMultiplier = 0.3D;
+		\nMouse Sensitivity will not be reduced below this amount while zoomed in.
+		Set to `1.0` to prevent it from being changed at all (not recommended without `enableCinematicZoom`).
+		DEFAULT: `0.4`""")
+	public double mouseSensitivityFloor = 0.4D;
 	
 	@Comment("""
 		\nSpeed for Zoom In/Out key binds.
