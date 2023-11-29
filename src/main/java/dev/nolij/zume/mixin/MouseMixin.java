@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import dev.nolij.zume.Zume;
 import net.minecraft.client.Mouse;
 import net.minecraft.entity.player.PlayerInventory;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import dev.nolij.zume.ZumeKeyBind;
@@ -27,7 +28,7 @@ public class MouseMixin {
 		return (T) (Object) Zume.getMouseSensitivity((Double) original);
 	}
 	
-	@SuppressWarnings("MixinAnnotationTarget")
+	@Dynamic
 	@ModifyExpressionValue(method = "updateMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/class_315;field_1843:D", remap = false), require = 0)
 	public double zume$updateMouse$mouseSensitivity(double original) {
 		return Zume.getMouseSensitivity(original);
