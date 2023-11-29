@@ -17,7 +17,10 @@ public class Zume implements ClientModInitializer {
 	
 	@Override
 	public void onInitializeClient() {
-		ZumeConfig.create(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE).toFile(), config -> CONFIG = config);
+		ZumeConfig.create(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE).toFile(), config -> {
+			CONFIG = config;
+			inverseSmoothness = 1D / CONFIG.zoomSmoothnessMs;
+		});
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
@@ -27,9 +30,10 @@ public class Zume implements ClientModInitializer {
 	private static double fromZoom = -1D;
 	private static double zoom = -1D;
 	private static long tweenStart = 0L;
+	private static double inverseSmoothness = 1D;
 	
 	private static double getZoom() {
-		final long tweenLength = CONFIG.zoomSmoothness;
+		final long tweenLength = CONFIG.zoomSmoothnessMs;
 		
 		if (tweenLength != 0) {
 			final long timestamp = System.currentTimeMillis();
@@ -37,13 +41,28 @@ public class Zume implements ClientModInitializer {
 			
 			if (tweenEnd >= timestamp) {
 				final long delta = timestamp - tweenStart;
-				final double progress = delta / (double) tweenLength;
+				final double progress = 1 - delta * inverseSmoothness;
 				
-				return fromZoom + ((zoom - fromZoom) * progress);
+				var easedProgress = progress;
+				for (var i = 1; i < CONFIG.easingExponent; i++)
+					easedProgress *= progress;
+				easedProgress = 1 - easedProgress;
+				
+				return fromZoom + ((zoom - fromZoom) * easedProgress);
 			}
 		}
 		
 		return zoom;
+	}
+	
+	public static double getFOV() {
+		var zoom = getZoom();
+		
+		if (CONFIG.useQuadratic) {
+			zoom *= zoom;
+		}
+		
+		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, realFOV) - CONFIG.minFOV) * zoom);
 	}
 	
 	public static double getMouseSensitivity(double original) {
@@ -56,16 +75,6 @@ public class Zume implements ClientModInitializer {
 		result *= CONFIG.mouseSensitivityFloor + (zoom * (1 - CONFIG.mouseSensitivityFloor));
 		
 		return result;
-	}
-	
-	public static double getFOV() {
-		var zoom = getZoom();
-		
-		if (CONFIG.useQuadratic) {
-			zoom *= zoom;
-		}
-		
-		return CONFIG.minFOV + ((CONFIG.maxFOV - CONFIG.minFOV) * zoom);
 	}
 	
 	private static void setZoom(double targetZoom) {
@@ -81,15 +90,20 @@ public class Zume implements ClientModInitializer {
 		zoom = MathHelper.clamp(targetZoom, 0D, 1D);
 	}
 	
+	public static boolean isActive() {
+		return ZumeKeyBind.ZOOM.isPressed();
+	}
+	
 	public static int scrollDelta = 0;
+	public static double realFOV = -1D;
 	private static boolean wasZooming = false;
 	private static long prevTimestamp;
 	public static void render() {
 		final long timestamp = System.currentTimeMillis();
-		final boolean zooming = ZumeKeyBind.ZOOM.isPressed();
+		final boolean zooming = isActive();
 		
 		if (zooming) {
-			if (!wasZooming && CONFIG.resetOnPress) {
+			if (!wasZooming) {
 				zoom = 1D;
 				setZoom(CONFIG.defaultZoom);
 			}
@@ -97,14 +111,14 @@ public class Zume implements ClientModInitializer {
 			final long timeDelta = timestamp - prevTimestamp;
 			
 			if (CONFIG.enableZoomScrolling && scrollDelta != 0) {
-				setZoom(zoom - scrollDelta * CONFIG.zoomSpeed / 150D);
+				setZoom(zoom - scrollDelta * CONFIG.zoomSpeed * 4E-3D);
 			} else if (ZumeKeyBind.ZOOM_IN.isPressed() ^ ZumeKeyBind.ZOOM_OUT.isPressed()) {
-				final double interpolatedIncrement = CONFIG.zoomSpeed / 10000D * timeDelta;
+				final double interpolatedIncrement = CONFIG.zoomSpeed * 1E-4D * timeDelta;
 				
 				if (ZumeKeyBind.ZOOM_IN.isPressed())
-					setZoomNoTween(zoom - interpolatedIncrement);
+					setZoom(zoom - interpolatedIncrement);
 				else if (ZumeKeyBind.ZOOM_OUT.isPressed())
-					setZoomNoTween(zoom + interpolatedIncrement);
+					setZoom(zoom + interpolatedIncrement);
 			}
 		}
 		

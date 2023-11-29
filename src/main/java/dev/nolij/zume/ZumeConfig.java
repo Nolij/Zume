@@ -26,8 +26,8 @@ public class ZumeConfig {
 	
 	@Comment("""
 		\nSpeed for Zoom In/Out key binds.
-		DEFAULT: `15`""")
-	public short zoomSpeed = 15;
+		DEFAULT: `20`""")
+	public short zoomSpeed = 20;
 	
 	@Comment("""
 		\nAllows you to zoom in and out by scrolling up and down on your mouse while zoom is active.
@@ -38,8 +38,15 @@ public class ZumeConfig {
 	@Comment("""
 		\nFOV changes will be spread out over this many milliseconds.
 		Set to `0` to minimize latency.
-		DEFAULT: `75`""")
-	public short zoomSmoothness = 75;
+		DEFAULT: `150`""")
+	public short zoomSmoothnessMs = 150;
+	
+	@Comment("""
+		\nSmoothing animation progress will be raised to this exponent for easing. Higher numbers will feel faster.
+		It is recommended to also increase `zoomSmoothnessMs` when increasing this.
+		Set to `1` to disable.
+		DEFAULT: `4`""")
+	public short easingExponent = 4;
 	
 	@Comment("""
 		\nZoom percentage will be squared before being applied if `true`.
@@ -51,11 +58,6 @@ public class ZumeConfig {
 		\nDefault starting zoom percentage.
 		DEFAULT: `0.5`""")
 	public double defaultZoom = 0.5D;
-	
-	@Comment("""
-		\nReset zoom level when Zoom key bind is pressed.
-		DEFAULT: `true`""")
-	public boolean resetOnPress = true;
 	
 	@Comment("""
 		\nMaximum zoom FOV.
