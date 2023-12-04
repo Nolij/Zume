@@ -19,8 +19,6 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
     
     include(implementation("blue.endless:jankson:${project.jankson_version}"))
-    
-    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}")))
 
     annotationProcessor "com.github.bsideup.jabel:jabel-javac-plugin:${project.jabel_version}"
     compileOnly "com.github.bsideup.jabel:jabel-javac-plugin:${project.jabel_version}"
