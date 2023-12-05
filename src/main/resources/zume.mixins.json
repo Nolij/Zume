@@ -6,8 +6,8 @@
 	"mixins": [
 	],
 	"client": [
-		"GameRendererMixin",
-		"MouseMixin"
+		"class_555Mixin",
+		"MinecraftMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

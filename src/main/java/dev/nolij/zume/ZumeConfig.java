@@ -22,7 +22,7 @@ public class ZumeConfig {
 		\nMouse Sensitivity will not be reduced below this amount while zoomed in.
 		Set to `1.0` to prevent it from being changed at all (not recommended without `enableCinematicZoom`).
 		DEFAULT: `0.4`""")
-	public double mouseSensitivityFloor = 0.4D;
+	public float mouseSensitivityFloor = 0.4F;
 	
 	@Comment("""
 		\nSpeed for Zoom In/Out key binds.
@@ -57,17 +57,17 @@ public class ZumeConfig {
 	@Comment("""
 		\nDefault starting zoom percentage.
 		DEFAULT: `0.5`""")
-	public double defaultZoom = 0.5D;
+	public float defaultZoom = 0.5F;
 	
 	@Comment("""
 		\nMaximum zoom FOV.
 		DEFAULT: `60.0`""")
-	public double maxFOV = 60D;
+	public float maxFOV = 60F;
 	
 	@Comment("""
 		\nMinimum zoom FOV.
 		DEFAULT: `1.0`""")
-	public double minFOV = 1D;
+	public float minFOV = 1F;
 	
 	
 	private static final JsonGrammar JSON_GRAMMAR = JsonGrammar.JANKSON;

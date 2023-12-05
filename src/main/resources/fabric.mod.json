@@ -17,13 +17,17 @@
 	"entrypoints": {
 		"client": [
 			"dev.nolij.zume.Zume"
+		],
+		"stationapi:event_bus_client": [
+			"dev.nolij.zume.event.KeyBindingRegistrar"
 		]
 	},
 	"mixins": [
 		"zume.mixins.json"
 	],
+	"accessWidener": "zume.accesswidener",
 	"depends": {
 		"fabricloader": ">=${loader_version}",
-		"fabric": "*"
+		"stationapi": "*"
 	}
 }

@@ -1,24 +1,62 @@
 plugins {
-    id "fabric-loom" version "1.4-SNAPSHOT"
+    id "babric-loom" version "1.4-SNAPSHOT"
     id "maven-publish"
 }
 
 version = project.mod_version
 group = project.maven_group
 
+loom {
+    gluedMinecraftJar()
+    customMinecraftManifest.set("https://babric.github.io/manifest-polyfill/${minecraft_version}.json")
+    intermediaryUrl.set("https://maven.glass-launcher.net/babric/babric/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
+    
+    accessWidenerPath = file("src/main/resources/zume.accesswidener")
+}
+
 repositories {
     mavenCentral()
+    maven {
+        name = "Babric"
+        url = "https://maven.glass-launcher.net/babric"
+    }
+    maven {
+        name = "Glass Releases"
+        url = "https://maven.glass-launcher.net/releases"
+    }
+    maven {
+        name = "Glass Snapshots"
+        url = "https://maven.glass-launcher.net/snapshots"
+    }
+    maven {
+        name = "Forge"
+        url = "https://maven.minecraftforge.net/"
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
     maven { url "https://jitpack.io/" }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    mappings "net.glasslauncher:biny:${project.biny_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    modImplementation "net.modificationstation:StationAPI:${project.station_api_version}"
     
     include(implementation("blue.endless:jankson:${project.jankson_version}"))
+
+    implementation "org.slf4j:slf4j-api:1.8.0-beta4"
+    implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
 
     annotationProcessor "com.github.bsideup.jabel:jabel-javac-plugin:${project.jabel_version}"
     compileOnly "com.github.bsideup.jabel:jabel-javac-plugin:${project.jabel_version}"

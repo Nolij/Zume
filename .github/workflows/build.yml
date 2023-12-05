@@ -17,5 +17,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: zume
-          path: "**/zume-*.jar"
+          name: primitive-zume
+          path: "**/primitive-zume-*.jar"

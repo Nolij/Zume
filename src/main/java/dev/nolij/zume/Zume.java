@@ -1,9 +1,10 @@
 package dev.nolij.zume;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.class_555;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.SmoothUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,20 +20,16 @@ public class Zume implements ClientModInitializer {
 	public void onInitializeClient() {
 		ZumeConfig.create(FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE).toFile(), config -> {
 			CONFIG = config;
-			inverseSmoothness = 1D / CONFIG.zoomSmoothnessMs;
+			inverseSmoothness = 1F / CONFIG.zoomSmoothnessMs;
 		});
-		
-		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
-			KeyBindingHelper.registerKeyBinding(keyBind.value);
-		}
 	}
 	
-	private static double fromZoom = -1D;
-	private static double zoom = -1D;
+	private static float fromZoom = -1F;
+	private static float zoom = -1F;
 	private static long tweenStart = 0L;
-	private static double inverseSmoothness = 1D;
+	private static float inverseSmoothness = 1F;
 	
-	private static double getZoom() {
+	private static float getZoom() {
 		final long tweenLength = CONFIG.zoomSmoothnessMs;
 		
 		if (tweenLength != 0) {
@@ -41,7 +38,7 @@ public class Zume implements ClientModInitializer {
 			
 			if (tweenEnd >= timestamp) {
 				final long delta = timestamp - tweenStart;
-				final double progress = 1 - delta * inverseSmoothness;
+				final float progress = 1 - delta * inverseSmoothness;
 				
 				var easedProgress = progress;
 				for (var i = 1; i < CONFIG.easingExponent; i++)
@@ -55,7 +52,7 @@ public class Zume implements ClientModInitializer {
 		return zoom;
 	}
 	
-	public static double getFOV() {
+	public static float getFOV() {
 		var zoom = getZoom();
 		
 		if (CONFIG.useQuadratic) {
@@ -65,11 +62,11 @@ public class Zume implements ClientModInitializer {
 		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, realFOV) - CONFIG.minFOV) * zoom);
 	}
 	
-	public static double getMouseSensitivity(double original) {
+	public static float getMouseSensitivity(float original) {
 		if (!ZumeKeyBind.ZOOM.isPressed())
 			return original;
 		
-		final double zoom = getZoom();
+		final float zoom = getZoom();
 		var result = original;
 		
 		result *= CONFIG.mouseSensitivityFloor + (zoom * (1 - CONFIG.mouseSensitivityFloor));
@@ -77,17 +74,21 @@ public class Zume implements ClientModInitializer {
 		return result;
 	}
 	
-	private static void setZoom(double targetZoom) {
-		final double currentZoom = getZoom();
-		tweenStart = System.currentTimeMillis();
-		fromZoom = currentZoom;
-		zoom = MathHelper.clamp(targetZoom, 0D, 1D);
+	private static float clamp(float value, float min, float max) {
+		return Math.max(Math.min(value, max), min);
 	}
 	
-	private static void setZoomNoTween(double targetZoom) {
+	private static void setZoom(float targetZoom) {
+		final float currentZoom = getZoom();
+		tweenStart = System.currentTimeMillis();
+		fromZoom = currentZoom;
+		zoom = clamp(targetZoom, 0F, 1F);
+	}
+	
+	private static void setZoomNoTween(float targetZoom) {
 		tweenStart = 0L;
-		fromZoom = -1D;
-		zoom = MathHelper.clamp(targetZoom, 0D, 1D);
+		fromZoom = -1F;
+		zoom = clamp(targetZoom, 0F, 1F);
 	}
 	
 	public static boolean isActive() {
@@ -95,7 +96,7 @@ public class Zume implements ClientModInitializer {
 	}
 	
 	public static int scrollDelta = 0;
-	public static double realFOV = -1D;
+	public static float realFOV = -1F;
 	private static boolean wasZooming = false;
 	private static long prevTimestamp;
 	public static void render() {
@@ -104,16 +105,21 @@ public class Zume implements ClientModInitializer {
 		
 		if (zooming) {
 			if (!wasZooming) {
-				zoom = 1D;
+				if (CONFIG.enableCinematicZoom && !Minecraft.INSTANCE.options.cinematicMode) {
+					final class_555 class555 = Minecraft.INSTANCE.field_2818;
+					class555.field_2353 = new SmoothUtil();
+					class555.field_2354 = new SmoothUtil();
+				}
+				zoom = 1F;
 				setZoom(CONFIG.defaultZoom);
 			}
 			
 			final long timeDelta = timestamp - prevTimestamp;
 			
 			if (CONFIG.enableZoomScrolling && scrollDelta != 0) {
-				setZoom(zoom - scrollDelta * CONFIG.zoomSpeed * 4E-3D);
+				setZoom(zoom - scrollDelta * CONFIG.zoomSpeed * 4E-3F);
 			} else if (ZumeKeyBind.ZOOM_IN.isPressed() ^ ZumeKeyBind.ZOOM_OUT.isPressed()) {
-				final double interpolatedIncrement = CONFIG.zoomSpeed * 1E-4D * timeDelta;
+				final float interpolatedIncrement = CONFIG.zoomSpeed * 1E-4F * timeDelta;
 				
 				if (ZumeKeyBind.ZOOM_IN.isPressed())
 					setZoom(zoom - interpolatedIncrement);

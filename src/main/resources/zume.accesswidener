@@ -1,0 +1,5 @@
+accessWidener   v2  named
+
+accessible field net/minecraft/client/Minecraft INSTANCE Lnet/minecraft/client/Minecraft;
+accessible field net/minecraft/class_555 field_2353 Lnet/minecraft/client/util/SmoothUtil;
+accessible field net/minecraft/class_555 field_2354 Lnet/minecraft/client/util/SmoothUtil;
