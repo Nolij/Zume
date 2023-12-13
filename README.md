@@ -4,7 +4,7 @@ By using this project in any form, you hereby give your "express assent" for the
 
 # Zume
 
-A simple zoom mod for Fabric.
+An ~~over-engineered~~ simple zoom mod.
 
 This mod adds a keybind which zooms in your FOV while it's held down, allowing you to see further away, and keybinds for increasing and decreasing the zoom level.
 
@@ -12,11 +12,14 @@ This mod adds a keybind which zooms in your FOV while it's held down, allowing y
 
 #### Q: What version is this for?
 
-A: According to my testing, this should support just about any Minecraft version supported by Fabric itself, from 14.4 (earlier versions lacked a proper key bind API) to the latest snapshot (as of writing).
+A: Zume supports the following platforms:
+- Fabric: Any version supported by Fabric Keybinding API v1 (currently 14.4+)
+- Legacy Fabric: Any version supported by Legacy Fabric Keybinding API v1 (currently 7.10 - 12.2)
+- Babric (Fabric for Minecraft Beta): Any version supported by Station API (currently b7.3)
 
-#### Q: Why Fabric?
+#### Q: Can you add support for \<insert platform here>?
 
-A: I'm used to Fabric, not Forge. Additionally use of Fabric is what makes this mod so universally compatible with Minecraft. I have no intention as of now to port to Forge/NeoForge, and it should work fine on Quilt so long as their Fabric compatibility continues to work.
+A: I intend to add support for Archaic Forge (Forge 7.10) and Vintage Forge (Forge 12.2) eventually (no promises). Outside of those two, PRs are welcome.
 
 #### Q: Where is the config?
 

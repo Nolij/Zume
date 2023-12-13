@@ -16,18 +16,14 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"dev.nolij.zume.ZumeBootstrapper"
-		],
-		"stationapi:event_bus_client": [
-			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
+			"dev.nolij.zume.modern.ModernZume"
 		]
 	},
 	"mixins": [
-		"zume-modern.mixins.json",
-		"zume-primitive.mixins.json",
-		"zume-legacy.mixins.json"
+		"zume-modern.mixins.json"
 	],
 	"depends": {
-		"fabricloader": [">=${loader_version}", "0.14.24-babric.1"]
+		"fabricloader": ">=${loader_version}",
+		"fabric-key-binding-api-v1": "*"
 	}
 }

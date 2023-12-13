@@ -16,18 +16,17 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"dev.nolij.zume.ZumeBootstrapper"
+			"dev.nolij.zume.primitive.PrimitiveZume"
 		],
 		"stationapi:event_bus_client": [
 			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
 		]
 	},
 	"mixins": [
-		"zume-modern.mixins.json",
-		"zume-primitive.mixins.json",
-		"zume-legacy.mixins.json"
+		"zume-primitive.mixins.json"
 	],
 	"depends": {
-		"fabricloader": [">=${loader_version}", "0.14.24-babric.1"]
+		"fabricloader": ">=${loader_version}",
+		"station-keybindings-v0": "*"
 	}
 }

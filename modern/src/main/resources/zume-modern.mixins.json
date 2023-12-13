@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.nolij.zume.modern.mixin",
+	"plugin": "dev.nolij.zume.modern.ModernZumeMixinPlugin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+	],
+	"client": [
+		"GameRendererMixin",
+		"MouseMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"refmap": "zume-modern-refmap.json"
+}
