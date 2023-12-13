@@ -4,10 +4,22 @@ pluginManagement {
             name = "Fabric"
             url = "https://maven.fabricmc.net/"
         }
+        maven {
+            name = "Babric"
+            url = "https://maven.glass-launcher.net/babric"
+        }
+        maven {
+            name = "legacy-fabric"
+            url = "https://repo.legacyfabric.net/repository/legacyfabric/"
+        }
         gradlePluginPortal()
     }
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.4.0'
+    id "org.gradle.toolchains.foojay-resolver-convention" version "0.4.0"
 }
+include "common"
+include "modern"
+include "primitive"
+include "legacy"

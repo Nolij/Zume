@@ -1,0 +1,72 @@
+plugins {
+    id "babric-loom" version "1.4-SNAPSHOT"
+}
+
+loom {
+    gluedMinecraftJar()
+    customMinecraftManifest.set("https://babric.github.io/manifest-polyfill/${primitive_minecraft_version}.json")
+    intermediaryUrl.set("https://maven.glass-launcher.net/babric/babric/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
+}
+
+repositories {
+    maven {
+        name = "Babric"
+        url = "https://maven.glass-launcher.net/babric"
+    }
+    maven {
+        name = "Glass Releases"
+        url = "https://maven.glass-launcher.net/releases"
+    }
+    maven {
+        name = "Glass Snapshots"
+        url = "https://maven.glass-launcher.net/snapshots"
+    }
+    maven {
+        name = "Forge"
+        url = "https://maven.minecraftforge.net/"
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${primitive_minecraft_version}"
+    mappings "net.glasslauncher:bin:${primitive_mappings_version}"
+    modImplementation "net.fabricmc:fabric-loader:${primitive_loader_version}"
+
+    modImplementation "net.modificationstation:StationAPI:${station_api_version}"
+
+    implementation "blue.endless:jankson:${jankson_version}"
+
+    implementation "org.slf4j:slf4j-api:1.8.0-beta4"
+    implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
+
+    implementation(project(":common"))
+}
+
+processResources {
+    inputs.property "version", mod_version
+    inputs.property "loader_version", primitive_loader_version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": mod_version,
+                "loader_version": primitive_loader_version
+    }
+}
+
+// bypass gradle being dumb
+task wrapper(type: Wrapper) {
+    gradleVersion = "8.4"
+}
+task prepareKotlinBuildScriptModel {
+}

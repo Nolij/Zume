@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.nolij.zume.legacy.mixin",
+	"plugin": "dev.nolij.zume.legacy.LegacyZumeMixinPlugin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"MinecraftClientMixin"
+	],
+	"client": [
+		"GameRendererAccessor",
+		"GameRendererMixin",
+		"KeyBindingMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"refmap": "zume-legacy-refmap.json"
+}

@@ -1,0 +1,33 @@
+plugins {
+	id "babric-loom" version "1.4-SNAPSHOT"
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${modern_minecraft_version}"
+	mappings "net.fabricmc:yarn:${modern_mappings_version}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${modern_loader_version}"
+
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${modern_fabric_api_version}"
+	
+	implementation "blue.endless:jankson:${jankson_version}"
+	
+	implementation(project(":common"))
+}
+
+processResources {
+	inputs.property "version", mod_version
+	inputs.property "loader_version", modern_loader_version
+	filteringCharset "UTF-8"
+
+	filesMatching("fabric.mod.json") {
+		expand "version": mod_version,
+				"loader_version": modern_loader_version
+	}
+}
+
+// bypass gradle being dumb
+task wrapper(type: Wrapper) {
+	gradleVersion = "8.4"
+}
+task prepareKotlinBuildScriptModel {
+}
