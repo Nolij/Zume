@@ -3,7 +3,7 @@ plugins {
 }
 
 loom {
-    intermediaryUrl.set("https://maven.legacyfabric.net/net/legacyfabric/v2/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
+    intermediaryUrl.set("https://maven.legacyfabric.net/net/legacyfabric/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
     runs {
         client {
             programArgs "--userProperties", "{}"
