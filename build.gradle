@@ -33,6 +33,10 @@ allprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
+        if (it.name in ["compileMcLauncherJava", "compilePatchedMcJava"]) {
+            return
+        }
+
         it.options.encoding = "UTF-8"
 
         it.sourceCompatibility = 17 // for the IDE support
