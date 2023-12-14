@@ -1,10 +1,10 @@
 [
     {
-      "modid": "${modId}",
-      "name": "${modName}",
-      "description": "A simple zoom mod",
-      "version": "${modVersion}",
-      "mcversion": "${minecraftVersion}",
+      "modid": "zume",
+      "name": "Zume",
+      "description": "A simple zoom mod by Nolij",
+      "version": "${mod_version}",
+      "mcversion": "${minecraft_version}",
       "url": "https://github.com/Nolij/Zume",
       "updateUrl": "",
       "authorList": ["Nolij"],

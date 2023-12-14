@@ -77,6 +77,7 @@ dependencies {
     shade(project(":modern")) { transitive false }
     shade(project(":primitive")) { transitive false }
     shade(project(":legacy")) { transitive false }
+    shade(project(":archaic")) { transitive false }
 }
 
 java {
@@ -111,6 +112,10 @@ sourcesJar {
     def legacySources = project(":legacy").sourcesJar
     dependsOn legacySources
     from(legacySources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
+
+    def archaicSources = project(":archaic").sourcesJar
+    dependsOn archaicSources
+    from(archaicSources.archiveFile.map { zipTree(it) }) { exclude "mcmod.info" }
 }
 
 build.dependsOn(shadowJar)

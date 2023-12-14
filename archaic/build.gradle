@@ -1,6 +1,5 @@
 plugins {
     id "java-library"
-    id "maven-publish"
     id "com.gtnewhorizons.retrofuturagradle" version "1.3.25"
 }
 
@@ -13,14 +12,26 @@ java {
     }
 }
 
-
 minecraft {
-    mcVersion.set("1.7.10")
-
-    // Username for client run configurations
+    mcVersion.set(archaic_minecraft_version)
     username.set("Developer")
+    
+    injectedTags.put("MOD_VERSION", mod_version)
 }
 
+tasks.injectTags.outputClassName.set("${maven_group}.zume.archaic.Tags")
+
 dependencies {
+    implementation(annotationProcessor("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${unimixins_version}"))
+
+    implementation "blue.endless:jankson:${jankson_version}"
+    
     implementation(project(":common"))
+}
+
+processResources {
+    filesMatching("mcmod.info") {
+        expand  "mod_version": mod_version,
+                "minecraft_version": archaic_minecraft_version
+    }
 }

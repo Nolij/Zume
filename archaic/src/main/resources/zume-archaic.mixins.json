@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.nolij.zume.archaic.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+	],
+	"client": [
+		"dev.nolij.zume.archaic.mixin.EntityRendererAccessor",
+		"dev.nolij.zume.archaic.mixin.EntityRendererMixin",
+		"dev.nolij.zume.archaic.mixin.MinecraftMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"refmap": "zume-archaic-refmap.json"
+}
