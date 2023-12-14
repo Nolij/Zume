@@ -6,9 +6,9 @@
 	"mixins": [
 	],
 	"client": [
-		"dev.nolij.zume.archaic.mixin.EntityRendererAccessor",
-		"dev.nolij.zume.archaic.mixin.EntityRendererMixin",
-		"dev.nolij.zume.archaic.mixin.MinecraftMixin"
+		"EntityRendererAccessor",
+		"EntityRendererMixin",
+		"MinecraftMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

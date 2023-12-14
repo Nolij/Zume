@@ -21,12 +21,25 @@ minecraft {
 
 tasks.injectTags.outputClassName.set("${maven_group}.zume.archaic.Tags")
 
+def mixinProviderSpec = "com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${unimixins_version}:dev"
+
 dependencies {
-    implementation(annotationProcessor("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${unimixins_version}"))
+    annotationProcessor(mixinProviderSpec)
+    implementation(modUtils.enableMixins(mixinProviderSpec, "zume-archaic-refmap.json"))
 
     implementation "blue.endless:jankson:${jankson_version}"
     
     implementation(project(":common"))
+}
+
+jar {
+    manifest {
+        attributes (
+            "FMLCorePluginContainsFMLMod": true,
+            "ForceLoadAsMod": true,
+            "FMLCorePlugin": "dev.nolij.zume.archaic.ArchaicZumeCore"
+        )
+    }
 }
 
 processResources {
