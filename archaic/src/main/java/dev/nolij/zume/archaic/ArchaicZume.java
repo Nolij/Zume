@@ -49,13 +49,13 @@ public class ArchaicZume implements IZumeProvider {
     public void onZoomActivate() {
         if (Zume.CONFIG.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
             final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
-            entityRenderer.setSmoothCamFilterX(0F);
-            entityRenderer.setSmoothCamFilterY(0F);
-            entityRenderer.setSmoothCamYaw(0F);
-            entityRenderer.setSmoothCamPitch(0F);
-            entityRenderer.setSmoothCamPartialTicks(0F);
             entityRenderer.setMouseFilterXAxis(new MouseFilter());
             entityRenderer.setMouseFilterYAxis(new MouseFilter());
+            entityRenderer.setSmoothCamYaw(0F);
+            entityRenderer.setSmoothCamPitch(0F);
+            entityRenderer.setSmoothCamFilterX(0F);
+            entityRenderer.setSmoothCamFilterY(0F);
+            entityRenderer.setSmoothCamPartialTicks(0F);
         }
     }
 }
