@@ -3,7 +3,7 @@
 	"id": "zume",
 	"version": "${version}",
 	"name": "Zume",
-	"description": "Simple Zoom mod by Nolij",
+	"description": "A simple zoom mod by Nolij",
 	"authors": [
 		"Nolij (@xdMatthewbx#1337)"
 	],
