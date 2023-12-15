@@ -19,17 +19,6 @@ public class LegacyZume implements ClientModInitializer, IZumeProvider {
 	public void onInitializeClient() {
 		INSTANCE = this;
 		
-		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
-			KeyBindingHelper.registerKeyBinding(keyBind.value);
-		}
-		
-		// workaround for keybinds not registering in 7.10
-		final GameOptions options = MinecraftClient.getInstance().options;
-		if (options != null) {
-			options.allKeys = KeyBindingRegistryImpl.process(options.allKeys);
-			options.load();
-		}
-		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE).toFile());
 	}
 	
