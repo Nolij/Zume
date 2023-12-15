@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ArchaicZumeCore implements IEarlyMixinLoader, IFMLLoadingPlugin {
+    
     @Override
     public String getMixinConfig() {
         return "zume-archaic.mixins.json";
@@ -43,4 +44,5 @@ public class ArchaicZumeCore implements IEarlyMixinLoader, IFMLLoadingPlugin {
     public String getAccessTransformerClass() {
         return null;
     }
+    
 }

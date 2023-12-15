@@ -5,10 +5,7 @@ import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.legacy.mixin.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.legacyfabric.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.legacyfabric.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.SmoothUtil;
 
 public class LegacyZume implements ClientModInitializer, IZumeProvider {

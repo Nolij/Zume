@@ -15,7 +15,7 @@ java {
 minecraft {
     mcVersion.set(archaic_minecraft_version)
     username.set("Developer")
-    
+
     injectedTags.put("MOD_VERSION", mod_version)
 }
 
@@ -28,16 +28,16 @@ dependencies {
     implementation(modUtils.enableMixins(mixinProviderSpec, "zume-archaic-refmap.json"))
 
     implementation "blue.endless:jankson:${jankson_version}"
-    
+
     implementation(project(":common"))
 }
 
 jar {
     manifest {
         attributes (
-            "FMLCorePluginContainsFMLMod": true,
-            "ForceLoadAsMod": true,
-            "FMLCorePlugin": "dev.nolij.zume.archaic.ArchaicZumeCore"
+			"FMLCorePluginContainsFMLMod": true,
+			"ForceLoadAsMod": true,
+			"FMLCorePlugin": "dev.nolij.zume.archaic.ArchaicZumeCore"
         )
     }
 }
