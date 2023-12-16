@@ -1,4 +1,4 @@
-package dev.nolij.zume.archaic.mixin;
+package dev.nolij.zume.legacyforge.mixin;
 
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.util.MouseFilter;

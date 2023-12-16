@@ -26,7 +26,7 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.PRIMITIVE;
 	}
 	
-	private static IZumeProvider ZUME_PROVIDER;
+	public static IZumeProvider ZUME_PROVIDER;
 	
 	public static ZumeConfig CONFIG;
 	private static double inverseSmoothness = 1D;
@@ -110,6 +110,9 @@ public class Zume {
 	}
 	
 	public static boolean isActive() {
+		if (ZUME_PROVIDER == null)
+			return false;
+		
 		return ZUME_PROVIDER.isZoomPressed();
 	}
 	

@@ -58,26 +58,23 @@ configurations {
     compileClasspath.extendsFrom shade
     runtimeClasspath.extendsFrom shade
     developmentFabric.extendsFrom shade
-
-    shadeExternal
-    compileClasspath.extendsFrom shadeExternal
-    runtimeClasspath.extendsFrom shadeExternal
-    developmentFabric.extendsFrom shadeExternal
 }
 
-dependencies {
-    implementation "net.fabricmc:fabric-loader:${loader_version}"
+def fabricImpls = [project(":modern"), project(":primitive"), project(":legacy")]
+def legacyForgeImpls = [project(":legacyforge"), project(":archaic"), project(":vintage")]
+def impls = [project(":common"), *fabricImpls, *legacyForgeImpls]
 
-    shadeExternal(implementation("blue.endless:jankson:${jankson_version}"))
+dependencies {
+    compileOnly "net.fabricmc:fabric-loader:${loader_version}"
+	
+    shade(implementation("blue.endless:jankson:${jankson_version}"))
 
     // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
     compileOnly "org.apache.logging.log4j:log4j-core:2.22.0"
 
-    shade(project(":common")) { transitive false }
-    shade(project(":modern")) { transitive false }
-    shade(project(":primitive")) { transitive false }
-    shade(project(":legacy")) { transitive false }
-    shade(project(":archaic")) { transitive false }
+	impls.forEach {
+		shade(it) { transitive false }
+	}
 }
 
 java {
@@ -89,45 +86,56 @@ shadowJar {
         rename { "${it}_${archives_base_name}"}
     }
 
-    configurations = [project.configurations.shade,
-                      project.configurations.shadeExternal]
+    configurations = [project.configurations.shade]
     archiveClassifier = ""
+	
+	legacyForgeImpls.forEach {
+		it.afterEvaluate {
+			def reobfJar = it.reobfJar
+			dependsOn reobfJar
+			from zipTree(reobfJar.archivePath)
+		}
+	}
 
     relocate "blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson"
+    
+    manifest {
+        attributes (
+            "FMLCorePluginContainsFMLMod": true,
+            "ForceLoadAsMod": true,
+            "FMLCorePlugin": "dev.nolij.zume.legacyforge.LegacyForgeZumeBootstrapper",
+	        "MixinConfigs": "zume-legacyforge.mixins.json",
+	        "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
+        )
+    }
 }
 
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-
-    def modernSources = project(":modern").sourcesJar
-    dependsOn modernSources
-    from(modernSources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
-
-    def primitiveSources = project(":primitive").sourcesJar
-    dependsOn primitiveSources
-    from(primitiveSources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
-
-    def legacySources = project(":legacy").sourcesJar
-    dependsOn legacySources
-    from(legacySources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
-
-    def archaicSources = project(":archaic").sourcesJar
-    dependsOn archaicSources
-    from(archaicSources.archiveFile.map { zipTree(it) }) { exclude "mcmod.info" }
+	impls.forEach {
+		def sourcesJarTask = it.sourcesJar
+		dependsOn sourcesJarTask
+		from(sourcesJarTask.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json", "mcmod.info" }
+	}
 }
 
 build.dependsOn(shadowJar)
 
 processResources {
+	from "common/src/main/resources"
+	from "legacyforge/src/main/resources"
+	
     inputs.property "version", version
     inputs.property "loader_version", loader_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": version,
+        expand  "version": version,
                 "loader_version": loader_version
+    }
+	
+    filesMatching("mcmod.info") {
+        expand  "mod_version": version,
+	            "minecraft_version": archaic_minecraft_version
     }
 }
 

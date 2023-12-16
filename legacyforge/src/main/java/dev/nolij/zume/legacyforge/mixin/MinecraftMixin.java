@@ -1,8 +1,7 @@
-package dev.nolij.zume.archaic.mixin;
+package dev.nolij.zume.legacyforge.mixin;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.archaic.ArchaicZume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.InventoryPlayer;
 import org.spongepowered.asm.mixin.Dynamic;
@@ -14,14 +13,14 @@ public class MinecraftMixin {
 
 	@Dynamic
 	@WrapWithCondition(method = {
-		"runTick", // archaic 
+		"func_71407_l()V", // archaic - runTick 
 		"func_184124_aB()V" // vintage
-	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;changeCurrentItem(I)V"))
+	}, remap = false, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;func_70453_c(I)V"), require = 0)
 	public boolean onMouseScroll$scrollInHotbar(InventoryPlayer instance, int scrollAmount) {
 		if (Zume.CONFIG.enableZoomScrolling)
-			Zume.scrollDelta += scrollAmount;
+			Zume.scrollDelta += scrollAmount > 0 ? 1 : -1;
 
-		return !(Zume.CONFIG.enableZoomScrolling && ArchaicZume.INSTANCE.isZoomPressed());
+		return !(Zume.CONFIG.enableZoomScrolling && Zume.ZUME_PROVIDER.isZoomPressed());
 	}
 
 }

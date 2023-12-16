@@ -1,8 +1,7 @@
-package dev.nolij.zume.archaic.mixin;
+package dev.nolij.zume.legacyforge.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.archaic.ArchaicZume;
 import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,9 +15,9 @@ public class EntityRendererMixin {
 
 	@Dynamic
 	@Inject(method = {
-		"updateCameraAndRender", // archaic
+		"func_78480_b(F)V", // archaic - updateCameraAndRender
 		"func_181560_a(FJ)V" // vintage
-	}, at = @At("HEAD"))
+	}, remap = false, at = @At("HEAD"))
 	public void zume$render$HEAD(CallbackInfo ci) {
 		Zume.render();
 	}
@@ -33,11 +32,12 @@ public class EntityRendererMixin {
 
 	@Dynamic
 	@ModifyExpressionValue(method = {
-		"updateCameraAndRender", "updateRenderer", // archaic
+		"func_78480_b(F)V", "func_78464_a()V", // archaic - updateCameraAndRender, updateRenderer
 		"func_181560_a(FJ)V", "func_78464_a()V" // vintage
-	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;smoothCamera:Z"))
+	}, remap = false, at = @At(value = "FIELD",
+		target = "Lnet/minecraft/client/settings/GameSettings;field_74326_T:Z"), require = 0)
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
-		if (Zume.CONFIG.enableCinematicZoom && ArchaicZume.INSTANCE.isZoomPressed()) {
+		if (Zume.CONFIG.enableCinematicZoom && Zume.ZUME_PROVIDER.isZoomPressed()) {
 			return true;
 		}
 
@@ -46,9 +46,10 @@ public class EntityRendererMixin {
 
 	@Dynamic
 	@ModifyExpressionValue(method = {
-		"updateCameraAndRender", "updateRenderer", // archaic
+		"func_78480_b(F)V", "func_78464_a()V", // archaic - updateCameraAndRender, updateRenderer
 		"func_181560_a(FJ)V", "func_78464_a()V" // vintage
-	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;mouseSensitivity:F"))
+	}, remap = false, at = @At(value = "FIELD", 
+		target = "Lnet/minecraft/client/settings/GameSettings;field_74341_c:F"), require = 0)
 	public float zume$updateMouse$mouseSensitivity(float original) {
 		return (float) Zume.getMouseSensitivity(original);
 	}

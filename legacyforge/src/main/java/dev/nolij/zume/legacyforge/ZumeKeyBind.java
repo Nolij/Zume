@@ -1,4 +1,4 @@
-package dev.nolij.zume.archaic;
+package dev.nolij.zume.legacyforge;
 
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
