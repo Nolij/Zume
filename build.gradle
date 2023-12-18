@@ -61,7 +61,7 @@ configurations {
 }
 
 def fabricImpls = [project(":modern"), project(":primitive"), project(":legacy")]
-def legacyForgeImpls = [project(":legacyforge"), project(":archaic"), project(":vintage")]
+def legacyForgeImpls = [project(":legacyforge")]
 def impls = [project(":common"), *fabricImpls, *legacyForgeImpls]
 
 dependencies {
@@ -103,7 +103,6 @@ shadowJar {
         attributes (
             "FMLCorePluginContainsFMLMod": true,
             "ForceLoadAsMod": true,
-            "FMLCorePlugin": "dev.nolij.zume.legacyforge.LegacyForgeZumeBootstrapper",
 	        "MixinConfigs": "zume-legacyforge.mixins.json",
 	        "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
         )

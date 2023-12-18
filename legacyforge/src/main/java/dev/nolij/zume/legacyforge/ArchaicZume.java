@@ -1,13 +1,11 @@
-package dev.nolij.zume.archaic;
+package dev.nolij.zume.legacyforge;
 
+import dev.nolij.zume.common.Zume;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import dev.nolij.zume.legacyforge.LegacyForgeZume;
-import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.legacyforge.ZumeKeyBind;
 
-@Mod(modid = Zume.MOD_ID, version = Tags.MOD_VERSION, name = Zume.MOD_ID, acceptedMinecraftVersions = Tags.MC_VERSIONS)
+@Mod(modid = Zume.MOD_ID, version = Tags.MOD_VERSION, name = Zume.MOD_ID, acceptedMinecraftVersions = Tags.ARCHAIC_RANGE)
 public class ArchaicZume extends LegacyForgeZume {
 	
 	@Mod.EventHandler

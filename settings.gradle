@@ -33,6 +33,4 @@ include "modern"
 include "primitive"
 include "legacy"
 include "legacyforge"
-include "archaic"
-include "vintage"
 
