@@ -70,7 +70,7 @@ public class Zume {
 		return zoom;
 	}
 	
-	public static double getFOV() {
+	public static double transformFOV(double realFOV) {
 		var zoom = getZoom();
 		
 		if (CONFIG.useQuadratic) {
@@ -80,7 +80,15 @@ public class Zume {
 		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, realFOV) - CONFIG.minFOV) * zoom);
 	}
 	
-	public static double getMouseSensitivity(double original) {
+	public static boolean transformCinematicCamera(boolean original) {
+		if (Zume.CONFIG.enableCinematicZoom && ZUME_PROVIDER.isZoomPressed()) {
+			return true;
+		}
+		
+		return original;
+	}
+	
+	public static double transformMouseSensitivity(double original) {
 		if (!ZUME_PROVIDER.isZoomPressed())
 			return original;
 		
@@ -90,6 +98,13 @@ public class Zume {
 		result *= CONFIG.mouseSensitivityFloor + (zoom * (1 - CONFIG.mouseSensitivityFloor));
 		
 		return result;
+	}
+	
+	public static boolean transformHotbarScroll(int scrollDelta) {
+		if (Zume.CONFIG.enableZoomScrolling)
+			Zume.scrollDelta += scrollDelta > 0 ? 1 : -1;
+		
+		return !(Zume.CONFIG.enableZoomScrolling && ZUME_PROVIDER.isZoomPressed());
 	}
 	
 	private static double clamp(double value, double min, double max) {
@@ -117,7 +132,6 @@ public class Zume {
 	}
 	
 	public static int scrollDelta = 0;
-	public static double realFOV = -1D;
 	private static boolean wasZooming = false;
 	private static long prevTimestamp;
 	

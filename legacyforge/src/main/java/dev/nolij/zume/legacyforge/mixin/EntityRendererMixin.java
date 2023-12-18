@@ -24,9 +24,8 @@ public class EntityRendererMixin {
 	
 	@Inject(method = "getFOVModifier", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		Zume.realFOV = cir.getReturnValueF();
 		if (Zume.isActive()) {
-			cir.setReturnValue((float) Zume.getFOV());
+			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}
 
@@ -35,13 +34,9 @@ public class EntityRendererMixin {
 		"func_78480_b(F)V", "func_78464_a()V", // archaic - updateCameraAndRender, updateRenderer
 		"func_181560_a(FJ)V", "func_78464_a()V" // vintage
 	}, remap = false, at = @At(value = "FIELD",
-		target = "Lnet/minecraft/client/settings/GameSettings;field_74326_T:Z"), require = 0)
+		target = "Lnet/minecraft/client/settings/GameSettings;field_74326_T:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
-		if (Zume.CONFIG.enableCinematicZoom && Zume.ZUME_PROVIDER.isZoomPressed()) {
-			return true;
-		}
-
-		return original;
+		return Zume.transformCinematicCamera(original);
 	}
 
 	@Dynamic
@@ -49,9 +44,9 @@ public class EntityRendererMixin {
 		"func_78480_b(F)V", "func_78464_a()V", // archaic - updateCameraAndRender, updateRenderer
 		"func_181560_a(FJ)V", "func_78464_a()V" // vintage
 	}, remap = false, at = @At(value = "FIELD", 
-		target = "Lnet/minecraft/client/settings/GameSettings;field_74341_c:F"), require = 0)
+		target = "Lnet/minecraft/client/settings/GameSettings;field_74341_c:F"))
 	public float zume$updateMouse$mouseSensitivity(float original) {
-		return (float) Zume.getMouseSensitivity(original);
+		return (float) Zume.transformMouseSensitivity(original);
 	}
 
 }

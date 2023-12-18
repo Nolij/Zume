@@ -15,12 +15,9 @@ public class MinecraftMixin {
 	@WrapWithCondition(method = {
 		"func_71407_l()V", // archaic - runTick 
 		"func_184124_aB()V" // vintage
-	}, remap = false, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;func_70453_c(I)V"), require = 0)
+	}, remap = false, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;func_70453_c(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(InventoryPlayer instance, int scrollAmount) {
-		if (Zume.CONFIG.enableZoomScrolling)
-			Zume.scrollDelta += scrollAmount > 0 ? 1 : -1;
-
-		return !(Zume.CONFIG.enableZoomScrolling && Zume.ZUME_PROVIDER.isZoomPressed());
+		return Zume.transformHotbarScroll(scrollAmount);
 	}
 
 }

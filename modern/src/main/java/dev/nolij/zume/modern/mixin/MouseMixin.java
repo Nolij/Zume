@@ -15,23 +15,19 @@ public class MouseMixin {
 	
 	@ModifyExpressionValue(method = "updateMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;smoothCameraEnabled:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
-		if (Zume.CONFIG.enableCinematicZoom && ModernZume.INSTANCE.isZoomPressed()) {
-			return true;
-		}
-		
-		return original;
+		return Zume.transformCinematicCamera(original);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@ModifyExpressionValue(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption;getValue()Ljava/lang/Object;", ordinal = 0), require = 0)
 	public <T> T zume$updateMouse$getMouseSensitivity$getValue(T original) {
-		return (T) (Object) Zume.getMouseSensitivity((Double) original);
+		return (T) (Object) Zume.transformMouseSensitivity((Double) original);
 	}
 	
 	@Dynamic
 	@ModifyExpressionValue(method = "updateMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/class_315;field_1843:D", remap = false), require = 0)
 	public double zume$updateMouse$mouseSensitivity(double original) {
-		return Zume.getMouseSensitivity(original);
+		return Zume.transformMouseSensitivity(original);
 	}
 	
 	@ModifyExpressionValue(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
@@ -44,10 +40,7 @@ public class MouseMixin {
 	
 	@WrapWithCondition(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;scrollInHotbar(D)V"))
 	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, double scrollAmount) {
-		if (Zume.CONFIG.enableZoomScrolling)
-			Zume.scrollDelta += (int) scrollAmount;
-		
-		return !(Zume.CONFIG.enableZoomScrolling && ModernZume.INSTANCE.isZoomPressed());
+		return Zume.transformHotbarScroll((int) scrollAmount);
 	}
 	
 }

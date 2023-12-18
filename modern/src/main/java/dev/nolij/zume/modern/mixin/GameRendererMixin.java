@@ -19,9 +19,8 @@ public class GameRendererMixin {
 	
 	@Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
 	public void zume$getFov$TAIL(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
-		Zume.realFOV = cir.getReturnValueD();
 		if (Zume.isActive()) {
-			cir.setReturnValue(Zume.getFOV());
+			cir.setReturnValue(Zume.transformFOV(cir.getReturnValueD()));
 		}
 	}
 	

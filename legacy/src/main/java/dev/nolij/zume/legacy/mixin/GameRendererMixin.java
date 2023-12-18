@@ -25,9 +25,8 @@ public class GameRendererMixin {
 	
 	@Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		Zume.realFOV = cir.getReturnValueF();
 		if (Zume.isActive()) {
-			cir.setReturnValue((float) Zume.getFOV());
+			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}
 	
@@ -37,11 +36,7 @@ public class GameRendererMixin {
 		"method_9775(FJ)V", "method_1321()V" // vintage
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;smoothCameraEnabled:Z"))
 	public boolean zume$archaic$smoothCameraEnabled(boolean original) {
-		if (Zume.CONFIG.enableCinematicZoom && LegacyZume.INSTANCE.isZoomPressed()) {
-			return true;
-		}
-		
-		return original;
+		return Zume.transformCinematicCamera(original);
 	}
 	
 	@Dynamic
@@ -50,7 +45,7 @@ public class GameRendererMixin {
 		"method_9775(FJ)V", "method_1321()V" // vintage
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;sensitivity:F"))
 	public float zume$archaic$mouseSensitivity(float original) {
-		return (float) Zume.getMouseSensitivity(original);
+		return (float) Zume.transformMouseSensitivity(original);
 	}
 	
 }
