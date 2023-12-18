@@ -15,9 +15,9 @@ public class MouseMixin {
 	
 	@Dynamic
 	@ModifyExpressionValue(method = {
-			"updateMouse", 
-			"method_1606(D)V" // 20.5+ compat
-		}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;smoothCameraEnabled:Z"))
+		"updateMouse", 
+		"method_1606(D)V" // 20.5+ compat
+	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;smoothCameraEnabled:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
 		return Zume.transformCinematicCamera(original);
 	}
