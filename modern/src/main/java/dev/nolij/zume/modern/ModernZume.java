@@ -18,7 +18,7 @@ public class ModernZume implements ClientModInitializer, IZumeProvider {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
 		}
 		
-		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE).toFile());
+		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 	}
 	
 	@Override

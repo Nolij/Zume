@@ -4,13 +4,15 @@ import dev.nolij.zume.common.config.ZumeConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 public class Zume {
 	
 	public static final String MOD_ID = "zume";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-	public static final String CONFIG_FILE = MOD_ID + ".json5";
+	public static final String CONFIG_FILE_NAME = MOD_ID + ".json5";
 	
 	public static ZumeVariant ZUME_VARIANT = null;
 	
@@ -29,6 +31,7 @@ public class Zume {
 	public static IZumeProvider ZUME_PROVIDER;
 	
 	public static ZumeConfig CONFIG;
+	public static File CONFIG_FILE;
 	private static double inverseSmoothness = 1D;
 	
 	public static void init(final IZumeProvider zumeProvider, final File configFile) {
@@ -36,11 +39,16 @@ public class Zume {
 			throw new AssertionError("Zume already initialized!");
 		
 		ZUME_PROVIDER = zumeProvider;
+		CONFIG_FILE = configFile;
 		
 		ZumeConfig.create(configFile, config -> {
 			CONFIG = config;
 			inverseSmoothness = 1D / CONFIG.zoomSmoothnessMs;
 		});
+	}
+	
+	public static void openConfigFile() throws IOException {
+		Desktop.getDesktop().open(Zume.CONFIG_FILE);
 	}
 	
 	private static double fromZoom = -1D;

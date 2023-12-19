@@ -16,7 +16,7 @@ public class LegacyZume implements ClientModInitializer, IZumeProvider {
 	public void onInitializeClient() {
 		INSTANCE = this;
 		
-		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE).toFile());
+		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 	}
 	
 	@Override

@@ -12,7 +12,7 @@ import java.io.File;
 public class LegacyForgeZume implements IZumeProvider {
     
     public void preInit() {
-        Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE));
+        Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
     }
     
     @Override
