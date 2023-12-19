@@ -9,7 +9,12 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-@Mod(modid = Zume.MOD_ID, version = Tags.MOD_VERSION, name = Zume.MOD_ID, acceptedMinecraftVersions = Tags.VINTAGE_RANGE)
+@Mod(
+	modid = Zume.MOD_ID,
+	name = Tags.MOD_NAME,
+	version = Tags.MOD_VERSION, 
+	acceptedMinecraftVersions = Tags.VINTAGE_RANGE,
+	dependencies = "required-after:mixinbooter@*")
 public class VintageZume extends LegacyForgeZume {
 	
 	@Mod.EventHandler

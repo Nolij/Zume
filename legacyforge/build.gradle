@@ -17,6 +17,7 @@ minecraft {
 	username.set("Developer")
 
 	injectedTags.put("MOD_VERSION", mod_version)
+	injectedTags.put("MOD_NAME", "Zume")
 	injectedTags.put("ARCHAIC_RANGE", archaic_minecraft_range)
 	injectedTags.put("VINTAGE_RANGE", vintage_minecraft_range)
 }
