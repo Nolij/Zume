@@ -1,4 +1,4 @@
-package dev.nolij.zume.legacyforge;
+package dev.nolij.zume.archaic;
 
 import cpw.mods.fml.client.IModGuiFactory;
 import cpw.mods.fml.client.config.GuiConfig;

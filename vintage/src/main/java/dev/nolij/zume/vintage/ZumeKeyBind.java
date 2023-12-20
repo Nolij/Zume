@@ -1,4 +1,4 @@
-package dev.nolij.zume.legacyforge;
+package dev.nolij.zume.vintage;
 
 import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
@@ -14,7 +14,7 @@ public enum ZumeKeyBind {
 	public final KeyBinding value;
 	
 	public boolean isPressed() {
-		return value.getIsKeyPressed();
+		return value.isKeyDown();
 	}
 	
 	ZumeKeyBind(String translationKey, int code, String category) {

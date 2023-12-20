@@ -16,16 +16,21 @@ public class Zume {
 	
 	public static ZumeVariant ZUME_VARIANT = null;
 	
+	private static final ClassLoader classLoader = Zume.class.getClassLoader();
 	public static void calculateZumeVariant() {
 		if (ZUME_VARIANT != null)
 			return;
 		
-		if (Zume.class.getClassLoader().getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		if (classLoader.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.MODERN;
-		else if (Zume.class.getClassLoader().getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		else if (classLoader.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.LEGACY;
-		else if (Zume.class.getClassLoader().getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
+		else if (classLoader.getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
 			ZUME_VARIANT = ZumeVariant.PRIMITIVE;
+		else if (classLoader.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
+			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
+		else if (classLoader.getResource("net/minecraftforge/fml/client/registry/ClientRegistry.class") != null)
+			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
 	}
 	
 	public static IZumeProvider ZUME_PROVIDER;

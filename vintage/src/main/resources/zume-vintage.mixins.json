@@ -1,7 +1,7 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "dev.nolij.zume.legacyforge.mixin",
+	"package": "dev.nolij.zume.vintage.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 	],
@@ -13,5 +13,5 @@
 	"injectors": {
 		"defaultRequire": 1
 	},
-	"refmap": "zume-legacyforge-refmap.json"
+	"refmap": "zume-vintage-refmap.json"
 }

@@ -1,3 +1,6 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id "maven-publish"
@@ -63,7 +66,8 @@ configurations {
 }
 
 def fabricImpls = [project(":modern"), project(":primitive"), project(":legacy")]
-def legacyForgeImpls = [project(":legacyforge")]
+def legacyForgeImplNames = ["archaic", "vintage"]
+def legacyForgeImpls = legacyForgeImplNames.collect { project(":${it}") }
 def impls = [project(":common"), *fabricImpls, *legacyForgeImpls]
 
 dependencies {
@@ -95,7 +99,34 @@ shadowJar {
 		it.afterEvaluate {
 			def reobfJar = it.reobfJar
 			dependsOn reobfJar
-			from zipTree(reobfJar.archivePath)
+			from(zipTree(reobfJar.archivePath))
+		}
+	}
+
+	def slurper = new JsonSlurper()
+
+	filesMatching("zume-legacyforge-refmap.json") {
+		def mergedRefMapFile = it.file
+		legacyForgeImplNames.forEach {
+			def implName = it
+//			exclude("zume-${implName}.mixins.json")
+//			exclude("zume-${implName}-refmap.json")
+			relocate "dev.nolij.zume.${implName}.mixin", "dev.nolij.zume.legacyforge.mixin.${implName}"
+
+			filesMatching("zume-${implName}-refmap.json") {
+				def implRefMap = slurper.parse(it.file)
+				Map<String, String> inputMappings = implRefMap.mappings
+				def parsedRefMap = slurper.parse(mergedRefMapFile)
+				inputMappings.keySet().forEach {
+					def key = it.replace("dev/nolij/zume/${implName}/mixin/", "dev/nolij/zume/legacyforge/mixin/${implName}/")
+					def value = inputMappings[it]
+					parsedRefMap.mappings[key] = value
+					parsedRefMap.data.searge[key] = value
+				}
+				mergedRefMapFile.withWriter {
+					it.write(JsonOutput.toJson(parsedRefMap))
+				}
+			}
 		}
 	}
 
@@ -123,7 +154,6 @@ build.dependsOn(shadowJar)
 
 processResources {
 	from "common/src/main/resources"
-	from "legacyforge/src/main/resources"
 	
     inputs.property "version", version
     inputs.property "loader_version", loader_version
@@ -138,6 +168,23 @@ processResources {
         expand  "mod_version": version,
 	            "minecraft_version": archaic_minecraft_version
     }
+
+	def slurper = new JsonSlurper()
+	
+	ArrayList<String> serverMixins = new ArrayList<>()
+	ArrayList<String> clientMixins = new ArrayList<>()
+	
+	legacyForgeImplNames.forEach {
+		def implName = it
+		def implMixins = slurper.parse(file("${implName}/src/main/resources/zume-${implName}.mixins.json"))
+		implMixins.mixins.forEach { serverMixins.add("${implName}.${it}") }
+		implMixins.client.forEach { clientMixins.add("${implName}.${it}") }
+	}
+	
+	filesMatching("zume-legacyforge.mixins.json") {
+		expand  "server_mixins": JsonOutput.toJson(serverMixins),
+				"client_mixins": JsonOutput.toJson(clientMixins)
+	}
 }
 
 // configure the maven publication

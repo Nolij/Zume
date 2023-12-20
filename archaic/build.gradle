@@ -18,25 +18,15 @@ minecraft {
 
 	injectedTags.put("MOD_VERSION", mod_version)
 	injectedTags.put("MOD_NAME", "Zume")
-	injectedTags.put("ARCHAIC_RANGE", archaic_minecraft_range)
-	injectedTags.put("VINTAGE_RANGE", vintage_minecraft_range)
+	injectedTags.put("VERSION_RANGE", archaic_minecraft_range)
 }
 
-tasks.injectTags.outputClassName.set("${maven_group}.zume.legacyforge.Tags")
-
-repositories {
-	maven {
-		name "Forge"
-		url "https://maven.minecraftforge.net/"
-	}
-}
+tasks.injectTags.outputClassName.set("${maven_group}.zume.archaic.Tags")
 
 def mixinProviderSpec = "com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${unimixins_version}:dev"
 
-dependencies {
-	compileOnly "net.minecraftforge:forge:1.12.2-14.23.5.2860:universal"
-	
-	implementation(annotationProcessor(modUtils.enableMixins(mixinProviderSpec, "zume-legacyforge-refmap.json")))
+dependencies {	
+	implementation(annotationProcessor(modUtils.enableMixins(mixinProviderSpec, "zume-archaic-refmap.json")))
 
 	implementation "blue.endless:jankson:${jankson_version}"
 
@@ -48,7 +38,7 @@ jar {
 		attributes (
 			"FMLCorePluginContainsFMLMod": true,
 			"ForceLoadAsMod": true,
-			"MixinConfigs": "zume-legacyforge.mixins.json",
+			"MixinConfigs": "zume-archaic.mixins.json",
 			"TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
 		)
 	}
@@ -56,10 +46,4 @@ jar {
 
 processResources {
 	from "common/src/main/resources"
-	from "src/main/resources/mcmod.info"
-
-	filesMatching("mcmod.info") {
-		expand  "mod_version": mod_version,
-				"minecraft_version": archaic_minecraft_version
-	}
 }

@@ -1,4 +1,4 @@
-package dev.nolij.zume.legacyforge.mixin;
+package dev.nolij.zume.archaic.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.nolij.zume.common.Zume;
@@ -13,11 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin {
 
-	@Dynamic
-	@Inject(method = {
-		"func_78480_b(F)V", // archaic - updateCameraAndRender
-		"func_181560_a(FJ)V" // vintage
-	}, remap = false, at = @At("HEAD"))
+	@Inject(method = "updateCameraAndRender", at = @At("HEAD"))
 	public void zume$render$HEAD(CallbackInfo ci) {
 		Zume.render();
 	}
@@ -29,22 +25,14 @@ public class EntityRendererMixin {
 		}
 	}
 
-	@Dynamic
-	@ModifyExpressionValue(method = {
-		"func_78480_b(F)V", "func_78464_a()V", // archaic - updateCameraAndRender, updateRenderer
-		"func_181560_a(FJ)V", "func_78464_a()V" // vintage
-	}, remap = false, at = @At(value = "FIELD",
-		target = "Lnet/minecraft/client/settings/GameSettings;field_74326_T:Z"))
+	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, at = @At(value = "FIELD",
+		target = "Lnet/minecraft/client/settings/GameSettings;smoothCamera:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
 		return Zume.transformCinematicCamera(original);
 	}
 
-	@Dynamic
-	@ModifyExpressionValue(method = {
-		"func_78480_b(F)V", "func_78464_a()V", // archaic - updateCameraAndRender, updateRenderer
-		"func_181560_a(FJ)V", "func_78464_a()V" // vintage
-	}, remap = false, at = @At(value = "FIELD", 
-		target = "Lnet/minecraft/client/settings/GameSettings;field_74341_c:F"))
+	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, at = @At(value = "FIELD", 
+		target = "Lnet/minecraft/client/settings/GameSettings;mouseSensitivity:F"))
 	public float zume$updateMouse$mouseSensitivity(float original) {
 		return (float) Zume.transformMouseSensitivity(original);
 	}

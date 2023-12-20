@@ -1,4 +1,4 @@
-package dev.nolij.zume.legacyforge.mixin;
+package dev.nolij.zume.archaic.mixin;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import dev.nolij.zume.common.Zume;
@@ -11,11 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
 
-	@Dynamic
-	@WrapWithCondition(method = {
-		"func_71407_l()V", // archaic - runTick 
-		"func_184124_aB()V" // vintage
-	}, remap = false, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;func_70453_c(I)V"))
+	@WrapWithCondition(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;changeCurrentItem(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(InventoryPlayer instance, int scrollAmount) {
 		return Zume.transformHotbarScroll(scrollAmount);
 	}
