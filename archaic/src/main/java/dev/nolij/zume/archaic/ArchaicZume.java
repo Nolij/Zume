@@ -1,5 +1,7 @@
 package dev.nolij.zume.archaic;
 
+import cpw.mods.fml.common.eventhandler.EventPriority;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import dev.nolij.zume.archaic.mixin.EntityRendererAccessor;
 import dev.nolij.zume.common.IZumeProvider;
 import dev.nolij.zume.common.Zume;
@@ -9,6 +11,8 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.MouseFilter;
+import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.io.File;
 
@@ -30,6 +34,8 @@ public class ArchaicZume implements IZumeProvider {
 		}
 		
 		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
+		
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
 	@Override
@@ -58,6 +64,15 @@ public class ArchaicZume implements IZumeProvider {
 			entityRenderer.setSmoothCamFilterX(0F);
 			entityRenderer.setSmoothCamFilterY(0F);
 			entityRenderer.setSmoothCamPartialTicks(0F);
+		}
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void mouseEvent(MouseEvent mouseEvent) {
+		final int scrollAmount = mouseEvent.dwheel;
+		if (scrollAmount != 0 &&
+			!Zume.transformHotbarScroll(scrollAmount)) {
+			mouseEvent.setCanceled(true);
 		}
 	}
 	

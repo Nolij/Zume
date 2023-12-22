@@ -7,8 +7,7 @@
 	],
 	"client": [
 		"EntityRendererAccessor",
-		"EntityRendererMixin",
-		"MinecraftMixin"
+		"EntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

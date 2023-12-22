@@ -6,9 +6,13 @@ import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.MouseFilter;
+import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
 
@@ -29,6 +33,8 @@ public class VintageZume implements IZumeProvider {
 		}
 		
 		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
+		
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
 	@Override
@@ -57,6 +63,15 @@ public class VintageZume implements IZumeProvider {
 			entityRenderer.setSmoothCamFilterX(0F);
 			entityRenderer.setSmoothCamFilterY(0F);
 			entityRenderer.setSmoothCamPartialTicks(0F);
+		}
+	}
+	
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void mouseEvent(MouseEvent mouseEvent) {
+		final int scrollAmount = mouseEvent.getDwheel();
+		if (scrollAmount != 0 &&
+			!Zume.transformHotbarScroll(scrollAmount)) {
+			mouseEvent.setCanceled(true);
 		}
 	}
 	
