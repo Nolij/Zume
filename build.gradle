@@ -1,5 +1,8 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+import org.apache.tools.zip.ZipOutputStream
 
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
@@ -102,32 +105,12 @@ shadowJar {
 			from(zipTree(reobfJar.archivePath))
 		}
 	}
-
-	def slurper = new JsonSlurper()
-
-	filesMatching("zume-legacyforge-refmap.json") {
-		def mergedRefMapFile = it.file
-		legacyForgeImplNames.forEach {
-			def implName = it
-//			exclude("zume-${implName}.mixins.json")
-//			exclude("zume-${implName}-refmap.json")
-			relocate "dev.nolij.zume.${implName}.mixin", "dev.nolij.zume.legacyforge.mixin.${implName}"
-
-			filesMatching("zume-${implName}-refmap.json") {
-				def implRefMap = slurper.parse(it.file)
-				Map<String, String> inputMappings = implRefMap.mappings
-				def parsedRefMap = slurper.parse(mergedRefMapFile)
-				inputMappings.keySet().forEach {
-					def key = it.replace("dev/nolij/zume/${implName}/mixin/", "dev/nolij/zume/legacyforge/mixin/${implName}/")
-					def value = inputMappings[it]
-					parsedRefMap.mappings[key] = value
-					parsedRefMap.data.searge[key] = value
-				}
-				mergedRefMapFile.withWriter {
-					it.write(JsonOutput.toJson(parsedRefMap))
-				}
-			}
-		}
+	
+	legacyForgeImplNames.forEach {
+		def implName = it
+		exclude("zume-${implName}.mixins.json")
+//		exclude("zume-${implName}-refmap.json")
+		relocate "dev.nolij.zume.${implName}.mixin", "dev.nolij.zume.legacyforge.mixin.${implName}"
 	}
 
     relocate "blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson"
@@ -142,12 +125,88 @@ shadowJar {
     }
 }
 
+class RefMapMergingTransformer implements Transformer {
+	
+	static final SLURPER = new JsonSlurper()
+	
+	@Input
+	String packageName
+	
+	@Input
+	String modId
+	
+	@Input
+	String targetRefMap
+	
+	@Input
+	List<String> sources
+	
+	@Override
+	boolean canTransformResource(FileTreeElement fileTreeElement) {
+		for (source in sources) {
+			if (fileTreeElement.name.equals("${modId}-${source}-refmap.json".toString())) {
+				return true
+			}
+		}
+		
+		return false
+	}
+	
+	private boolean transformed = false
+	
+	private Map<String, Map<String, String>> mappings = new HashMap<>()
+	
+	@Override
+	void transform(TransformerContext transformerContext) {
+		this.transformed = true
+		
+		def parsed = SLURPER.parse(transformerContext.is)
+		Map<String, Map<String, String>> parsedMappings = parsed.mappings
+		
+		for (key in parsedMappings.keySet()) {
+			def values = parsedMappings[key]
+			def newKey = key.replaceFirst(/\/(\w+)\/mixin\//, "/${targetRefMap}/mixin/\$1/")
+			
+			mappings[newKey] = values
+		}
+	}
+	
+	@Override
+	boolean hasTransformedResource() {
+		return transformed
+	}
+	
+	@Override
+	void modifyOutputStream(ZipOutputStream zipOutputStream, boolean b) {
+		def targetRefMapEntry = new org.apache.tools.zip.ZipEntry("${modId}-${targetRefMap}-refmap.json")
+		zipOutputStream.putNextEntry(targetRefMapEntry)
+		zipOutputStream.write(JsonOutput.toJson([
+		    mappings: this.mappings,
+			data: [
+			    searge: this.mappings
+			]
+		]).getBytes())
+		
+		transformed = false
+		mappings.clear()
+	}
+	
+}
+
+shadowJar.transform(RefMapMergingTransformer.class) {
+	packageName = "${maven_group}.${archives_base_name}"
+	modId = archives_base_name
+	targetRefMap = "legacyforge"
+	sources = legacyForgeImplNames
+}
+
 sourcesJar {
 	impls.forEach {
 		def sourcesJarTask = it.sourcesJar
 		dependsOn sourcesJarTask
 		from(sourcesJarTask.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json", "mcmod.info" }
 	}
+	exclude("zume-legacyforge.mixins.json")
 }
 
 build.dependsOn(shadowJar)
