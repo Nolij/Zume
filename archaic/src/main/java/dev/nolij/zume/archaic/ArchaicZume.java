@@ -17,7 +17,7 @@ import java.io.File;
 	name = Tags.MOD_NAME,
 	version = Tags.MOD_VERSION, 
 	acceptedMinecraftVersions = Tags.VERSION_RANGE,
-	guiFactory = "dev.nolij.zume.legacyforge.ArchaicConfigProvider",
+	guiFactory = "dev.nolij.zume.archaic.ArchaicConfigProvider",
 	dependencies = "required-after:unimixins@*")
 public class ArchaicZume implements IZumeProvider {
 	
