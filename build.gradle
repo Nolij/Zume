@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContex
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+import org.apache.tools.zip.ZipEntry
 import org.apache.tools.zip.ZipOutputStream
 
 plugins {
@@ -178,7 +179,7 @@ class RefMapMergingTransformer implements Transformer {
 	
 	@Override
 	void modifyOutputStream(ZipOutputStream zipOutputStream, boolean b) {
-		def targetRefMapEntry = new org.apache.tools.zip.ZipEntry("${modId}-${targetRefMap}-refmap.json")
+		def targetRefMapEntry = new ZipEntry("${modId}-${targetRefMap}-refmap.json")
 		zipOutputStream.putNextEntry(targetRefMapEntry)
 		zipOutputStream.write(JsonOutput.toJson([
 		    mappings: this.mappings,
