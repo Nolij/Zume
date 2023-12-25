@@ -21,6 +21,7 @@ import java.io.File;
 	name = Tags.MOD_NAME,
 	version = Tags.MOD_VERSION, 
 	acceptedMinecraftVersions = Tags.VERSION_RANGE,
+	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider",
 	dependencies = "required-after:mixinbooter@*")
 public class VintageZume implements IZumeProvider {
 	
