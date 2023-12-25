@@ -22,7 +22,7 @@ import java.io.File;
 	version = Tags.MOD_VERSION, 
 	acceptedMinecraftVersions = Tags.VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.archaic.ArchaicConfigProvider",
-	dependencies = "required-after:unimixins@*")
+	dependencies = "required-after:unimixins@[0.1.15,)")
 public class ArchaicZume implements IZumeProvider {
 	
 	@Mod.EventHandler
