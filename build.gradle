@@ -10,6 +10,8 @@ plugins {
     id "maven-publish"
 	id "com.modrinth.minotaur" version "2.+"
 	id "io.github.themrmilchmann.curseforge-publish" version "0.4.0"
+	id "babric-loom" version "1.4-SNAPSHOT" apply false
+	id "com.gtnewhorizons.retrofuturagradle" version "1.3.25" apply false
 }
 
 group = maven_group
@@ -110,7 +112,6 @@ shadowJar {
 	legacyForgeImplNames.forEach {
 		def implName = it
 		exclude("zume-${implName}.mixins.json")
-//		exclude("zume-${implName}-refmap.json")
 		relocate "dev.nolij.zume.${implName}.mixin", "dev.nolij.zume.legacyforge.mixin.${implName}"
 	}
 
