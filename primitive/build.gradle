@@ -1,5 +1,5 @@
 plugins {
-    id "babric-loom" version "1.4-SNAPSHOT"
+    id "babric-loom"
 }
 
 loom {
@@ -54,12 +54,14 @@ dependencies {
 }
 
 processResources {
+	from "common/src/main/resources"
+	
     inputs.property "version", mod_version
     inputs.property "loader_version", primitive_loader_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": mod_version,
+        expand  "version": mod_version,
                 "loader_version": primitive_loader_version
     }
 }

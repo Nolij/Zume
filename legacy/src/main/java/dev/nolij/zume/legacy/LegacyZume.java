@@ -5,10 +5,7 @@ import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.legacy.mixin.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.legacyfabric.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.legacyfabric.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.SmoothUtil;
 
 public class LegacyZume implements ClientModInitializer, IZumeProvider {
@@ -19,18 +16,7 @@ public class LegacyZume implements ClientModInitializer, IZumeProvider {
 	public void onInitializeClient() {
 		INSTANCE = this;
 		
-		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
-			KeyBindingHelper.registerKeyBinding(keyBind.value);
-		}
-		
-		// workaround for keybinds not registering in 7.10
-		final GameOptions options = MinecraftClient.getInstance().options;
-		if (options != null) {
-			options.allKeys = KeyBindingRegistryImpl.process(options.allKeys);
-			options.load();
-		}
-		
-		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE).toFile());
+		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 	}
 	
 	@Override

@@ -8,6 +8,7 @@
 		"MinecraftClientMixin"
 	],
 	"client": [
+		"GameOptionsMixin",
 		"GameRendererAccessor",
 		"GameRendererMixin",
 		"KeyBindingMixin"

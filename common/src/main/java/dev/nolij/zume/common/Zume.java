@@ -4,31 +4,39 @@ import dev.nolij.zume.common.config.ZumeConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 public class Zume {
 	
 	public static final String MOD_ID = "zume";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-	public static final String CONFIG_FILE = MOD_ID + ".json5";
+	public static final String CONFIG_FILE_NAME = MOD_ID + ".json5";
 	
 	public static ZumeVariant ZUME_VARIANT = null;
 	
+	private static final ClassLoader classLoader = Zume.class.getClassLoader();
 	public static void calculateZumeVariant() {
 		if (ZUME_VARIANT != null)
 			return;
 		
-		if (Zume.class.getClassLoader().getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		if (classLoader.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.MODERN;
-		else if (Zume.class.getClassLoader().getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		else if (classLoader.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.LEGACY;
-		else if (Zume.class.getClassLoader().getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
+		else if (classLoader.getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
 			ZUME_VARIANT = ZumeVariant.PRIMITIVE;
+		else if (classLoader.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
+			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
+		else if (classLoader.getResource("net/minecraftforge/fml/client/registry/ClientRegistry.class") != null)
+			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
 	}
 	
-	private static IZumeProvider ZUME_PROVIDER;
+	public static IZumeProvider ZUME_PROVIDER;
 	
 	public static ZumeConfig CONFIG;
+	public static File CONFIG_FILE;
 	private static double inverseSmoothness = 1D;
 	
 	public static void init(final IZumeProvider zumeProvider, final File configFile) {
@@ -36,11 +44,16 @@ public class Zume {
 			throw new AssertionError("Zume already initialized!");
 		
 		ZUME_PROVIDER = zumeProvider;
+		CONFIG_FILE = configFile;
 		
 		ZumeConfig.create(configFile, config -> {
 			CONFIG = config;
 			inverseSmoothness = 1D / CONFIG.zoomSmoothnessMs;
 		});
+	}
+	
+	public static void openConfigFile() throws IOException {
+		Desktop.getDesktop().open(Zume.CONFIG_FILE);
 	}
 	
 	private static double fromZoom = -1D;
@@ -70,7 +83,7 @@ public class Zume {
 		return zoom;
 	}
 	
-	public static double getFOV() {
+	public static double transformFOV(double realFOV) {
 		var zoom = getZoom();
 		
 		if (CONFIG.useQuadratic) {
@@ -80,7 +93,15 @@ public class Zume {
 		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, realFOV) - CONFIG.minFOV) * zoom);
 	}
 	
-	public static double getMouseSensitivity(double original) {
+	public static boolean transformCinematicCamera(boolean original) {
+		if (Zume.CONFIG.enableCinematicZoom && ZUME_PROVIDER.isZoomPressed()) {
+			return true;
+		}
+		
+		return original;
+	}
+	
+	public static double transformMouseSensitivity(double original) {
 		if (!ZUME_PROVIDER.isZoomPressed())
 			return original;
 		
@@ -90,6 +111,13 @@ public class Zume {
 		result *= CONFIG.mouseSensitivityFloor + (zoom * (1 - CONFIG.mouseSensitivityFloor));
 		
 		return result;
+	}
+	
+	public static boolean transformHotbarScroll(int scrollDelta) {
+		if (Zume.CONFIG.enableZoomScrolling)
+			Zume.scrollDelta += scrollDelta > 0 ? 1 : -1;
+		
+		return !(Zume.CONFIG.enableZoomScrolling && ZUME_PROVIDER.isZoomPressed());
 	}
 	
 	private static double clamp(double value, double min, double max) {
@@ -110,11 +138,13 @@ public class Zume {
 	}
 	
 	public static boolean isActive() {
+		if (ZUME_PROVIDER == null)
+			return false;
+		
 		return ZUME_PROVIDER.isZoomPressed();
 	}
 	
 	public static int scrollDelta = 0;
-	public static double realFOV = -1D;
 	private static boolean wasZooming = false;
 	private static long prevTimestamp;
 	

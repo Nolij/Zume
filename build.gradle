@@ -1,6 +1,17 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+import org.apache.tools.zip.ZipEntry
+import org.apache.tools.zip.ZipOutputStream
+
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id "maven-publish"
+	id "com.modrinth.minotaur" version "2.+"
+	id "io.github.themrmilchmann.curseforge-publish" version "0.4.0"
+	id "babric-loom" version "1.4-SNAPSHOT" apply false
+	id "com.gtnewhorizons.retrofuturagradle" version "1.3.25" apply false
 }
 
 group = maven_group
@@ -33,6 +44,10 @@ allprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
+        if (it.name in ["compileMcLauncherJava", "compilePatchedMcJava"]) {
+            return
+        }
+
         it.options.encoding = "UTF-8"
 
         it.sourceCompatibility = 17 // for the IDE support
@@ -54,25 +69,24 @@ configurations {
     compileClasspath.extendsFrom shade
     runtimeClasspath.extendsFrom shade
     developmentFabric.extendsFrom shade
-
-    shadeExternal
-    compileClasspath.extendsFrom shadeExternal
-    runtimeClasspath.extendsFrom shadeExternal
-    developmentFabric.extendsFrom shadeExternal
 }
 
-dependencies {
-    implementation "net.fabricmc:fabric-loader:${loader_version}"
+def fabricImpls = [project(":modern"), project(":primitive"), project(":legacy")]
+def legacyForgeImplNames = ["archaic", "vintage"]
+def legacyForgeImpls = legacyForgeImplNames.collect { project(":${it}") }
+def impls = [project(":common"), *fabricImpls, *legacyForgeImpls]
 
-    shadeExternal(implementation("blue.endless:jankson:${jankson_version}"))
+dependencies {
+    compileOnly "net.fabricmc:fabric-loader:${loader_version}"
+	
+    shade(implementation("blue.endless:jankson:${jankson_version}"))
 
     // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
     compileOnly "org.apache.logging.log4j:log4j-core:2.22.0"
 
-    shade(project(":common")) { transitive false }
-    shade(project(":modern")) { transitive false }
-    shade(project(":primitive")) { transitive false }
-    shade(project(":legacy")) { transitive false }
+	impls.forEach {
+		shade(it) { transitive false }
+	}
 }
 
 java {
@@ -84,42 +98,154 @@ shadowJar {
         rename { "${it}_${archives_base_name}"}
     }
 
-    configurations = [project.configurations.shade,
-                      project.configurations.shadeExternal]
+    configurations = [project.configurations.shade]
     archiveClassifier = ""
+	
+	legacyForgeImpls.forEach {
+		it.afterEvaluate {
+			def reobfJar = it.reobfJar
+			dependsOn reobfJar
+			from(zipTree(reobfJar.archivePath))
+		}
+	}
+	
+	legacyForgeImplNames.forEach {
+		def implName = it
+		exclude("zume-${implName}.mixins.json")
+		relocate "dev.nolij.zume.${implName}.mixin", "dev.nolij.zume.legacyforge.mixin.${implName}"
+	}
 
     relocate "blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson"
+    
+    manifest {
+        attributes (
+            "FMLCorePluginContainsFMLMod": true,
+            "ForceLoadAsMod": true,
+	        "MixinConfigs": "zume-legacyforge.mixins.json",
+	        "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
+        )
+    }
+}
+
+class RefMapMergingTransformer implements Transformer {
+	
+	static final SLURPER = new JsonSlurper()
+	
+	@Input
+	String packageName
+	
+	@Input
+	String modId
+	
+	@Input
+	String targetRefMap
+	
+	@Input
+	List<String> sources
+	
+	@Override
+	boolean canTransformResource(FileTreeElement fileTreeElement) {
+		for (source in sources) {
+			if (fileTreeElement.name.equals("${modId}-${source}-refmap.json".toString())) {
+				return true
+			}
+		}
+		
+		return false
+	}
+	
+	private boolean transformed = false
+	
+	private Map<String, Map<String, String>> mappings = new HashMap<>()
+	
+	@Override
+	void transform(TransformerContext transformerContext) {
+		this.transformed = true
+		
+		def parsed = SLURPER.parse(transformerContext.is)
+		Map<String, Map<String, String>> parsedMappings = parsed.mappings
+		
+		for (key in parsedMappings.keySet()) {
+			def values = parsedMappings[key]
+			def newKey = key.replaceFirst(/\/(\w+)\/mixin\//, "/${targetRefMap}/mixin/\$1/")
+			
+			mappings[newKey] = values
+		}
+	}
+	
+	@Override
+	boolean hasTransformedResource() {
+		return transformed
+	}
+	
+	@Override
+	void modifyOutputStream(ZipOutputStream zipOutputStream, boolean b) {
+		def targetRefMapEntry = new ZipEntry("${modId}-${targetRefMap}-refmap.json")
+		zipOutputStream.putNextEntry(targetRefMapEntry)
+		zipOutputStream.write(JsonOutput.toJson([
+		    mappings: this.mappings,
+			data: [
+			    searge: this.mappings
+			]
+		]).getBytes())
+		
+		transformed = false
+		mappings.clear()
+	}
+	
+}
+
+shadowJar.transform(RefMapMergingTransformer.class) {
+	packageName = "${maven_group}.${archives_base_name}"
+	modId = archives_base_name
+	targetRefMap = "legacyforge"
+	sources = legacyForgeImplNames
 }
 
 sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-
-    def modernSources = project(":modern").sourcesJar
-    dependsOn modernSources
-    from(modernSources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
-
-    def primitiveSources = project(":primitive").sourcesJar
-    dependsOn primitiveSources
-    from(primitiveSources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
-
-    def legacySources = project(":legacy").sourcesJar
-    dependsOn legacySources
-    from(legacySources.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json" }
+	impls.forEach {
+		def sourcesJarTask = it.sourcesJar
+		dependsOn sourcesJarTask
+		from(sourcesJarTask.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json", "mcmod.info" }
+	}
+	exclude("zume-legacyforge.mixins.json")
 }
 
 build.dependsOn(shadowJar)
 
 processResources {
+	from "common/src/main/resources"
+	
     inputs.property "version", version
     inputs.property "loader_version", loader_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": version,
+        expand  "version": version,
                 "loader_version": loader_version
     }
+	
+    filesMatching("mcmod.info") {
+        expand  "mod_version": version,
+	            "minecraft_version": archaic_minecraft_version
+    }
+
+	def slurper = new JsonSlurper()
+	
+	ArrayList<String> serverMixins = new ArrayList<>()
+	ArrayList<String> clientMixins = new ArrayList<>()
+	
+	legacyForgeImplNames.forEach {
+		def implName = it
+		def implMixins = slurper.parse(file("${implName}/src/main/resources/zume-${implName}.mixins.json"))
+		implMixins.mixins.forEach { serverMixins.add("${implName}.${it}") }
+		implMixins.client.forEach { clientMixins.add("${implName}.${it}") }
+	}
+	
+	filesMatching("zume-legacyforge.mixins.json") {
+		expand  "server_mixins": JsonOutput.toJson(serverMixins),
+				"client_mixins": JsonOutput.toJson(clientMixins)
+	}
 }
 
 // configure the maven publication
