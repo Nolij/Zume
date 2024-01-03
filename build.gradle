@@ -1,10 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
-import org.apache.tools.zip.ZipEntry
-import org.apache.tools.zip.ZipOutputStream
-
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id "maven-publish"
@@ -108,11 +101,11 @@ shadowJar {
 			from(zipTree(reobfJar.archivePath))
 		}
 	}
-	
+
+	def legacyForgeMixinConfigs = []
 	legacyForgeImplNames.forEach {
 		def implName = it
-		exclude("zume-${implName}.mixins.json")
-		relocate "dev.nolij.zume.${implName}.mixin", "dev.nolij.zume.legacyforge.mixin.${implName}"
+		legacyForgeMixinConfigs.push("zume-${implName}.mixins.json")
 	}
 
     relocate "blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson"
@@ -121,85 +114,10 @@ shadowJar {
         attributes (
             "FMLCorePluginContainsFMLMod": true,
             "ForceLoadAsMod": true,
-	        "MixinConfigs": "zume-legacyforge.mixins.json",
+	        "MixinConfigs": legacyForgeMixinConfigs.join(","),
 	        "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
         )
     }
-}
-
-class RefMapMergingTransformer implements Transformer {
-	
-	static final SLURPER = new JsonSlurper()
-	
-	@Input
-	String packageName
-	
-	@Input
-	String modId
-	
-	@Input
-	String targetRefMap
-	
-	@Input
-	List<String> sources
-	
-	@Override
-	boolean canTransformResource(FileTreeElement fileTreeElement) {
-		for (source in sources) {
-			if (fileTreeElement.name.equals("${modId}-${source}-refmap.json".toString())) {
-				return true
-			}
-		}
-		
-		return false
-	}
-	
-	private boolean transformed = false
-	
-	private Map<String, Map<String, String>> mappings = new HashMap<>()
-	
-	@Override
-	void transform(TransformerContext transformerContext) {
-		this.transformed = true
-		
-		def parsed = SLURPER.parse(transformerContext.is)
-		Map<String, Map<String, String>> parsedMappings = parsed.mappings
-		
-		for (key in parsedMappings.keySet()) {
-			def values = parsedMappings[key]
-			def newKey = key.replaceFirst(/\/(\w+)\/mixin\//, "/${targetRefMap}/mixin/\$1/")
-			
-			mappings[newKey] = values
-		}
-	}
-	
-	@Override
-	boolean hasTransformedResource() {
-		return transformed
-	}
-	
-	@Override
-	void modifyOutputStream(ZipOutputStream zipOutputStream, boolean b) {
-		def targetRefMapEntry = new ZipEntry("${modId}-${targetRefMap}-refmap.json")
-		zipOutputStream.putNextEntry(targetRefMapEntry)
-		zipOutputStream.write(JsonOutput.toJson([
-		    mappings: this.mappings,
-			data: [
-			    searge: this.mappings
-			]
-		]).getBytes())
-		
-		transformed = false
-		mappings.clear()
-	}
-	
-}
-
-shadowJar.transform(RefMapMergingTransformer.class) {
-	packageName = "${maven_group}.${archives_base_name}"
-	modId = archives_base_name
-	targetRefMap = "legacyforge"
-	sources = legacyForgeImplNames
 }
 
 sourcesJar {
@@ -208,7 +126,6 @@ sourcesJar {
 		dependsOn sourcesJarTask
 		from(sourcesJarTask.archiveFile.map { zipTree(it) }) { exclude "fabric.mod.json", "mcmod.info" }
 	}
-	exclude("zume-legacyforge.mixins.json")
 }
 
 build.dependsOn(shadowJar)
@@ -229,23 +146,6 @@ processResources {
         expand  "mod_version": version,
 	            "minecraft_version": archaic_minecraft_version
     }
-
-	def slurper = new JsonSlurper()
-	
-	ArrayList<String> serverMixins = new ArrayList<>()
-	ArrayList<String> clientMixins = new ArrayList<>()
-	
-	legacyForgeImplNames.forEach {
-		def implName = it
-		def implMixins = slurper.parse(file("${implName}/src/main/resources/zume-${implName}.mixins.json"))
-		implMixins.mixins.forEach { serverMixins.add("${implName}.${it}") }
-		implMixins.client.forEach { clientMixins.add("${implName}.${it}") }
-	}
-	
-	filesMatching("zume-legacyforge.mixins.json") {
-		expand  "server_mixins": JsonOutput.toJson(serverMixins),
-				"client_mixins": JsonOutput.toJson(clientMixins)
-	}
 }
 
 // configure the maven publication

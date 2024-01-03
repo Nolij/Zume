@@ -2,6 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.archaic.mixin",
+	"plugin": "dev.nolij.zume.common.LegacyForgeZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 	],
