@@ -1,5 +1,6 @@
 package dev.nolij.zume.vintage;
 
+import dev.nolij.zume.common.Constants;
 import dev.nolij.zume.vintage.mixin.EntityRendererAccessor;
 import dev.nolij.zume.common.IZumeProvider;
 import dev.nolij.zume.common.Zume;
@@ -18,9 +19,9 @@ import java.io.File;
 
 @Mod(
 	modid = Zume.MOD_ID,
-	name = Tags.MOD_NAME,
-	version = Tags.MOD_VERSION, 
-	acceptedMinecraftVersions = Tags.VERSION_RANGE,
+	name = Constants.MOD_NAME,
+	version = Constants.MOD_VERSION, 
+	acceptedMinecraftVersions = Constants.VINTAGE_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider",
 	dependencies = "required-after:mixinbooter@*")
 public class VintageZume implements IZumeProvider {

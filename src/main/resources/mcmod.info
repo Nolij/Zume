@@ -4,7 +4,7 @@
       "name": "Zume",
       "description": "A simple zoom mod by Nolij",
       "version": "${mod_version}",
-      "mcversion": "${minecraft_version}",
+      "mcversion": "${archaic_minecraft_version}",
       "url": "https://github.com/Nolij/Zume",
       "updateUrl": "",
       "authorList": ["Nolij"],

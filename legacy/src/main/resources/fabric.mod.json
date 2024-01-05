@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "zume",
-	"version": "${version}",
+	"version": "${mod_version}",
 	"name": "Zume",
 	"description": "A simple zoom mod by Nolij",
 	"authors": [
@@ -23,7 +23,7 @@
 		"zume-legacy.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=${loader_version}",
+		"fabricloader": ">=${legacy_fabric_version}",
 		"legacy-fabric-keybinding-api-v1-common": "*"
 	}
 }

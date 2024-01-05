@@ -12,8 +12,6 @@ jobs:
                     java-version: '17'
             -   name: Adjust Gradle permission
                 run: chmod +x ./gradlew
-            -   name: :setupCIWorkspace
-                run: ./gradlew setupCIWorkspace
             -   name: :build
                 run: ./gradlew build
             -   name: Upload artifacts

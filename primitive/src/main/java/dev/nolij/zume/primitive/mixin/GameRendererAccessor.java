@@ -1,16 +1,16 @@
 package dev.nolij.zume.primitive.mixin;
 
-import net.minecraft.client.util.Smoother;
-import net.minecraft.sortme.GameRenderer;
+import net.minecraft.class_555;
+import net.minecraft.client.util.SmoothUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(GameRenderer.class)
+@Mixin(class_555.class)
 public interface GameRendererAccessor {
 	
-	@Accessor("cinematicYawSmoother")
-	void setCinematicYawSmoother(Smoother value);
-	@Accessor("cinematicPitchSmoother")
-	void setCinematicPitchSmoother(Smoother value);
+	@Accessor("field_2353")
+	void setCinematicYawSmoother(SmoothUtil value);
+	@Accessor("field_2354")
+	void setCinematicPitchSmoother(SmoothUtil value);
 	
 }

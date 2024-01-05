@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
 	
-	@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;scrollInHotbar(I)V"))
+	@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;method_692(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, int scrollAmount) {
 		return Zume.transformHotbarScroll(scrollAmount);
 	}

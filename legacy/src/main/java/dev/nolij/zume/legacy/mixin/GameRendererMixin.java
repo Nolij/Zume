@@ -33,18 +33,18 @@ public class GameRendererMixin {
 	@Dynamic
 	@ModifyExpressionValue(method = {
 		"method_1331", "tick", // archaic
-		"method_9775(FJ)V", "method_1321()V" // vintage
+		"method_9775(FJ)V" // vintage
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;smoothCameraEnabled:Z"))
-	public boolean zume$archaic$smoothCameraEnabled(boolean original) {
+	public boolean zume$smoothCameraEnabled(boolean original) {
 		return Zume.transformCinematicCamera(original);
 	}
 	
 	@Dynamic
 	@ModifyExpressionValue(method = {
 		"method_1331", "tick", // archaic
-		"method_9775(FJ)V", "method_1321()V" // vintage
+		"method_9775(FJ)V" // vintage
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;sensitivity:F"))
-	public float zume$archaic$mouseSensitivity(float original) {
+	public float zume$mouseSensitivity(float original) {
 		return (float) Zume.transformMouseSensitivity(original);
 	}
 	

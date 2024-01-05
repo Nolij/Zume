@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "zume",
-	"version": "${version}",
+	"version": "${mod_version}",
 	"name": "Zume",
 	"description": "A simple zoom mod by Nolij",
 	"authors": [
@@ -24,10 +24,10 @@
 	},
 	"mixins": [
 		"zume-modern.mixins.json",
-		"zume-primitive.mixins.json",
-		"zume-legacy.mixins.json"
+		"zume-legacy.mixins.json",
+		"zume-primitive.mixins.json"
 	],
 	"depends": {
-		"fabricloader": [">=${loader_version}", "0.14.24-babric.1"]
+		"fabricloader": [">=${modern_fabric_version}", "${primitive_fabric_version}"]
 	}
 }
