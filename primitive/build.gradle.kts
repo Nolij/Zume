@@ -14,7 +14,7 @@ unimined.minecraft {
 	}
 
 	babric {
-		loader("primitive_fabric_version"())
+		loader("babric_version"())
 	}
 
 	mappings {
@@ -34,7 +34,6 @@ dependencies {
     "modImplementation"(fabricApi.stationModule(moduleName = "station-keybindings-v0", version = "station_api_version"()))
 	
 	val mixinExtras = "io.github.llamalad7:mixinextras-fabric:${"mixinextras_version"()}"
-//	annotationProcessor(mixinExtras)
 	implementation(mixinExtras)
 
     implementation("org.slf4j:slf4j-api:1.8.0-beta4")

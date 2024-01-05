@@ -23,7 +23,7 @@
 		"zume-modern.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=${modern_fabric_version}",
+		"fabricloader": ">=${fabric_version}",
 		"fabric-key-binding-api-v1": "*"
 	}
 }

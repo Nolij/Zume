@@ -26,7 +26,7 @@
 		"zume-primitive.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=${primitive_fabric_version}",
+		"fabricloader": ">=${babric_version}",
 		"station-keybindings-v0": "*"
 	}
 }

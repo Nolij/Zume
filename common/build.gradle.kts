@@ -12,6 +12,7 @@ buildConfig {
 
 	useJavaOutput()
 
+	// the below errors shown by IntelliJ can be safely ignored; Jabel works around this
 	buildConfigField("MOD_VERSION", "mod_version"())
 	buildConfigField("MOD_NAME", "Zume")
 	buildConfigField("ARCHAIC_VERSION_RANGE", "archaic_minecraft_range"())

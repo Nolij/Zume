@@ -23,7 +23,7 @@ import java.io.File;
 	version = Constants.MOD_VERSION, 
 	acceptedMinecraftVersions = Constants.VINTAGE_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider",
-	dependencies = "required-after:mixinbooter@*")
+	dependencies = "required-after:mixinbooter@[5.0,)")
 public class VintageZume implements IZumeProvider {
 	
 	@Mod.EventHandler

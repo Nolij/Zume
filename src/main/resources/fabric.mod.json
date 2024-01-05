@@ -28,6 +28,6 @@
 		"zume-primitive.mixins.json"
 	],
 	"depends": {
-		"fabricloader": [">=${modern_fabric_version}", "${primitive_fabric_version}"]
+		"fabricloader": [">=${fabric_version}", "${babric_version}"]
 	}
 }
