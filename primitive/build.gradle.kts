@@ -31,7 +31,15 @@ repositories {
 }
 
 dependencies {
-    "modImplementation"(fabricApi.stationModule(moduleName = "station-keybindings-v0", version = "station_api_version"()))
+	"modImplementation"(fabricApi.stationModule(moduleName = "station-keybindings-v0", version = "station_api_version"())) {
+		exclude(module = "fabric-loader")
+		exclude(group = "org.ow2.asm")
+	}
+	"modImplementation"("net.modificationstation:StationAPI:2.0-PRE2") {
+		exclude(module = "cursed-fabric-loader")
+		exclude(module = "fabric-loader")
+		exclude(group = "org.ow2.asm")
+	}
 	
 	val mixinExtras = "io.github.llamalad7:mixinextras-fabric:${"mixinextras_version"()}"
 	implementation(mixinExtras)
