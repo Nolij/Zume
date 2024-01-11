@@ -22,6 +22,33 @@ base {
 	archivesName = "archives_base_name"()
 }
 
+val fabricImpls = arrayOf(
+	"modern",
+	"legacy",
+	"primitive",
+)
+val legacyForgeImpls = arrayOf(
+	"archaic",
+	"vintage",
+)
+val lexForgeImpls = arrayOf(
+	*legacyForgeImpls,
+//	"lexforge16",
+//	"lexforge",
+)
+val neoForgeImpls = arrayOf(
+	"neoforge",
+)
+val uniminedImpls = arrayOf(
+	*fabricImpls,
+	*lexForgeImpls,
+	*neoForgeImpls,
+)
+val impls = arrayOf(
+	"common",
+	*uniminedImpls,
+)
+
 allprojects {	
 	apply(plugin = "java")
 	apply(plugin = "maven-publish")
@@ -104,24 +131,6 @@ unimined.minecraft {
 	defaultRemapJar = false
 }
 
-val fabricImpls = arrayOf(
-	"modern",
-	"legacy",
-	"primitive",
-)
-val legacyForgeImpls = arrayOf(
-	"archaic",
-	"vintage",
-)
-val uniminedImpls = arrayOf(
-	*fabricImpls,
-	*legacyForgeImpls,
-)
-val impls = arrayOf(
-	"common",
-	*uniminedImpls,
-)
-
 configurations {
 	val shade = create("shade")
 	
@@ -147,7 +156,7 @@ tasks.processResources {
 
 	filteringCharset = "UTF-8"
 
-	filesMatching(immutableListOf("fabric.mod.json", "mcmod.info")) {
+	filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")) {
 		expand(rootProject.properties)
 	}
 }
@@ -170,7 +179,7 @@ tasks.shadowJar {
 		val remapJar = project(":${it}").tasks.withType<RemapJarTask>()["remapJar"]
 		shadowJar.dependsOn(remapJar)
 		from(zipTree(remapJar.archiveFile.get())) {
-			exclude("fabric.mod.json", "mcmod.info")
+			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")
 		}
 	}
 	
@@ -180,7 +189,7 @@ tasks.shadowJar {
 		attributes(
 			"FMLCorePluginContainsFMLMod" to true,
 			"ForceLoadAsMod" to true,
-			"MixinConfigs" to legacyForgeImpls.joinToString(",") { "zume-${it}.mixins.json" },
+			"MixinConfigs" to lexForgeImpls.joinToString(",") { "zume-${it}.mixins.json" },
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker"
 		)
 	}

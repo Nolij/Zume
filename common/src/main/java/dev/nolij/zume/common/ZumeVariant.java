@@ -7,5 +7,6 @@ public enum ZumeVariant {
 	LEGACY,
 	ARCHAIC_FORGE,
 	VINTAGE_FORGE,
+	NEOFORGE,
 	
 }

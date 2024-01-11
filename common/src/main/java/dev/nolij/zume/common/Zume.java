@@ -31,6 +31,8 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
 		else if (classLoader.getResource("net/minecraftforge/fml/client/registry/ClientRegistry.class") != null)
 			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
+		else if (classLoader.getResource("net/neoforged/neoforge/common/NeoForge.class") != null)
+			ZUME_VARIANT = ZumeVariant.NEOFORGE;
 	}
 	
 	public static IZumeProvider ZUME_PROVIDER;
