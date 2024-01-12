@@ -12,10 +12,8 @@ jobs:
                     java-version: '17'
             -   name: Adjust Gradle permission
                 run: chmod +x ./gradlew
-            -   name: :common:build
-                run: ./gradlew :common:build
             -   name: :build
-                run: ./gradlew :build
+                run: ./gradlew build
             -   name: Upload artifacts
                 uses: actions/upload-artifact@v3
                 with:
