@@ -31,7 +31,7 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.PRIMITIVE;
 		else if (classLoader.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
 			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
-		else if (classLoader.getResource("net/minecraftforge/fml/client/registry/ClientRegistry.class") != null)
+		else if (classLoader.getResource("net/minecraftforge/oredict/OreDictionary.class") != null)
 			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
 		else if (classLoader.getResource("net/neoforged/neoforge/common/NeoForge.class") != null)
 			ZUME_VARIANT = ZumeVariant.NEOFORGE;
@@ -41,8 +41,10 @@ public class Zume {
 				final Method getVersionMethod = forgeVersionClass.getMethod("getVersion");
 				final String forgeVersion = (String) getVersionMethod.invoke(null);
 				final int major = Integer.parseInt(forgeVersion.substring(0, forgeVersion.indexOf('.')));
-				if (major > 36)
+				if (major > 40)
 					ZUME_VARIANT = ZumeVariant.LEXFORGE;
+				else if (major > 36)
+					ZUME_VARIANT = ZumeVariant.LEXFORGE18;
 				else 
 					ZUME_VARIANT = ZumeVariant.LEXFORGE16;
 			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}

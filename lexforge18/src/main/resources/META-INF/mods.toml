@@ -3,9 +3,6 @@ loaderVersion = "[1,)"
 license = "OSL-3.0"
 issueTrackerURL="https://github.com/Nolij/Zume/issues"
 
-[[mixins]]
-config="zume-neoforge.mixins.json"
-
 [[mods]]
 modId="zume"
 version="${mod_version}"
@@ -19,6 +16,7 @@ An over-engineered Zoom mod by Nolij
 [[dependencies.zume]]
 modId="minecraft"
 type="required"
-versionRange="${neoforge_version_range}"
+mandatory=true
+versionRange="${lexforge18_version_range}"
 ordering="NONE"
 side="CLIENT"

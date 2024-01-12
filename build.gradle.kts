@@ -37,12 +37,13 @@ val fabricImpls = arrayOf(
 	"primitive",
 )
 val legacyForgeImpls = arrayOf(
-	"archaic",
 	"vintage",
+	"archaic",
 )
 val lexForgeImpls = arrayOf(
 	"lexforge",
-//	"lexforge16",
+	"lexforge18",
+	"lexforge16",
 	*legacyForgeImpls,
 )
 val neoForgeImpls = arrayOf(
@@ -196,6 +197,8 @@ tasks.shadowJar {
 	
 	filesMatching(immutableListOf(
 			"dev/nolij/zume/lexforge/LexZume.class", 
+			"dev/nolij/zume/lexforge18/LexZume18.class", 
+			"dev/nolij/zume/lexforge16/LexZume16.class", 
 			"dev/nolij/zume/vintage/VintageZume.class")) {
 		val reader = ClassReader(this.open())
 		val node = ClassNode()

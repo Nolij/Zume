@@ -11,6 +11,5 @@ public @interface Mod {
 	String version();
 	String acceptedMinecraftVersions();
 	String guiFactory();
-	String dependencies();
 	
 }

@@ -8,7 +8,6 @@ modId="zume"
 version="${mod_version}"
 displayName="${mod_name}"
 dispolayURL="https://modrinth.com/mod/zume"
-logoFile="assets/zume/icon_large.png"
 authors="Nolij"
 description="""
 An over-engineered Zoom mod by Nolij

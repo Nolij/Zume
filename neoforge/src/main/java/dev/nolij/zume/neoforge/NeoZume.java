@@ -18,11 +18,7 @@ import java.io.File;
 @OnlyIn(Dist.CLIENT)
 public class NeoZume implements IZumeProvider {
 	
-	public static NeoZume INSTANCE;
-	
 	public NeoZume(IEventBus modEventBus) {
-		INSTANCE = this;
-		
 		Zume.LOGGER.info("Loading NeoZume...");
 		
 		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));

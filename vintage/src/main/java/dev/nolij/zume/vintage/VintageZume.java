@@ -11,7 +11,6 @@ import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -22,8 +21,7 @@ import java.io.File;
 	name = Constants.MOD_NAME,
 	version = Constants.MOD_VERSION, 
 	acceptedMinecraftVersions = Constants.VINTAGE_VERSION_RANGE,
-	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider",
-	dependencies = "required-after:mixinbooter@[5.0,)")
+	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeProvider {
 	
 	public VintageZume() {
