@@ -5,6 +5,8 @@ operator fun String.invoke(): String {
 }
 
 unimined.minecraft {
+	combineWith(project(":common").sourceSets.main.get())
+	
 	version("lexforge_minecraft_version"())
 
 	runs {
@@ -30,6 +32,8 @@ unimined.minecraft {
 //	mixinRemap {
 //		enableMixinExtra()
 //	}
+//	
+//	dependsOn(project(":common").tasks["jar"])
 //}
 
 dependencies {
@@ -41,7 +45,7 @@ dependencies {
 //	val mixinExtrasForge = "io.github.llamalad7:mixinextras-forge:${"mixinextras_version"()}"
 //	"minecraftLibraries"(mixinExtrasForge)
 
-	"minecraftLibraries"(project(":common"))
+	implementation(project(":common"))
 }
 
 tasks.processResources {
