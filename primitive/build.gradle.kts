@@ -1,3 +1,5 @@
+import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+
 operator fun String.invoke(): String {
 	return (rootProject.properties[this] as String?)!!
 }
@@ -24,6 +26,12 @@ unimined.minecraft {
 	}
 
 	defaultRemapJar = true
+}
+
+tasks.withType<RemapJarTask> {
+	mixinRemap {
+		enableMixinExtra()
+	}
 }
 
 repositories {
