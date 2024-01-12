@@ -33,8 +33,13 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
 		else if (classLoader.getResource("net/neoforged/neoforge/common/NeoForge.class") != null)
 			ZUME_VARIANT = ZumeVariant.NEOFORGE;
-		else if (classLoader.getResource("cpw/mods/jarhandling/SecureJar.class") != null)
-			ZUME_VARIANT = ZumeVariant.LEXFORGE;
+		else {
+			try {
+				Class.forName("cpw.mods.jarhandling.SecureJar");
+				ZUME_VARIANT = ZumeVariant.LEXFORGE;
+				return;
+			} catch (ClassNotFoundException ignored) {}
+		}
 	}
 	
 	public static IZumeProvider ZUME_PROVIDER;
