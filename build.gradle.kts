@@ -1,5 +1,14 @@
 import okhttp3.internal.immutableListOf
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+
+buildscript {
+	dependencies {
+		classpath("org.ow2.asm:asm-tree:9.6")
+	}
+}
 
 plugins {
     id("java")
@@ -144,6 +153,8 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
 	compileOnly("org.apache.logging.log4j:log4j-core:2.22.0")
 	
+	compileOnly(project(":stubs"))
+	
 	"shade"(project(":common")) { isTransitive = false }
 	
 	uniminedImpls.forEach { 
@@ -183,6 +194,20 @@ tasks.shadowJar {
 		}
 	}
 	
+	filesMatching(immutableListOf(
+			"dev/nolij/zume/lexforge/LexZume.class", 
+			"dev/nolij/zume/vintage/VintageZume.class")) {
+		val reader = ClassReader(this.open())
+		val node = ClassNode()
+		reader.accept(node, 0)
+		
+		node.visibleAnnotations.removeIf { it.desc == "Lnet/minecraftforge/fml/common/Mod;" }
+		
+		val writer = ClassWriter(0)
+		node.accept(writer)
+		this.file.writeBytes(writer.toByteArray())
+	}
+	
 	relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
 	
 	manifest {
@@ -193,6 +218,12 @@ tasks.shadowJar {
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker"
 		)
 	}
+	
+//	transform(AnnotationStrippingTransformer(
+//		"Lnet/minecraftforge/fml/common/Mod;", 
+//		arrayOf(
+//			"dev/nolij/zume/lexforge/LexZume.class", 
+//			"dev/nolij/zume/vintage/VintageZume.class")))
 }
 
 tasks.build {

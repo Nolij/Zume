@@ -6,7 +6,7 @@ import dev.nolij.zume.primitive.PrimitiveZume;
 import dev.nolij.zume.legacy.LegacyZume;
 import net.fabricmc.api.ClientModInitializer;
 
-public class ZumeBootstrapper implements ClientModInitializer {
+public class FabricZumeBootstrapper implements ClientModInitializer {
 	
 	@Override
 	public void onInitializeClient() {

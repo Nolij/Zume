@@ -26,8 +26,7 @@ import java.io.File;
 	dependencies = "required-after:mixinbooter@[5.0,)")
 public class VintageZume implements IZumeProvider {
 	
-	@Mod.EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
+	public VintageZume() {
 		Zume.LOGGER.info("Loading Vintage Zume...");
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {

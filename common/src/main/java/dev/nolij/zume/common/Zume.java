@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class Zume {
 	
@@ -35,10 +37,15 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.NEOFORGE;
 		else {
 			try {
-				Class.forName("cpw.mods.jarhandling.SecureJar");
-				ZUME_VARIANT = ZumeVariant.LEXFORGE;
-				return;
-			} catch (ClassNotFoundException ignored) {}
+				final Class<?> forgeVersionClass = Class.forName("net.minecraftforge.versions.forge.ForgeVersion");
+				final Method getVersionMethod = forgeVersionClass.getMethod("getVersion");
+				final String forgeVersion = (String) getVersionMethod.invoke(null);
+				final int major = Integer.parseInt(forgeVersion.substring(0, forgeVersion.indexOf('.')));
+				if (major > 36)
+					ZUME_VARIANT = ZumeVariant.LEXFORGE;
+				else 
+					ZUME_VARIANT = ZumeVariant.LEXFORGE16;
+			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
 		}
 	}
 	
