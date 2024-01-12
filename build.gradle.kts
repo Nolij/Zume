@@ -14,8 +14,7 @@ plugins {
     id("java")
 	id("com.github.johnrengelman.shadow") version "8.1.1"
     id("maven-publish")
-	id("com.modrinth.minotaur") version "2.+"
-	id("io.github.themrmilchmann.curseforge-publish") version "0.4.0"
+	id("me.modmuss50.mod-publish-plugin") version "0.4.5"
 	id("com.github.gmazzo.buildconfig") version "5.2.0" apply(false)
 	id("xyz.wagyourtail.unimined") version "1.2.0-SNAPSHOT"
 }
@@ -225,4 +224,61 @@ tasks.shadowJar {
 
 tasks.build {
 	dependsOn(tasks.shadowJar)
+}
+
+afterEvaluate {
+	publishMods {
+		file = tasks.shadowJar.get().archiveFile
+		type = STABLE
+		displayName = "mod_name"()
+		changelog = file("CHANGELOG.md").readText()
+		
+		modLoaders.addAll("fabric", "forge", "neoforge")
+		dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
+		
+		github {
+			accessToken = providers.environmentVariable("GITHUB_TOKEN")
+			repository = "Nolij/Zume"
+			commitish = "master"
+			tagName = "release/${"mod_version"()}"
+		}
+		
+		modrinth {
+			accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+			projectId = "o6qsdrrQ"
+			
+			minecraftVersionRange {
+				start = "1.14.4"
+				end = "latest"
+				
+				includeSnapshots = true
+			}
+			
+			minecraftVersions.add("b1.7.3")
+			minecraftVersions.add("1.7.10")
+			minecraftVersions.add("1.8.9")
+			minecraftVersions.add("1.9.4")
+			minecraftVersions.add("1.10.2")
+			minecraftVersions.add("1.11.2")
+			minecraftVersions.add("1.12.2")
+		}
+		
+		curseforge {
+			accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+			projectId = "927564"
+			
+			minecraftVersionRange {
+				start = "1.14.4"
+				end = "latest"
+			}
+	
+			minecraftVersions.add("b1.7.3")
+			minecraftVersions.add("1.7.10")
+			minecraftVersions.add("1.8.9")
+			minecraftVersions.add("1.9.4")
+			minecraftVersions.add("1.10.2")
+			minecraftVersions.add("1.11.2")
+			minecraftVersions.add("1.12.2")
+		}
+	}
 }
