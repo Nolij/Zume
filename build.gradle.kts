@@ -218,12 +218,6 @@ tasks.shadowJar {
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker"
 		)
 	}
-	
-//	transform(AnnotationStrippingTransformer(
-//		"Lnet/minecraftforge/fml/common/Mod;", 
-//		arrayOf(
-//			"dev/nolij/zume/lexforge/LexZume.class", 
-//			"dev/nolij/zume/vintage/VintageZume.class")))
 }
 
 tasks.build {
