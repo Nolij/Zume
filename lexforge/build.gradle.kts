@@ -26,20 +26,20 @@ unimined.minecraft {
 	defaultRemapJar = true
 }
 
-tasks.withType<RemapJarTask> {
-	mixinRemap {
-		enableMixinExtra()
-	}
-}
+//tasks.withType<RemapJarTask> {
+//	mixinRemap {
+//		enableMixinExtra()
+//	}
+//}
 
 dependencies {
 	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
 	
-	val mixinExtrasCommon = "io.github.llamalad7:mixinextras-common:${"mixinextras_version"()}"
-	compileOnly(mixinExtrasCommon)
-	annotationProcessor(mixinExtrasCommon)
-	val mixinExtrasForge = "io.github.llamalad7:mixinextras-forge:${"mixinextras_version"()}"
-	"minecraftLibraries"(mixinExtrasForge)
+//	val mixinExtrasCommon = "io.github.llamalad7:mixinextras-common:${"mixinextras_version"()}"
+//	compileOnly(mixinExtrasCommon)
+//	annotationProcessor(mixinExtrasCommon)
+//	val mixinExtrasForge = "io.github.llamalad7:mixinextras-forge:${"mixinextras_version"()}"
+//	"minecraftLibraries"(mixinExtrasForge)
 
 	"minecraftLibraries"(project(":common"))
 }
