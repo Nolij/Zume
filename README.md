@@ -20,7 +20,7 @@ A: Zume supports the following platforms:
 
 - Fabric: Any version supported by Fabric Keybinding API v1 (currently 14.4+)
 - NeoForge: 20.1+
-- LexForge: 14.4+
+- LexForge: 14.4+ (requires MixinBootstrap before 16.1)
 - Legacy Fabric: Any version supported by Legacy Fabric Keybinding API v1 (currently 7.10 - 12.2)
 - Babric (Fabric for Minecraft Beta): Any version supported by Station API (currently b7.3)
 - Vintage Forge: 8.9 - 12.2 (requires MixinBooter)
