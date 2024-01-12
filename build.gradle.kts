@@ -32,9 +32,9 @@ val legacyForgeImpls = arrayOf(
 	"vintage",
 )
 val lexForgeImpls = arrayOf(
-	*legacyForgeImpls,
+	"lexforge",
 //	"lexforge16",
-//	"lexforge",
+	*legacyForgeImpls,
 )
 val neoForgeImpls = arrayOf(
 	"neoforge",
