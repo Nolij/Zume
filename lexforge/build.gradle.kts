@@ -32,8 +32,6 @@ unimined.minecraft {
 //	mixinRemap {
 //		enableMixinExtra()
 //	}
-//	
-//	dependsOn(project(":common").tasks["jar"])
 //}
 
 dependencies {
