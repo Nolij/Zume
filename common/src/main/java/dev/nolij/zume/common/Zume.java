@@ -23,7 +23,14 @@ public class Zume {
 		if (ZUME_VARIANT != null)
 			return;
 		
-		if (classLoader.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		var connectorPresent = false;
+		try {
+			Class.forName("dev.su5ed.sinytra.connector.service.ConnectorLoaderService");
+			connectorPresent = true;
+		} catch (ClassNotFoundException ignored) {}
+		
+		if (!connectorPresent && 
+			classLoader.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.MODERN;
 		else if (classLoader.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.LEGACY;
