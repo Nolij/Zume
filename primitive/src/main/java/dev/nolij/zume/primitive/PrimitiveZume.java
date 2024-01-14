@@ -12,6 +12,8 @@ public class PrimitiveZume implements ClientModInitializer, IZumeProvider {
 	
 	@Override
 	public void onInitializeClient() {
+		Zume.LOGGER.info("Loading Primitive Zume...");
+		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 	}
 	
