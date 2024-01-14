@@ -40,7 +40,7 @@ public class MouseMixin {
 	
 	@ModifyExpressionValue(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
 	public boolean onMouseScroll$isSpectator(boolean original) {
-		if (Zume.CONFIG.enableZoomScrolling && ModernZume.INSTANCE.isZoomPressed())
+		if (Zume.CONFIG.enableZoomScrolling && Zume.ZUME_PROVIDER.isZoomPressed())
 			return false;
 		
 		return original;

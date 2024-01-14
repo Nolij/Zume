@@ -10,12 +10,8 @@ import net.minecraft.client.util.SmoothUtil;
 
 public class LegacyZume implements ClientModInitializer, IZumeProvider {
 	
-	public static LegacyZume INSTANCE;
-	
 	@Override
 	public void onInitializeClient() {
-		INSTANCE = this;
-		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 	}
 	
