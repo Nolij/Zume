@@ -23,7 +23,7 @@ A: Zume supports the following platforms:
 - LexForge: 14.4+ (requires MixinBootstrap before 16.1)
 - Legacy Fabric: Any version supported by Legacy Fabric Keybinding API v1 (currently 7.10 - 12.2)
 - Babric (Fabric for Minecraft Beta): Any version supported by Station API (currently b7.3)
-- Vintage Forge: 8.9 - 12.2 (requires MixinBooter)
+- Vintage Forge: 8.9 - 12.2 (requires MixinBooter or UniMixins)
 - Archaic Forge: 7.10 (requires UniMixins)
 
 #### Q: Can you add support for \<insert platform here>?
