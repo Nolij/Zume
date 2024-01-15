@@ -1,0 +1,22 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "OSL-3.0"
+issueTrackerURL="https://github.com/Nolij/Zume/issues"
+
+[[mods]]
+modId="zume"
+version="${mod_version}"
+displayName="${mod_name}"
+dispolayURL="https://modrinth.com/mod/zume"
+authors="Nolij"
+description="""
+An over-engineered Zoom mod by Nolij
+"""
+
+[[dependencies.zume]]
+modId="minecraft"
+type="required"
+mandatory=true
+versionRange="${lexforge18_version_range}"
+ordering="NONE"
+side="CLIENT"

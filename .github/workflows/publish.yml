@@ -1,0 +1,27 @@
+name: publish
+on: [ workflow_dispatch ]
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: actions/setup-java@v3
+                with:
+                    distribution: 'temurin' # See 'Supported distributions' for available options
+                    java-version: '17'
+            -   name: Adjust Gradle permission
+                run: chmod +x ./gradlew
+            -   name: :build
+                run: ./gradlew build
+            -   name: Upload artifacts
+                uses: actions/upload-artifact@v3
+                with:
+                    name: zume
+                    path: "**/zume-*.jar"
+            -   name: :publishMods
+                run: ./gradlew publishMods
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                    MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+                    CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}

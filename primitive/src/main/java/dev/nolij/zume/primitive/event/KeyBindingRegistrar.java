@@ -2,7 +2,7 @@ package dev.nolij.zume.primitive.event;
 
 import dev.nolij.zume.primitive.ZumeKeyBind;
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
 
 import java.util.List;

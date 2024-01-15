@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+	    mavenCentral()
 	    maven {
 		    name = "Fabric"
 		    url = "https://maven.fabricmc.net/"
@@ -21,16 +22,37 @@ pluginManagement {
                 includeGroup("com.gtnewhorizons.retrofuturagradle")
             }
         }
-        gradlePluginPortal()
+	    maven {
+		    name = "Unimined Releases"
+		    url = "https://maven.wagyourtail.xyz/releases"
+	    }
+	    maven {
+		    name = "Unimined Snapshots"
+		    url = "https://maven.wagyourtail.xyz/snapshots"
+	    }
+        gradlePluginPortal() {
+	        content {
+		        excludeGroup("org.apache.logging.log4j")
+	        }
+        }
     }
+	plugins {
+		id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+	}
 }
 
 plugins {
     id "org.gradle.toolchains.foojay-resolver-convention" version "0.7.0"
 }
+
+include "stubs"
 include "common"
 include "modern"
-include "primitive"
 include "legacy"
+include "primitive"
 include "archaic"
 include "vintage"
+include "neoforge"
+include "lexforge"
+include "lexforge18"
+include "lexforge16"

@@ -8,11 +8,9 @@ import net.fabricmc.loader.api.FabricLoader;
 
 public class ModernZume implements ClientModInitializer, IZumeProvider {
 	
-	public static ModernZume INSTANCE;
-	
 	@Override
 	public void onInitializeClient() {
-		INSTANCE = this;
+		Zume.LOGGER.info("Loading Modern Zume...");
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);

@@ -6,15 +6,13 @@ import dev.nolij.zume.primitive.mixin.GameRendererAccessor;
 import dev.nolij.zume.primitive.mixin.MinecraftAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.util.Smoother;
+import net.minecraft.client.util.SmoothUtil;
 
 public class PrimitiveZume implements ClientModInitializer, IZumeProvider {
 	
-	public static PrimitiveZume INSTANCE;
-	
 	@Override
 	public void onInitializeClient() {
-		INSTANCE = this;
+		Zume.LOGGER.info("Loading Primitive Zume...");
 		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 	}
@@ -37,10 +35,11 @@ public class PrimitiveZume implements ClientModInitializer, IZumeProvider {
 	
 	@Override
 	public void onZoomActivate() {
+		//noinspection ConstantValue
 		if (Zume.CONFIG.enableCinematicZoom && !MinecraftAccessor.getInstance().options.cinematicMode) {
-			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().gameRenderer;
-			gameRenderer.setCinematicYawSmoother(new Smoother());
-			gameRenderer.setCinematicPitchSmoother(new Smoother());
+			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().field_2818;
+			gameRenderer.setCinematicYawSmoother(new SmoothUtil());
+			gameRenderer.setCinematicPitchSmoother(new SmoothUtil());
 		}
 	}
 	

@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.nolij.zume.lexforge18.mixin",
+	"plugin": "dev.nolij.zume.lexforge18.LexZume18MixinPlugin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"GameRendererMixin",
+		"MouseHandlerMixin"
+	],
+	"client": [
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"refmap": "zume-lexforge18-refmap.json"
+}

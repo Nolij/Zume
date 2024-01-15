@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "zume",
-	"version": "${version}",
+	"version": "${mod_version}",
 	"name": "Zume",
 	"description": "A simple zoom mod by Nolij",
 	"authors": [
@@ -16,7 +16,7 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"dev.nolij.zume.ZumeBootstrapper"
+			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
 		"stationapi:event_bus_client": [
 			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
@@ -24,10 +24,10 @@
 	},
 	"mixins": [
 		"zume-modern.mixins.json",
-		"zume-primitive.mixins.json",
-		"zume-legacy.mixins.json"
+		"zume-legacy.mixins.json",
+		"zume-primitive.mixins.json"
 	],
 	"depends": {
-		"fabricloader": [">=${loader_version}", "0.14.24-babric.1"]
+		"fabricloader": [">=${fabric_version}", "${babric_version}"]
 	}
 }
