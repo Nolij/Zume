@@ -14,6 +14,14 @@ for increasing and decreasing the zoom level.
 
 # FAQ
 
+#### Q: Where is the config?
+
+A: You'll find the config at `.minecraft/config/zume.json5`. You can modify the file while the game is running, and
+the config will be automatically reloaded.
+
+#### Q: discord where
+A: https://discord.gg/6ZjX4mvCMR
+
 #### Q: What version is this for?
 
 A: Zume supports the following platforms:
@@ -46,11 +54,6 @@ the following conditions are met**:
 - Must not have exclusive features without significant justification - if you're adding a feature, add it to every 
   version.
 
-#### Q: Where is the config?
-
-A: You'll find the config at `.minecraft/config/zume.json5`. You can modify the file while the game is running, and 
-the config will be automatically reloaded. 
-
 #### Q: What kind of weird license is this?
 
 A: OSL-3.0 is the closest equivalent to a LAGPL I could find. AGPL and GPL are incompatible with Minecraft, and LGPL 
@@ -62,9 +65,6 @@ A: This is, and will remain, free, copyleft software. Any requests to change the
 stronger will be denied immediately (unfortunately GPL and AGPL aren't compatible with Minecraft due to linking 
 restrictions, as much as I'd like to use them). Even in situations where I use parts of other projects with more 
 "permissive" licenses, I will treat them as copyleft, free software.
-
-#### Q: discord where
-A: https://discord.gg/6ZjX4mvCMR
 
 ## License
 
