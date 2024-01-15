@@ -217,7 +217,7 @@ tasks.shadowJar {
 			"FMLCorePluginContainsFMLMod" to true,
 			"ForceLoadAsMod" to true,
 			"MixinConfigs" to lexForgeImpls.joinToString(",") { "zume-${it}.mixins.json" },
-			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker"
+			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
 		)
 	}
 }
