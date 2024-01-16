@@ -1,3 +1,4 @@
+import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -230,9 +231,9 @@ afterEvaluate {
 	publishMods {
 		file = tasks.shadowJar.get().archiveFile
 		type = STABLE
-		displayName = "mod_name"()
-		changelog = file("CHANGELOG.md").readText()
+		displayName = "mod_version"()
 		version = "mod_version"()
+		changelog = file("CHANGELOG.md").readText()
 		
 		modLoaders.addAll("fabric", "forge", "neoforge")
 		dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
@@ -255,17 +256,19 @@ afterEvaluate {
 				includeSnapshots = true
 			}
 			
+			minecraftVersionRange {
+				start = "1.7.10"
+				end = "1.12.2"
+				
+				includeSnapshots = true
+			}
+			
 			minecraftVersions.add("b1.7.3")
-			minecraftVersions.add("1.7.10")
-			minecraftVersions.add("1.8.9")
-			minecraftVersions.add("1.9.4")
-			minecraftVersions.add("1.10.2")
-			minecraftVersions.add("1.11.2")
-			minecraftVersions.add("1.12.2")
 		}
 		
 		curseforge {
-			accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+			val cfAccessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+			accessToken = cfAccessToken
 			projectId = "927564"
 			
 			minecraftVersionRange {
@@ -273,13 +276,44 @@ afterEvaluate {
 				end = "latest"
 			}
 	
-			minecraftVersions.add("b1.7.3")
-			minecraftVersions.add("1.7.10")
-			minecraftVersions.add("1.8.9")
-			minecraftVersions.add("1.9.4")
-			minecraftVersions.add("1.10.2")
-			minecraftVersions.add("1.11.2")
-			minecraftVersions.add("1.12.2")
+			minecraftVersionRange {
+				start = "1.7.10"
+				end = "1.12.2"
+			}
+
+			if (cfAccessToken.orNull != null) {
+				val cfAPI = CurseforgeApi(cfAccessToken.get(), apiEndpoint.get())
+				
+				val mcVersions = minecraftVersions.get().map {
+					"${it}-Snapshot"
+				}.toHashSet()
+				
+				@Suppress("UnstableApiUsage")
+				minecraftVersions.addAll(providerFactory.provider {
+					cfAPI.getGameVersions().map {
+						it.name
+					}.filter {
+						it.endsWith("-Snapshot")
+					}.filter { cfVersion ->
+						mcVersions.contains(cfVersion)
+					}
+				})
+			}
+
+			minecraftVersions.add("1.20.5-Snapshot")
+			minecraftVersions.add("Beta 1.7.3")
+		}
+		
+		discord {
+			webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+			
+			username = "Zume Updates"
+			
+			avatarUrl = "https://github.com/Nolij/Zume/raw/master/common/src/main/resources/assets/zume/icon_large.png"
+			
+			content = changelog.map {
+				"# A new version of Zume has been released! ```md\n${it}\n```"
+			}
 		}
 	}
 }
