@@ -3,6 +3,8 @@
 
 package dev.nolij.zume.common.util;
 
+import dev.nolij.zume.common.Zume;
+
 import java.io.IOException;
 import java.nio.file.*;
 
@@ -52,7 +54,7 @@ public class FileWatcher {
 					Thread.currentThread().interrupt();
 					break;
 				} catch (IOException e) {
-					throw new RuntimeException(e);
+					Zume.LOGGER.error("Error in config watcher: ", e);
 				} finally {
 					if (wk != null) {
 						wk.reset();
@@ -68,6 +70,7 @@ public class FileWatcher {
 		try {
 			watchService.close();
 		} catch (IOException e) {
+			Zume.LOGGER.error("Error in config watcher: ", e);
 			throw new RuntimeException(e);
 		}
 	}

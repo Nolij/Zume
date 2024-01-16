@@ -9,6 +9,7 @@ import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.common.util.FileWatcher;
 
 import java.io.*;
+import java.nio.file.Files;
 
 @NonnullByDefault
 public class ZumeConfig {
@@ -81,20 +82,25 @@ public class ZumeConfig {
 		void set(ZumeConfig config);
 	}
 	
-	private static ZumeConfig readFromFile(final File CONFIG_FILE) {
-		if (!CONFIG_FILE.exists())
+	private static ZumeConfig readFromFile(final File configFile) {
+		if (!configFile.exists())
 			return new ZumeConfig();
 		
 		try {
-			return JANKSON.fromJson(JANKSON.load(CONFIG_FILE), ZumeConfig.class);
+			var config = new String(Files.readAllBytes(configFile.toPath()));
+			
+			if (!config.endsWith("\n")) // jankson why are you this way
+				config += '\n';
+			
+			return JANKSON.fromJson(JANKSON.load(config), ZumeConfig.class);
 		} catch (IOException | SyntaxError e) {
-			Zume.LOGGER.error(e.toString());
+			Zume.LOGGER.error("Error parsing config: ", e);
 			return new ZumeConfig();
 		}
 	}
 	
-	private void writeToFile(final File CONFIG_FILE) {
-		try (final FileWriter configWriter = new FileWriter(CONFIG_FILE)) {
+	private void writeToFile(final File configFile) {
+		try (final FileWriter configWriter = new FileWriter(configFile)) {
 			JANKSON.toJson(this).toJson(configWriter, JSON_GRAMMAR, 0);
 			configWriter.flush();
 		} catch (IOException e) {
@@ -102,19 +108,19 @@ public class ZumeConfig {
 		}
 	}
 	
-	public static void create(final File CONFIG_FILE, ConfigSetter setter) {		
-		ZumeConfig config = readFromFile(CONFIG_FILE);
+	public static void create(final File configFile, final ConfigSetter setter) {		
+		ZumeConfig config = readFromFile(configFile);
 		
 		// write new options and comment updates to disk
-		config.writeToFile(CONFIG_FILE);
+		config.writeToFile(configFile);
 		
 		setter.set(config);
 		
 		try {
-			FileWatcher.onFileChange(CONFIG_FILE.toPath(), () -> {
+			FileWatcher.onFileChange(configFile.toPath(), () -> {
 				Zume.LOGGER.info("Reloading config...");
 				
-				ZumeConfig newConfig = readFromFile(CONFIG_FILE);
+				ZumeConfig newConfig = readFromFile(configFile);
 				
 				setter.set(newConfig);
 			});

@@ -4,3 +4,4 @@
 - add support for NeoForge 20.1+
 - remove hard dependency on MixinBooter in Vintage Forge; Zume just verifies that mixins get loaded now, it doesn't 
   care how
+- fixed config reloading issues on Windows
