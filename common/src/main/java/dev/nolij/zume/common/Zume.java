@@ -108,7 +108,7 @@ public class Zume {
 		return zoom;
 	}
 	
-	public static double transformFOV(double realFOV) {
+	public static double transformFOV(final double realFOV) {
 		var zoom = getZoom();
 		
 		if (CONFIG.useQuadratic) {
@@ -118,7 +118,7 @@ public class Zume {
 		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, realFOV) - CONFIG.minFOV) * zoom);
 	}
 	
-	public static boolean transformCinematicCamera(boolean original) {
+	public static boolean transformCinematicCamera(final boolean original) {
 		if (Zume.CONFIG.enableCinematicZoom && ZUME_PROVIDER.isZoomPressed()) {
 			return true;
 		}
@@ -126,7 +126,7 @@ public class Zume {
 		return original;
 	}
 	
-	public static double transformMouseSensitivity(double original) {
+	public static double transformMouseSensitivity(final double original) {
 		if (!ZUME_PROVIDER.isZoomPressed())
 			return original;
 		
@@ -138,25 +138,25 @@ public class Zume {
 		return result;
 	}
 	
-	public static boolean transformHotbarScroll(int scrollDelta) {
+	public static boolean transformHotbarScroll(final int scrollDelta) {
 		if (Zume.CONFIG.enableZoomScrolling)
 			Zume.scrollDelta += scrollDelta > 0 ? 1 : -1;
 		
 		return !(Zume.CONFIG.enableZoomScrolling && ZUME_PROVIDER.isZoomPressed());
 	}
 	
-	private static double clamp(double value, double min, double max) {
+	private static double clamp(final double value, final double min, final double max) {
 		return Math.max(Math.min(value, max), min);
 	}
 	
-	private static void setZoom(double targetZoom) {
+	private static void setZoom(final double targetZoom) {
 		final double currentZoom = getZoom();
 		tweenStart = System.currentTimeMillis();
 		fromZoom = currentZoom;
 		zoom = clamp(targetZoom, 0D, 1D);
 	}
 	
-	private static void setZoomNoTween(double targetZoom) {
+	private static void setZoomNoTween(final double targetZoom) {
 		tweenStart = 0L;
 		fromZoom = -1D;
 		zoom = clamp(targetZoom, 0D, 1D);
