@@ -232,6 +232,7 @@ afterEvaluate {
 		type = STABLE
 		displayName = "mod_name"()
 		changelog = file("CHANGELOG.md").readText()
+		version = "mod_version"()
 		
 		modLoaders.addAll("fabric", "forge", "neoforge")
 		dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
