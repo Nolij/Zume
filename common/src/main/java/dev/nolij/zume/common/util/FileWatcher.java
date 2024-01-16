@@ -41,20 +41,22 @@ public class FileWatcher {
 				WatchKey wk = null;
 				try {
 					wk = watchService.take();
-					for (WatchEvent<?> event : wk.pollEvents()) {
+					for (final WatchEvent<?> event : wk.pollEvents()) {
 						Path changed = parent.resolve((Path) event.context());
-						if (System.currentTimeMillis() > debounce && 
-							Files.exists(changed) && Files.isSameFile(changed, file)) {
-							debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
-							callback.invoke();
-							break;
+						try {
+							if (System.currentTimeMillis() > debounce &&
+								Files.isSameFile(changed, file)) {
+								debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
+								callback.invoke();
+								break;
+							}
+						} catch (IOException e) {
+							Zume.LOGGER.error("Error in config watcher: ", e);
 						}
 					}
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 					break;
-				} catch (IOException e) {
-					Zume.LOGGER.error("Error in config watcher: ", e);
 				} finally {
 					if (wk != null) {
 						wk.reset();
