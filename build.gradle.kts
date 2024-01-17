@@ -5,19 +5,12 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 
-buildscript {
-	dependencies {
-		classpath("org.ow2.asm:asm-tree:9.6")
-	}
-}
-
 plugins {
     id("java")
-	id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("maven-publish")
-	id("me.modmuss50.mod-publish-plugin") version "0.4.5"
-	id("com.github.gmazzo.buildconfig") version "5.2.0" apply(false)
-	id("xyz.wagyourtail.unimined") version "1.2.0-SNAPSHOT"
+	id("maven-publish")
+	id("com.github.johnrengelman.shadow")
+	id("me.modmuss50.mod-publish-plugin")
+	id("xyz.wagyourtail.unimined")
 }
 
 operator fun String.invoke(): String {
@@ -187,11 +180,11 @@ tasks.shadowJar {
 	archiveClassifier = ""
 	isPreserveFileTimestamps = false
 	
-	uniminedImpls.forEach { 
+	uniminedImpls.forEach {
 		val remapJar = project(":${it}").tasks.withType<RemapJarTask>()["remapJar"]
 		shadowJar.dependsOn(remapJar)
 		from(zipTree(remapJar.archiveFile.get())) {
-			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")
+			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 		}
 	}
 	
