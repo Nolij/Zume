@@ -2,14 +2,15 @@
 	"schemaVersion": 1,
 	"id": "zume",
 	"version": "${mod_version}",
-	"name": "Zume",
-	"description": "A simple zoom mod by Nolij",
+	"name": "${mod_name}",
+	"description": "${mod_description}",
 	"authors": [
-		"Nolij (@xdMatthewbx#1337)"
+		"${nolij}"
 	],
 	"contact": {
-		"website": "https://github.com/Nolij/Zume",
-		"repo": "https://github.com/Nolij/Zume"
+		"website": "${mod_url}",
+		"repo": "${repo_url}",
+		"issues": "${issue_url}"
 	},
 	"license": "OSL-3.0",
 	"icon": "assets/zume/icon.png",

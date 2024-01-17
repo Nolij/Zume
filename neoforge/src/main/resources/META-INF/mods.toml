@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[1,)"
 license = "OSL-3.0"
-issueTrackerURL="https://github.com/Nolij/Zume/issues"
+issueTrackerURL="${issue_url}"
 
 [[mixins]]
 config="zume-neoforge.mixins.json"
@@ -10,10 +10,10 @@ config="zume-neoforge.mixins.json"
 modId="zume"
 version="${mod_version}"
 displayName="${mod_name}"
-dispolayURL="https://modrinth.com/mod/zume"
-authors="Nolij"
+displayURL="${mod_url}"
+authors="${nolij}"
 description="""
-An over-engineered Zoom mod by Nolij
+${mod_description}
 """
 
 [[dependencies.zume]]
