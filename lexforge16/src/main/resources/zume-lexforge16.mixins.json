@@ -1,5 +1,5 @@
 {
-	"required": true,
+	"required": false,
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.lexforge16.mixin",
 	"plugin": "dev.nolij.zume.lexforge16.LexZume16MixinPlugin",

@@ -1,5 +1,5 @@
 {
-	"required": true,
+	"required": false,
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.vintage.mixin",
 	"plugin": "dev.nolij.zume.common.LegacyForgeZumeMixinPlugin",

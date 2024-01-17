@@ -1,0 +1,10 @@
+{
+	"id": "zume",
+	"name": "${mod_name}",
+	"authors": [
+		"Nolij (xdMatthewbx#1337)"
+	],
+	"listeners": [
+		"dev.nolij.zume.rift.RiftZume"
+	]
+}

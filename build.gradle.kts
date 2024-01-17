@@ -46,6 +46,7 @@ val uniminedImpls = arrayOf(
 	*fabricImpls,
 	*lexForgeImpls,
 	*neoForgeImpls,
+	"rift",
 )
 val impls = arrayOf(
 	"common",

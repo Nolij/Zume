@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"minVersion": "0.7.11",
+	"package": "dev.nolij.zume.rift.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"GameRendererMixin",
+		"MouseHelperMixin"
+	],
+	"client": [
+		"KeyBindingMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"refmap": "zume-rift-refmap.json"
+}
