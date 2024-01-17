@@ -6,7 +6,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -24,6 +26,8 @@ public class LexZume implements IZumeProvider {
 		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
 		
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);
+		MinecraftForge.EVENT_BUS.addListener(this::render);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
@@ -45,6 +49,18 @@ public class LexZume implements IZumeProvider {
 	private void registerKeyBindings(RegisterKeyMappingsEvent event) {
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			event.register(keyBind.value);
+		}
+	}
+	
+	private void render(TickEvent.RenderTickEvent event) {
+		if (event.phase == TickEvent.Phase.START) {
+			Zume.render();
+		}
+	}
+	
+	private void calculateFOV(ViewportEvent.ComputeFov event) {
+		if (Zume.isActive()) {
+			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}
 	

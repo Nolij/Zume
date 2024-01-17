@@ -5,6 +5,7 @@ import dev.nolij.zume.common.Zume;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -23,6 +24,7 @@ public class LexZume18 implements IZumeProvider {
 		
 		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
 		
+		MinecraftForge.EVENT_BUS.addListener(this::render);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
@@ -39,6 +41,12 @@ public class LexZume18 implements IZumeProvider {
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	private void render(TickEvent.RenderTickEvent event) {
+		if (event.phase == TickEvent.Phase.START) {
+			Zume.render();
+		}
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {

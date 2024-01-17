@@ -10,7 +10,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
 
 import java.io.File;
 
@@ -24,6 +26,8 @@ public class NeoZume implements IZumeProvider {
 		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
 		
 		modEventBus.addListener(this::registerKeyBindings);
+		NeoForge.EVENT_BUS.addListener(this::render);
+		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
@@ -45,6 +49,18 @@ public class NeoZume implements IZumeProvider {
 	private void registerKeyBindings(RegisterKeyMappingsEvent event) {
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			event.register(keyBind.value);
+		}
+	}
+	
+	private void render(TickEvent.RenderTickEvent event) {
+		if (event.phase == TickEvent.Phase.START) {
+			Zume.render();
+		}
+	}
+	
+	private void calculateFOV(ViewportEvent.ComputeFov event) {
+		if (Zume.isActive()) {
+			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}
 	

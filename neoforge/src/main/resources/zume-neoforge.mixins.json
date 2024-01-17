@@ -4,7 +4,6 @@
 	"package": "dev.nolij.zume.neoforge.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"GameRendererMixin",
 		"MouseHandlerMixin"
 	],
 	"client": [

@@ -5,7 +5,6 @@
 	"plugin": "dev.nolij.zume.lexforge.LexZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"GameRendererMixin",
 		"MouseHandlerMixin"
 	],
 	"client": [

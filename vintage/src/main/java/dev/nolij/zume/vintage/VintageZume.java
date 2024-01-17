@@ -7,12 +7,14 @@ import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.MouseFilter;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.io.File;
 
@@ -62,6 +64,20 @@ public class VintageZume implements IZumeProvider {
 			entityRenderer.setSmoothCamFilterX(0F);
 			entityRenderer.setSmoothCamFilterY(0F);
 			entityRenderer.setSmoothCamPartialTicks(0F);
+		}
+	}
+	
+	@SubscribeEvent
+	public void render(TickEvent.RenderTickEvent event) {
+		if (event.phase == TickEvent.Phase.START) {
+			Zume.render();
+		}
+	}
+	
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
+		if (Zume.isActive()) {
+			event.setFOV((float) Zume.transformFOV(event.getFOV()));
 		}
 	}
 	

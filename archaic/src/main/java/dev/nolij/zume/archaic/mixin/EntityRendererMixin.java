@@ -3,7 +3,6 @@ package dev.nolij.zume.archaic.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.renderer.EntityRenderer;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
