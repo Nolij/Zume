@@ -27,7 +27,7 @@ public class ZumeConfig {
 	public double mouseSensitivityFloor = 0.4D;
 	
 	@Comment("""
-		\nSpeed for Zoom In/Out key binds.
+		\nSpeed for Zoom In/Out key binds & zoom scrolling (if enabled).
 		DEFAULT: `20`""")
 	public short zoomSpeed = 20;
 	
@@ -39,7 +39,7 @@ public class ZumeConfig {
 	
 	@Comment("""
 		\nFOV changes will be spread out over this many milliseconds.
-		Set to `0` to minimize latency.
+		Set to `0` to disable animations.
 		DEFAULT: `150`""")
 	public short zoomSmoothnessMs = 150;
 	
