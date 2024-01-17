@@ -82,15 +82,13 @@ public class Zume {
 	}
 	
 	private static double fromZoom = -1D;
-	private static double zoom = -1D;
+	private static double zoom = 1D;
 	private static long tweenStart = 0L;
+	private static long tweenEnd = 0L;
 	
 	private static double getZoom() {
-		final long tweenLength = CONFIG.zoomSmoothnessMs;
-		
-		if (tweenLength != 0) {
+		if (tweenEnd != 0L && CONFIG.zoomSmoothnessMs != 0) {
 			final long timestamp = System.currentTimeMillis();
-			final long tweenEnd = tweenStart + tweenLength;
 			
 			if (tweenEnd >= timestamp) {
 				final long delta = timestamp - tweenStart;
@@ -108,14 +106,14 @@ public class Zume {
 		return zoom;
 	}
 	
-	public static double transformFOV(final double realFOV) {
+	public static double transformFOV(final double original) {
 		var zoom = getZoom();
 		
 		if (CONFIG.useQuadratic) {
 			zoom *= zoom;
 		}
 		
-		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, realFOV) - CONFIG.minFOV) * zoom);
+		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, original) - CONFIG.minFOV) * zoom);
 	}
 	
 	public static boolean transformCinematicCamera(final boolean original) {
@@ -138,9 +136,13 @@ public class Zume {
 		return result;
 	}
 	
+	private static int sign(final int input) {
+		return input >> (Integer.SIZE - 1) | 1;
+	}
+	
 	public static boolean transformHotbarScroll(final int scrollDelta) {
 		if (Zume.CONFIG.enableZoomScrolling)
-			Zume.scrollDelta += scrollDelta > 0 ? 1 : -1;
+			Zume.scrollDelta += sign(scrollDelta);
 		
 		return !(Zume.CONFIG.enableZoomScrolling && ZUME_PROVIDER.isZoomPressed());
 	}
@@ -150,14 +152,21 @@ public class Zume {
 	}
 	
 	private static void setZoom(final double targetZoom) {
+		if (CONFIG.zoomSmoothnessMs == 0) {
+			setZoomNoTween(targetZoom);
+			return;
+		}
+		
 		final double currentZoom = getZoom();
 		tweenStart = System.currentTimeMillis();
+		tweenEnd = tweenStart + CONFIG.zoomSmoothnessMs;
 		fromZoom = currentZoom;
 		zoom = clamp(targetZoom, 0D, 1D);
 	}
 	
 	private static void setZoomNoTween(final double targetZoom) {
 		tweenStart = 0L;
+		tweenEnd = 0L;
 		fromZoom = -1D;
 		zoom = clamp(targetZoom, 0D, 1D);
 	}
@@ -166,7 +175,7 @@ public class Zume {
 		if (ZUME_PROVIDER == null)
 			return false;
 		
-		return ZUME_PROVIDER.isZoomPressed();
+		return ZUME_PROVIDER.isZoomPressed() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
 	}
 	
 	public static int scrollDelta = 0;
@@ -175,12 +184,11 @@ public class Zume {
 	
 	public static void render() {
 		final long timestamp = System.currentTimeMillis();
-		final boolean zooming = isActive();
+		final boolean zooming = ZUME_PROVIDER.isZoomPressed();
 		
 		if (zooming) {
 			if (!wasZooming) {
 				ZUME_PROVIDER.onZoomActivate();
-				zoom = 1D;
 				setZoom(CONFIG.defaultZoom);
 			}
 			
@@ -196,6 +204,8 @@ public class Zume {
 				else if (ZUME_PROVIDER.isZoomOutPressed())
 					setZoom(zoom + interpolatedIncrement);
 			}
+		} else if (wasZooming) {
+			setZoom(1D);
 		}
 		
 		scrollDelta = 0;
