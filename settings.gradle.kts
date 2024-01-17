@@ -1,6 +1,5 @@
 pluginManagement {
     repositories {
-		mavenLocal()
 	    mavenCentral()
 	    maven("https://maven.fabricmc.net/")
 	    maven("https://maven.glass-launcher.net/babric")
