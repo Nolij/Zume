@@ -23,7 +23,7 @@ buildscript {
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
-	id("xyz.wagyourtail.unimined") version "1.2.1-dev.1" apply(false)
+	id("xyz.wagyourtail.unimined") version "1.2.0-SNAPSHOT" apply(false)
 	id("com.github.gmazzo.buildconfig") version "5.2.0" apply(false)
 	id("com.github.johnrengelman.shadow") version "8.1.1" apply(false)
 	id("me.modmuss50.mod-publish-plugin") version "0.4.5" apply(false)
