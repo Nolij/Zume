@@ -61,7 +61,7 @@ public class NeoZume implements IZumeProvider {
 	}
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
-		if (Zume.isActive()) {
+		if (Zume.isZooming()) {
 			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}

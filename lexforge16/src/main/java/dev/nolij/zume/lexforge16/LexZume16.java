@@ -52,7 +52,7 @@ public class LexZume16 implements IZumeProvider {
 	}
 	
 	private void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (Zume.isActive()) {
+		if (Zume.isZooming()) {
 			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}

@@ -2,7 +2,6 @@ package dev.nolij.zume.legacy.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.legacy.LegacyZume;
 import net.minecraft.client.render.GameRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +24,7 @@ public class GameRendererMixin {
 	
 	@Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.isActive()) {
+		if (Zume.isZooming()) {
 			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}

@@ -62,6 +62,11 @@ public class ZumeConfig {
 	public double defaultZoom = 0.5D;
 	
 	@Comment("""
+		\nIf `true`, the Zoom keybind will act as a toggle. If `false`, Zoom will only be active while the keybind is held.
+		DEFAULT: `false`""")
+	public boolean toggleMode = false;
+	
+	@Comment("""
 		\nMaximum zoom FOV.
 		DEFAULT: `60.0`""")
 	public double maxFOV = 60D;

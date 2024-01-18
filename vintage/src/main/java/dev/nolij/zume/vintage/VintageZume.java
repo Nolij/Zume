@@ -76,7 +76,7 @@ public class VintageZume implements IZumeProvider {
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (Zume.isActive()) {
+		if (Zume.isZooming()) {
 			event.setFOV((float) Zume.transformFOV(event.getFOV()));
 		}
 	}

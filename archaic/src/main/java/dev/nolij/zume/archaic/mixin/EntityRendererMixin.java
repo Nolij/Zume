@@ -19,7 +19,7 @@ public class EntityRendererMixin {
 	
 	@Inject(method = "getFOVModifier", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.isActive()) {
+		if (Zume.isZooming()) {
 			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}

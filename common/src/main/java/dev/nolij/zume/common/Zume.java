@@ -74,6 +74,7 @@ public class Zume {
 		ZumeConfig.create(configFile, config -> {
 			CONFIG = config;
 			inverseSmoothness = 1D / CONFIG.zoomSmoothnessMs;
+			toggle = false;
 		});
 	}
 	
@@ -117,7 +118,7 @@ public class Zume {
 	}
 	
 	public static boolean transformCinematicCamera(final boolean original) {
-		if (Zume.CONFIG.enableCinematicZoom && ZUME_PROVIDER.isZoomPressed()) {
+		if (Zume.CONFIG.enableCinematicZoom && isActive()) {
 			return true;
 		}
 		
@@ -125,7 +126,7 @@ public class Zume {
 	}
 	
 	public static double transformMouseSensitivity(final double original) {
-		if (!ZUME_PROVIDER.isZoomPressed())
+		if (!isActive())
 			return original;
 		
 		final double zoom = getZoom();
@@ -144,7 +145,7 @@ public class Zume {
 		if (Zume.CONFIG.enableZoomScrolling)
 			Zume.scrollDelta += sign(scrollDelta);
 		
-		return !(Zume.CONFIG.enableZoomScrolling && ZUME_PROVIDER.isZoomPressed());
+		return !(Zume.CONFIG.enableZoomScrolling && isActive());
 	}
 	
 	private static double clamp(final double value, final double min, final double max) {
@@ -175,16 +176,29 @@ public class Zume {
 		if (ZUME_PROVIDER == null)
 			return false;
 		
-		return ZUME_PROVIDER.isZoomPressed() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
+		if (CONFIG.toggleMode)
+			return toggle;
+		
+		return ZUME_PROVIDER.isZoomPressed();
+	}
+	
+	public static boolean isZooming() {
+		return isActive() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
 	}
 	
 	public static int scrollDelta = 0;
+	private static boolean toggle = false;
+	private static boolean wasHeld = false;
 	private static boolean wasZooming = false;
 	private static long prevTimestamp;
 	
 	public static void render() {
 		final long timestamp = System.currentTimeMillis();
-		final boolean zooming = ZUME_PROVIDER.isZoomPressed();
+		final boolean held = ZUME_PROVIDER.isZoomPressed();
+		final boolean zooming = isActive();
+		
+		if (CONFIG.toggleMode && held && !wasHeld)
+			toggle = !toggle;
 		
 		if (zooming) {
 			if (!wasZooming) {
@@ -210,6 +224,7 @@ public class Zume {
 		
 		scrollDelta = 0;
 		prevTimestamp = timestamp;
+		wasHeld = held;
 		wasZooming = zooming;
 	}
 	
