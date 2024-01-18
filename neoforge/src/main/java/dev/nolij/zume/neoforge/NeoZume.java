@@ -8,7 +8,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.client.event.CalculateTurnPlayerValuesEvent;
+import net.neoforged.neoforge.client.event.CalculatePlayerTurnEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -66,7 +66,7 @@ public class NeoZume implements IZumeProvider {
 		}
 	}
 	
-	private void calculateTurnPlayerValues(CalculateTurnPlayerValuesEvent event) {
+	private void calculateTurnPlayerValues(CalculatePlayerTurnEvent event) {
 		event.setMouseSensitivity(Zume.transformMouseSensitivity(event.getMouseSensitivity()));
 		event.setCinematicCameraEnabled(Zume.transformCinematicCamera(event.getCinematicCameraEnabled()));
 	}
