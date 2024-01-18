@@ -17,7 +17,7 @@ public class FileWatcher {
 	private long debounce = 0L;
 	
 	public interface Callback {
-		void invoke();
+		void invoke() throws InterruptedException;
 	}
 	
 	/**

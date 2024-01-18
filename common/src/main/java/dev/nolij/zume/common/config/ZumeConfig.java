@@ -87,12 +87,7 @@ public class ZumeConfig {
 			return new ZumeConfig();
 		
 		try {
-			var config = new String(Files.readAllBytes(configFile.toPath()));
-			
-			if (!config.endsWith("\n")) // jankson why are you this way
-				config += '\n';
-			
-			return JANKSON.fromJson(JANKSON.load(config), ZumeConfig.class);
+			return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfig.class);
 		} catch (IOException | SyntaxError e) {
 			Zume.LOGGER.error("Error parsing config: ", e);
 			return new ZumeConfig();
@@ -108,6 +103,8 @@ public class ZumeConfig {
 		}
 	}
 	
+	private static final boolean isWindows = System.getProperty("os.name").contains("win");
+	
 	public static void create(final File configFile, final ConfigSetter setter) {		
 		ZumeConfig config = readFromFile(configFile);
 		
@@ -120,7 +117,13 @@ public class ZumeConfig {
 			FileWatcher.onFileChange(configFile.toPath(), () -> {
 				Zume.LOGGER.info("Reloading config...");
 				
-				ZumeConfig newConfig = readFromFile(configFile);
+				// No, this isn't DRM. It's a bug fix.
+				// Windows is bad and requires a delay after the file is 
+				// written to, otherwise it will fail to read properly.
+				if (isWindows)
+					Thread.sleep(100);
+				
+				final ZumeConfig newConfig = readFromFile(configFile);
 				
 				setter.set(newConfig);
 			});
