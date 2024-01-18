@@ -2,14 +2,6 @@ operator fun String.invoke(): String {
 	return (rootProject.properties[this] as String?)!!
 }
 
-repositories {
-	maven("https://prmaven.neoforged.net/NeoForge/pr534") {
-		content {
-			includeModule("net.neoforged", "neoforge")
-		}
-	}
-}
-
 unimined.minecraft {
 	version("neoforge_minecraft_version"())
 
