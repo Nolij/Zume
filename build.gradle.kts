@@ -4,6 +4,7 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import java.security.MessageDigest
 
 plugins {
     id("java")
@@ -159,6 +160,11 @@ dependencies {
 tasks.processResources {
 	from("common/src/main/resources")
 
+	// discard cached resources whenever `gradle.properties` changes
+	val sha1 = MessageDigest.getInstance("SHA1")
+	file("gradle.properties").forEachBlock { buffer, _ -> sha1.update(buffer) }
+	inputs.property("propertiesHash", sha1.digest().joinToString("") { byte -> "%02x".format(byte) })
+	
 	filteringCharset = "UTF-8"
 
 	filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")) {
