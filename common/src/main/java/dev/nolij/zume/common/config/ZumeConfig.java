@@ -16,7 +16,7 @@ public class ZumeConfig {
 	
 	@Comment("""
 		\nEnable Cinematic Camera while zooming.
-		If you disable this, you should also try setting `zoomSmoothness` to `0`.
+		If you disable this, you should also try setting `zoomSmoothnessMs` to `0`.
 		DEFAULT: `true`""")
 	public boolean enableCinematicZoom = true;
 	
