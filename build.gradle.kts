@@ -289,7 +289,7 @@ afterEvaluate {
 						it.endsWith("-Snapshot")
 					}.filter { cfVersion ->
 						mcVersions.contains(cfVersion)
-					}
+					}.toHashSet()
 				})
 			}
 
