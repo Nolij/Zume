@@ -1,3 +1,3 @@
-- replace several mixins with events on LexForge & NeoForge implementations
-- add zoom out animation when zoom key is released
-- sync mod manifests
+- removed all mixins from NeoZume (thanks @embeddedt)
+- dropped 20.2 NeoForge support (sorry, was necessary for above)
+- actually fixed Windows config reloading issue (hopefully)
