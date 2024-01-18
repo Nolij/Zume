@@ -13,7 +13,6 @@ unimined.minecraft {
 
 	neoForged {
 		loader("neoforge_version"())
-		mixinConfig("zume-neoforge.mixins.json")
 	}
 
 	mappings {

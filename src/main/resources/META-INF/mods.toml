@@ -3,9 +3,6 @@ loaderVersion = "[1,)"
 license = "OSL-3.0"
 issueTrackerURL="${issue_url}"
 
-[[mixins]]
-config="zume-neoforge.mixins.json"
-
 [[mods]]
 modId="zume"
 version="${mod_version}"

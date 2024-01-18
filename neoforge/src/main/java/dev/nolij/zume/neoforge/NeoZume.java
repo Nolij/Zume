@@ -8,6 +8,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.CalculatePlayerTurnEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -28,6 +29,7 @@ public class NeoZume implements IZumeProvider {
 		modEventBus.addListener(this::registerKeyBindings);
 		NeoForge.EVENT_BUS.addListener(this::render);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
+		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
@@ -62,6 +64,11 @@ public class NeoZume implements IZumeProvider {
 		if (Zume.isActive()) {
 			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
+	}
+	
+	private void calculateTurnPlayerValues(CalculatePlayerTurnEvent event) {
+		event.setMouseSensitivity(Zume.transformMouseSensitivity(event.getMouseSensitivity()));
+		event.setCinematicCameraEnabled(Zume.transformCinematicCamera(event.getCinematicCameraEnabled()));
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
