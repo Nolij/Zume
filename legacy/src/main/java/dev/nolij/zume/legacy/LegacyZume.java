@@ -1,6 +1,6 @@
 package dev.nolij.zume.legacy;
 
-import dev.nolij.zume.common.IZumeProvider;
+import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.legacy.mixin.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
@@ -8,7 +8,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SmoothUtil;
 
-public class LegacyZume implements ClientModInitializer, IZumeProvider {
+public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
 	public void onInitializeClient() {
@@ -34,7 +34,7 @@ public class LegacyZume implements ClientModInitializer, IZumeProvider {
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.CONFIG.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
+		if (Zume.config.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
 			gameRenderer.setCursorXSmoother(new SmoothUtil());
 			gameRenderer.setCursorYSmoother(new SmoothUtil());

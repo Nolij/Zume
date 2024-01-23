@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge;
 
-import dev.nolij.zume.common.IZumeProvider;
+import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -18,7 +18,7 @@ import java.io.File;
 
 @Mod(Zume.MOD_ID)
 @OnlyIn(Dist.CLIENT)
-public class LexZume implements IZumeProvider {
+public class LexZume implements IZumeImplementation {
 	
 	public LexZume() {
 		Zume.LOGGER.info("Loading LexZume...");
@@ -59,7 +59,7 @@ public class LexZume implements IZumeProvider {
 	}
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
-		if (Zume.isZooming()) {
+		if (Zume.isFOVModified()) {
 			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}
@@ -67,7 +67,7 @@ public class LexZume implements IZumeProvider {
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
 		if (scrollAmount != 0 &&
-			!Zume.transformHotbarScroll(scrollAmount)) {
+			Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

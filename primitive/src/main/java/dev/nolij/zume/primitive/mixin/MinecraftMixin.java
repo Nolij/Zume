@@ -12,7 +12,7 @@ public class MinecraftMixin {
 	
 	@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;method_692(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, int scrollAmount) {
-		return Zume.transformHotbarScroll(scrollAmount);
+		return !Zume.interceptScroll(scrollAmount);
 	}
 	
 }

@@ -17,7 +17,7 @@ public class MinecraftClientMixin {
 		"method_12141()V" // vintage
 	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;scrollInHotbar(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, int scrollAmount) {
-		return Zume.transformHotbarScroll(scrollAmount);
+		return !Zume.interceptScroll(scrollAmount);
 	}
 	
 }

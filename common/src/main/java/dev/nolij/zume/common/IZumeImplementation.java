@@ -1,6 +1,6 @@
 package dev.nolij.zume.common;
 
-public interface IZumeProvider {
+public interface IZumeImplementation {
 	
 	boolean isZoomPressed();
 	boolean isZoomInPressed();

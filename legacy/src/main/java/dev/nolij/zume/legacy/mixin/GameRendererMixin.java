@@ -24,7 +24,7 @@ public class GameRendererMixin {
 	
 	@Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.isZooming()) {
+		if (Zume.isFOVModified()) {
 			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}

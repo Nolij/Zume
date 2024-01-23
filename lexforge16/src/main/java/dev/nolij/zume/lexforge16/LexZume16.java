@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge16;
 
-import dev.nolij.zume.common.IZumeProvider;
+import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.InputEvent;
@@ -14,7 +14,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.io.File;
 
 @Mod(Zume.MOD_ID)
-public class LexZume16 implements IZumeProvider {
+public class LexZume16 implements IZumeImplementation {
 	
 	public LexZume16() {
 		Zume.LOGGER.info("Loading LexZume16...");
@@ -52,7 +52,7 @@ public class LexZume16 implements IZumeProvider {
 	}
 	
 	private void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (Zume.isZooming()) {
+		if (Zume.isFOVModified()) {
 			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}
@@ -60,7 +60,7 @@ public class LexZume16 implements IZumeProvider {
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
 		if (scrollAmount != 0 &&
-			!Zume.transformHotbarScroll(scrollAmount)) {
+			Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

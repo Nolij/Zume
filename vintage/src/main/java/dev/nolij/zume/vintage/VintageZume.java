@@ -1,8 +1,8 @@
 package dev.nolij.zume.vintage;
 
 import dev.nolij.zume.common.Constants;
+import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.vintage.mixin.EntityRendererAccessor;
-import dev.nolij.zume.common.IZumeProvider;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
@@ -24,7 +24,7 @@ import java.io.File;
 	version = Constants.MOD_VERSION, 
 	acceptedMinecraftVersions = Constants.VINTAGE_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
-public class VintageZume implements IZumeProvider {
+public class VintageZume implements IZumeImplementation {
 	
 	public VintageZume() {
 		Zume.LOGGER.info("Loading Vintage Zume...");
@@ -55,7 +55,7 @@ public class VintageZume implements IZumeProvider {
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.CONFIG.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
+		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
 			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
 			entityRenderer.setMouseFilterXAxis(new MouseFilter());
 			entityRenderer.setMouseFilterYAxis(new MouseFilter());
@@ -76,7 +76,7 @@ public class VintageZume implements IZumeProvider {
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (Zume.isZooming()) {
+		if (Zume.isFOVModified()) {
 			event.setFOV((float) Zume.transformFOV(event.getFOV()));
 		}
 	}
@@ -85,7 +85,7 @@ public class VintageZume implements IZumeProvider {
 	public void mouseEvent(MouseEvent mouseEvent) {
 		final int scrollAmount = mouseEvent.getDwheel();
 		if (scrollAmount != 0 &&
-			!Zume.transformHotbarScroll(scrollAmount)) {
+			Zume.interceptScroll(scrollAmount)) {
 			mouseEvent.setCanceled(true);
 		}
 	}

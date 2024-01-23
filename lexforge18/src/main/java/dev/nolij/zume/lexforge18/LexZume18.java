@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge18;
 
-import dev.nolij.zume.common.IZumeProvider;
+import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
@@ -13,7 +13,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.io.File;
 
 @Mod(Zume.MOD_ID)
-public class LexZume18 implements IZumeProvider {
+public class LexZume18 implements IZumeImplementation {
 	
 	public LexZume18() {
 		Zume.LOGGER.info("Loading LexZume18...");
@@ -52,7 +52,7 @@ public class LexZume18 implements IZumeProvider {
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
 		if (scrollAmount != 0 &&
-			!Zume.transformHotbarScroll(scrollAmount)) {
+			Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

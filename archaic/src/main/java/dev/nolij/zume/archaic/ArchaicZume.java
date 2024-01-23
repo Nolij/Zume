@@ -4,7 +4,7 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import dev.nolij.zume.archaic.mixin.EntityRendererAccessor;
 import dev.nolij.zume.common.Constants;
-import dev.nolij.zume.common.IZumeProvider;
+import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.Mod;
@@ -24,7 +24,7 @@ import java.io.File;
 	acceptedMinecraftVersions = Constants.ARCHAIC_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.archaic.ArchaicConfigProvider",
 	dependencies = "required-after:unimixins@[0.1.15,)")
-public class ArchaicZume implements IZumeProvider {
+public class ArchaicZume implements IZumeImplementation {
 	
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -56,7 +56,7 @@ public class ArchaicZume implements IZumeProvider {
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.CONFIG.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
+		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
 			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
 			entityRenderer.setMouseFilterXAxis(new MouseFilter());
 			entityRenderer.setMouseFilterYAxis(new MouseFilter());
@@ -72,7 +72,7 @@ public class ArchaicZume implements IZumeProvider {
 	public void mouseEvent(MouseEvent mouseEvent) {
 		final int scrollAmount = mouseEvent.dwheel;
 		if (scrollAmount != 0 &&
-			!Zume.transformHotbarScroll(scrollAmount)) {
+			Zume.interceptScroll(scrollAmount)) {
 			mouseEvent.setCanceled(true);
 		}
 	}

@@ -12,83 +12,119 @@ import java.lang.reflect.Method;
 
 public class Zume {
 	
+	//region Constants
+	private static final ClassLoader CLASS_LOADER = Zume.class.getClassLoader();
+	
 	public static final String MOD_ID = "zume";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	public static final String CONFIG_FILE_NAME = MOD_ID + ".json5";
+	public static final ZumeVariant ZUME_VARIANT;
+	//endregion
 	
-	public static ZumeVariant ZUME_VARIANT = null;
-	
-	private static final ClassLoader classLoader = Zume.class.getClassLoader();
-	public static void calculateZumeVariant() {
-		if (ZUME_VARIANT != null)
-			return;
-		
+	//region Variant Detection
+	static {
 		var connectorPresent = false;
 		try {
 			Class.forName("dev.su5ed.sinytra.connector.service.ConnectorLoaderService");
 			connectorPresent = true;
 		} catch (ClassNotFoundException ignored) {}
 		
-		if (!connectorPresent && 
-			classLoader.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		if (!connectorPresent &&
+			CLASS_LOADER.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.MODERN;
-		else if (classLoader.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
+		else if (CLASS_LOADER.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.LEGACY;
-		else if (classLoader.getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
+		else if (CLASS_LOADER.getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
 			ZUME_VARIANT = ZumeVariant.PRIMITIVE;
-		else if (classLoader.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
+		else if (CLASS_LOADER.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
 			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
-		else if (classLoader.getResource("net/minecraftforge/oredict/OreDictionary.class") != null)
+		else if (CLASS_LOADER.getResource("net/minecraftforge/oredict/OreDictionary.class") != null)
 			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
-		else if (classLoader.getResource("net/neoforged/neoforge/common/NeoForge.class") != null)
+		else if (CLASS_LOADER.getResource("net/neoforged/neoforge/common/NeoForge.class") != null)
 			ZUME_VARIANT = ZumeVariant.NEOFORGE;
 		else {
+			String forgeVersion = null;
+			
 			try {
 				final Class<?> forgeVersionClass = Class.forName("net.minecraftforge.versions.forge.ForgeVersion");
 				final Method getVersionMethod = forgeVersionClass.getMethod("getVersion");
-				final String forgeVersion = (String) getVersionMethod.invoke(null);
+				forgeVersion = (String) getVersionMethod.invoke(null);
+			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
+			
+			if (forgeVersion != null) {
 				final int major = Integer.parseInt(forgeVersion.substring(0, forgeVersion.indexOf('.')));
 				if (major > 40)
 					ZUME_VARIANT = ZumeVariant.LEXFORGE;
 				else if (major > 36)
 					ZUME_VARIANT = ZumeVariant.LEXFORGE18;
-				else 
+				else
 					ZUME_VARIANT = ZumeVariant.LEXFORGE16;
-			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
+			} else {
+				ZUME_VARIANT = null;
+			}
 		}
 	}
+	//endregion
 	
-	public static IZumeProvider ZUME_PROVIDER;
+	//region Helper Methods
+	private static int sign(final int input) {
+		return input >> (Integer.SIZE - 1) | 1;
+	}
 	
-	public static ZumeConfig CONFIG;
-	public static File CONFIG_FILE;
+	private static double clamp(final double value) {
+		return Math.max(Math.min(value, 1D), 0D);
+	}
+	//endregion
+	
+	//region Public Members
+	public static IZumeImplementation implementation;
+	public static ZumeConfig config;
+	public static File configFile;
+	//endregion
+	
+	//region Private Members
 	private static double inverseSmoothness = 1D;
-	
-	public static void init(final IZumeProvider zumeProvider, final File configFile) {
-		if (ZUME_PROVIDER != null)
-			throw new AssertionError("Zume already initialized!");
-		
-		ZUME_PROVIDER = zumeProvider;
-		CONFIG_FILE = configFile;
-		
-		ZumeConfig.create(configFile, config -> {
-			CONFIG = config;
-			inverseSmoothness = 1D / CONFIG.zoomSmoothnessMs;
-			toggle = false;
-		});
-	}
-	
-	public static void openConfigFile() throws IOException {
-		Desktop.getDesktop().open(Zume.CONFIG_FILE);
-	}
-	
 	private static double fromZoom = -1D;
 	private static double zoom = 1D;
 	private static long tweenStart = 0L;
 	private static long tweenEnd = 0L;
+	private static int scrollDelta = 0;
+	private static boolean toggle = false;
+	private static boolean wasHeld = false;
+	private static boolean wasZooming = false;
+	private static long prevRenderTimestamp;
+	//endregion
 	
+	//region Initialization Methods
+	/**
+	 * Trigger variant detection if class isn't already loaded (it shouldn't be the first time this is called).
+	 */
+	static void calculateZumeVariant() {}
+	
+	/**
+	 * Invoke this in the initializer of your Zume implementation. 
+	 * 
+	 * @param implementation The {@linkplain IZumeImplementation} Zume should use. 
+	 * @param configFile The {@linkplain File} Zume should use for storing the config.
+	 */
+	public static void init(final IZumeImplementation implementation, final File configFile) {
+		if (Zume.implementation != null)
+			throw new AssertionError("Zume already initialized!");
+		
+		Zume.implementation = implementation;
+		Zume.configFile = configFile;
+		
+		ZumeConfig.create(configFile, config -> {
+			Zume.config = config;
+			inverseSmoothness = 1D / Zume.config.zoomSmoothnessMs;
+			toggle = false;
+		});
+	}
+	//endregion
+	
+	//region Zoom Mutation Methods
 	private static double getZoom() {
-		if (tweenEnd != 0L && CONFIG.zoomSmoothnessMs != 0) {
+		if (tweenEnd != 0L && config.zoomSmoothnessMs != 0) {
 			final long timestamp = System.currentTimeMillis();
 			
 			if (tweenEnd >= timestamp) {
@@ -96,7 +132,7 @@ public class Zume {
 				final double progress = 1 - delta * inverseSmoothness;
 				
 				var easedProgress = progress;
-				for (var i = 1; i < CONFIG.easingExponent; i++)
+				for (var i = 1; i < config.easingExponent; i++)
 					easedProgress *= progress;
 				easedProgress = 1 - easedProgress;
 				
@@ -107,115 +143,155 @@ public class Zume {
 		return zoom;
 	}
 	
-	public static double transformFOV(final double original) {
-		var zoom = getZoom();
-		
-		if (CONFIG.useQuadratic) {
-			zoom *= zoom;
-		}
-		
-		return CONFIG.minFOV + ((Math.max(CONFIG.maxFOV, original) - CONFIG.minFOV) * zoom);
-	}
-	
-	public static boolean transformCinematicCamera(final boolean original) {
-		if (Zume.CONFIG.enableCinematicZoom && isActive()) {
-			return true;
-		}
-		
-		return original;
-	}
-	
-	public static double transformMouseSensitivity(final double original) {
-		if (!isActive())
-			return original;
-		
-		final double zoom = getZoom();
-		var result = original;
-		
-		result *= CONFIG.mouseSensitivityFloor + (zoom * (1 - CONFIG.mouseSensitivityFloor));
-		
-		return result;
-	}
-	
-	private static int sign(final int input) {
-		return input >> (Integer.SIZE - 1) | 1;
-	}
-	
-	public static boolean transformHotbarScroll(final int scrollDelta) {
-		if (Zume.CONFIG.enableZoomScrolling)
-			Zume.scrollDelta += sign(scrollDelta);
-		
-		return !(Zume.CONFIG.enableZoomScrolling && isActive());
-	}
-	
-	private static double clamp(final double value, final double min, final double max) {
-		return Math.max(Math.min(value, max), min);
-	}
-	
 	private static void setZoom(final double targetZoom) {
-		if (CONFIG.zoomSmoothnessMs == 0) {
+		if (config.zoomSmoothnessMs == 0) {
 			setZoomNoTween(targetZoom);
 			return;
 		}
 		
 		final double currentZoom = getZoom();
 		tweenStart = System.currentTimeMillis();
-		tweenEnd = tweenStart + CONFIG.zoomSmoothnessMs;
+		tweenEnd = tweenStart + config.zoomSmoothnessMs;
 		fromZoom = currentZoom;
-		zoom = clamp(targetZoom, 0D, 1D);
+		zoom = clamp(targetZoom);
 	}
 	
 	private static void setZoomNoTween(final double targetZoom) {
 		tweenStart = 0L;
 		tweenEnd = 0L;
 		fromZoom = -1D;
-		zoom = clamp(targetZoom, 0D, 1D);
+		zoom = clamp(targetZoom);
+	}
+	//endregion
+	
+	//region API Methods
+	/**
+	 * Attempts to open the {@linkplain Zume#configFile Zume config file} in the system's text editor.
+	 */
+	public static void openConfigFile() throws IOException {
+		Desktop.getDesktop().open(Zume.configFile);
 	}
 	
-	public static boolean isActive() {
-		if (ZUME_PROVIDER == null)
+	/**
+	 * ONLY INVOKE THIS METHOD WHEN {@linkplain Zume#isFOVModified()} RETURNS `true`. This check was explicitly excluded 
+	 * for efficiency and for mixin compatibility. The {@linkplain IZumeImplementation} is responsible for this check.
+	 * 
+	 * @param original The unmodified FOV value
+	 * {@return The new FOV transformed by Zume}
+	 */
+	public static double transformFOV(final double original) {
+		var zoom = getZoom();
+		
+		if (config.useQuadratic) {
+			zoom *= zoom;
+		}
+		
+		return config.minFOV + ((Math.max(config.maxFOV, original) - config.minFOV) * zoom);
+	}
+	
+	/**
+	 * The return value of this method can be safely used without checking whether Zume is active.
+	 * 
+	 * @param original The unmodified cinematic camera state
+	 * {@return The new cinematic camera state, transformed by Zume}
+	 */
+	public static boolean transformCinematicCamera(final boolean original) {
+		if (Zume.config.enableCinematicZoom && isEnabled()) {
+			return true;
+		}
+		
+		return original;
+	}
+	
+	/**
+	 * The return value of this method can be safely used without checking whether Zume is active.
+	 *
+	 * @param original The unmodified mouse sensitivity
+	 * {@return The new mouse sensitivity, transformed by Zume}
+	 */
+	public static double transformMouseSensitivity(final double original) {
+		if (!isEnabled())
+			return original;
+		
+		final double zoom = getZoom();
+		var result = original;
+		
+		result *= config.mouseSensitivityFloor + (zoom * (1 - config.mouseSensitivityFloor));
+		
+		return result;
+	}
+	
+	public static boolean shouldCancelScroll() {
+		return Zume.config.enableZoomScrolling && isEnabled();
+	}
+	
+	/**
+	 * The return value of this method can be safely used without checking whether Zume is active.
+	 *
+	 * @param scrollDelta The scroll delta (magnitude will be ignored, only the sign is used)
+	 * {@return `true` if the invoker should prevent further handling of this scroll event}
+	 */
+	public static boolean interceptScroll(final int scrollDelta) {
+        if (!shouldCancelScroll())
+            return false;
+		
+        Zume.scrollDelta += sign(scrollDelta);
+        return true;
+    }
+	
+	/**
+	 * Returns `true` if Zume is active.
+	 */
+	public static boolean isEnabled() {
+		if (implementation == null)
 			return false;
 		
-		if (CONFIG.toggleMode)
+		if (config.toggleMode)
 			return toggle;
 		
-		return ZUME_PROVIDER.isZoomPressed();
+		return implementation.isZoomPressed();
 	}
 	
-	public static boolean isZooming() {
-		return isActive() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
+	/**
+	 * Returns `true` if there is an active Zoom animation. Important distinction between this method and
+	 * {@linkplain Zume#isEnabled()}: This method will return `true` when
+	 * {@linkplain Zume#isEnabled()} returns `false` if the zoom out animation is still playing. Use this method to 
+	 * determine whether the user's FOV and camera values should be hooked. For other scenarios, use
+	 * {@linkplain Zume#isEnabled()}.
+	 */
+	public static boolean isFOVModified() {
+		return isEnabled() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
 	}
 	
-	public static int scrollDelta = 0;
-	private static boolean toggle = false;
-	private static boolean wasHeld = false;
-	private static boolean wasZooming = false;
-	private static long prevTimestamp;
-	
+	/**
+	 * This should be invoked once at the beginning of every frame. It will handle Keybindings and Scrolling if the
+	 * {@linkplain IZumeImplementation} is implemented properly, and if {@linkplain Zume#scrollDelta} is maintained 
+	 * via use of {@linkplain Zume#interceptScroll(int)}.
+	 */
 	public static void render() {
 		final long timestamp = System.currentTimeMillis();
-		final boolean held = ZUME_PROVIDER.isZoomPressed();
-		final boolean zooming = isActive();
+		final boolean held = implementation.isZoomPressed();
+		final boolean zooming = isEnabled();
 		
-		if (CONFIG.toggleMode && held && !wasHeld)
+		if (config.toggleMode && held && !wasHeld)
 			toggle = !toggle;
 		
 		if (zooming) {
 			if (!wasZooming) {
-				ZUME_PROVIDER.onZoomActivate();
-				setZoom(CONFIG.defaultZoom);
+				implementation.onZoomActivate();
+				setZoom(config.defaultZoom);
 			}
 			
-			final long timeDelta = timestamp - prevTimestamp;
+			final long timeDelta = timestamp - prevRenderTimestamp;
 			
-			if (CONFIG.enableZoomScrolling && scrollDelta != 0) {
-				setZoom(zoom - scrollDelta * CONFIG.zoomSpeed * 4E-3D);
-			} else if (ZUME_PROVIDER.isZoomInPressed() ^ ZUME_PROVIDER.isZoomOutPressed()) {
-				final double interpolatedIncrement = CONFIG.zoomSpeed * 1E-4D * timeDelta;
+			if (config.enableZoomScrolling && scrollDelta != 0) {
+				setZoom(zoom - scrollDelta * config.zoomSpeed * 4E-3D);
+			} else if (implementation.isZoomInPressed() ^ implementation.isZoomOutPressed()) {
+				final double interpolatedIncrement = config.zoomSpeed * 1E-4D * timeDelta;
 				
-				if (ZUME_PROVIDER.isZoomInPressed())
+				if (implementation.isZoomInPressed())
 					setZoom(zoom - interpolatedIncrement);
-				else if (ZUME_PROVIDER.isZoomOutPressed())
+				else if (implementation.isZoomOutPressed())
 					setZoom(zoom + interpolatedIncrement);
 			}
 		} else if (wasZooming) {
@@ -223,9 +299,10 @@ public class Zume {
 		}
 		
 		scrollDelta = 0;
-		prevTimestamp = timestamp;
+		prevRenderTimestamp = timestamp;
 		wasHeld = held;
 		wasZooming = zooming;
 	}
+	//endregion
 	
 }
