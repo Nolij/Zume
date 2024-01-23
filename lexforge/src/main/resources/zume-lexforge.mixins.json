@@ -2,7 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.lexforge.mixin",
-	"plugin": "dev.nolij.zume.lexforge.LexZumeMixinPlugin",
+	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 		"MouseHandlerMixin"

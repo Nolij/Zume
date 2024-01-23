@@ -2,7 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.lexforge18.mixin",
-	"plugin": "dev.nolij.zume.lexforge18.LexZume18MixinPlugin",
+	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 		"GameRendererMixin",
