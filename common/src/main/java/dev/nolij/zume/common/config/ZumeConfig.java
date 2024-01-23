@@ -9,7 +9,6 @@ import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.common.util.FileWatcher;
 
 import java.io.*;
-import java.nio.file.Files;
 
 @NonnullByDefault
 public class ZumeConfig {
@@ -77,26 +76,41 @@ public class ZumeConfig {
 	public double minFOV = 1D;
 	
 	
-	private static final JsonGrammar JSON_GRAMMAR = JsonGrammar.JANKSON;
-	private static final Jankson JANKSON = Jankson.builder()
-		.allowBareRootObject()
-		.build();
-	
 	@FunctionalInterface
 	public interface ConfigSetter {
 		void set(ZumeConfig config);
 	}
 	
+	private static final int MAX_RETRIES = 5;
+	private static final JsonGrammar JSON_GRAMMAR = JsonGrammar.JANKSON;
+	private static final Jankson JANKSON = Jankson.builder()
+		.allowBareRootObject()
+		.build();
+	
 	private static ZumeConfig readFromFile(final File configFile) {
 		if (!configFile.exists())
 			return new ZumeConfig();
 		
-		try {
-			return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfig.class);
-		} catch (IOException | SyntaxError e) {
-			Zume.LOGGER.error("Error parsing config: ", e);
-			return new ZumeConfig();
-		}
+		for (int i = 0; ; i++) {
+			try {
+				return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfig.class);
+            } catch (SyntaxError e) {
+				if (i < MAX_RETRIES) {
+                    try {
+	                    //noinspection BusyWait
+	                    Thread.sleep((i + 1) * 200L);
+						continue;
+                    } catch (InterruptedException ignored) {
+                        return new ZumeConfig();
+                    }
+                }
+				Zume.LOGGER.error("Error parsing config after " + MAX_RETRIES + " retries: ", e);
+				return new ZumeConfig();
+			} catch (IOException e) {
+				Zume.LOGGER.error("Error reading config: ", e);
+				return new ZumeConfig();
+            }
+        }
 	}
 	
 	private void writeToFile(final File configFile) {
@@ -108,8 +122,6 @@ public class ZumeConfig {
 		}
 	}
 	
-	private static final boolean isWindows = System.getProperty("os.name").contains("win");
-	
 	public static void create(final File configFile, final ConfigSetter setter) {		
 		ZumeConfig config = readFromFile(configFile);
 		
@@ -119,14 +131,8 @@ public class ZumeConfig {
 		setter.set(config);
 		
 		try {
-			FileWatcher.onFileChange(configFile.toPath(), () -> {
+			FileWatcher.onFileChange(configFile.toPath(), () -> {				
 				Zume.LOGGER.info("Reloading config...");
-				
-				// No, this isn't DRM. It's a bug fix.
-				// Windows is bad and requires a delay after the file is 
-				// written to, otherwise it will fail to read properly.
-				if (isWindows)
-					Thread.sleep(100);
 				
 				final ZumeConfig newConfig = readFromFile(configFile);
 				

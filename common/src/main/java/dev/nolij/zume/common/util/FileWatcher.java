@@ -7,28 +7,48 @@ import dev.nolij.zume.common.Zume;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.concurrent.Semaphore;
 
 public class FileWatcher {
 	
-	private static final long DEBOUNCE_DURATION_MS = 500L;
-	
-	private WatchService watchService;
-	private Thread thread;
-	private long debounce = 0L;
-	
+	@FunctionalInterface
 	public interface Callback {
 		void invoke() throws InterruptedException;
 	}
+	
+	private static final long DEBOUNCE_DURATION_MS = 500L;
 	
 	/**
 	 * Starts watching a file and the given path and calls the callback when it is changed.
 	 * A shutdown hook is registered to stop watching. To control this yourself, create an
 	 * instance and use the start/stop methods.
 	 */
-	public static void onFileChange(Path file, Callback callback) throws IOException {
-		FileWatcher watcher = new FileWatcher();
+	public static FileWatcher onFileChange(Path file, Callback callback) throws IOException {
+		final FileWatcher watcher = new FileWatcher();
 		watcher.start(file, callback);
 		Runtime.getRuntime().addShutdownHook(new Thread(watcher::stop));
+		
+		return watcher;
+	}
+	
+	private WatchService watchService;
+	private Thread thread;
+	private long debounce = 0L;
+	private final Semaphore semaphore = new Semaphore(1);
+	
+	public boolean lock() {
+		synchronized (semaphore) {
+			return semaphore.tryAcquire();
+		}
+	}
+	
+	public void unlock() {
+		synchronized (semaphore) {
+			if (semaphore.availablePermits() > 0)
+				return;
+			
+			semaphore.release();
+		}
 	}
 	
 	public void start(Path file, Callback callback) throws IOException {
@@ -42,16 +62,22 @@ public class FileWatcher {
 				try {
 					wk = watchService.take();
 					for (final WatchEvent<?> event : wk.pollEvents()) {
-						Path changed = parent.resolve((Path) event.context());
+						final Path changed = parent.resolve((Path) event.context());
+						boolean locked = false;
 						try {
-							if (System.currentTimeMillis() > debounce &&
+							if ((locked = lock()) &&
+								System.currentTimeMillis() > debounce &&
+								Files.exists(changed) && 
 								Files.isSameFile(changed, file)) {
-								debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
 								callback.invoke();
 								break;
 							}
 						} catch (IOException e) {
 							Zume.LOGGER.error("Error in config watcher: ", e);
+						} finally {
+							debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
+							if (locked)
+								unlock();
 						}
 					}
 				} catch (InterruptedException e) {
