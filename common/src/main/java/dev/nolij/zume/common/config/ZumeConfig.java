@@ -91,14 +91,15 @@ public class ZumeConfig {
 		if (!configFile.exists())
 			return new ZumeConfig();
 		
-		for (int i = 0; ; i++) {
+		int i = 0;
+		while (true) {
 			try {
 				return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfig.class);
             } catch (SyntaxError e) {
-				if (i < MAX_RETRIES) {
+				if (i++ < MAX_RETRIES) {
                     try {
 	                    //noinspection BusyWait
-	                    Thread.sleep((i + 1) * 200L);
+	                    Thread.sleep(i * 200L);
 						continue;
                     } catch (InterruptedException ignored) {
                         return new ZumeConfig();
