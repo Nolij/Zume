@@ -269,6 +269,7 @@ afterEvaluate {
 			val cfAccessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
 			accessToken = cfAccessToken
 			projectId = "927564"
+			projectSlug = "zume"
 			
 			minecraftVersionRange {
 				start = "1.14.4"
