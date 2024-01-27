@@ -105,7 +105,7 @@ public class ZumeConfig {
                         return new ZumeConfig();
                     }
                 }
-				Zume.LOGGER.error("Error parsing config after " + MAX_RETRIES + " retries: ", e);
+				Zume.LOGGER.error("Error parsing config after " + i + " retries: ", e);
 				return new ZumeConfig();
 			} catch (IOException e) {
 				Zume.LOGGER.error("Error reading config: ", e);
