@@ -33,6 +33,8 @@ dependencies {
 tasks.processResources {
 	from("common/src/main/resources")
 
+	inputs.file("../gradle.properties")
+
 	filteringCharset = "UTF-8"
 
 	filesMatching("fabric.mod.json") {
