@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
@@ -90,6 +91,7 @@ allprojects {
 
 subprojects {
 	val subProject = this
+	val implName = subProject.name
 	
 	apply(plugin = "xyz.wagyourtail.unimined")
 	
@@ -103,9 +105,67 @@ subprojects {
 	tasks.withType<GenerateModuleMetadata> {
 		enabled = false
 	}
-	
-	dependencies {
-		implementation("blue.endless:jankson:${"jankson_version"()}")
+
+	if (implName in uniminedImpls) {
+		apply(plugin = "com.github.johnrengelman.shadow")
+
+		configurations {
+			val shade = create("shade")
+
+			compileClasspath.get().extendsFrom(shade)
+			runtimeClasspath.get().extendsFrom(shade)
+		}
+
+		dependencies {
+			"shade"("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
+
+			"shade"(project(":common")) { isTransitive = false }
+		}
+		
+		afterEvaluate {
+			val platformJar = tasks.create<ShadowJar>("platformJar") {
+				from("../LICENSE") {
+					rename { "${it}_${"archives_base_name"()}" }
+				}
+
+				val remapJar = tasks.withType<RemapJarTask>()["remapJar"]
+				dependsOn(remapJar)
+				from(remapJar)
+
+				configurations = immutableListOf(project.configurations["shade"])
+				archiveBaseName = rootProject.name
+				archiveClassifier = implName
+				isPreserveFileTimestamps = false
+
+				relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
+
+				if (implName in lexForgeImpls) {
+					manifest {
+						attributes(
+							"MixinConfigs" to "zume-${implName}.mixins.json",
+						)
+					}
+					
+					if (implName in legacyForgeImpls) {
+						manifest {
+							attributes(
+								"ForceLoadAsMod" to true,
+								"FMLCorePluginContainsFMLMod" to true,
+								"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
+							)
+						}
+					}
+				}
+			}
+
+			tasks.build {
+				dependsOn(platformJar)
+			}
+		}
+	} else {
+		dependencies {
+			implementation("blue.endless:jankson:${"jankson_version"()}")
+		}
 	}
 }
 

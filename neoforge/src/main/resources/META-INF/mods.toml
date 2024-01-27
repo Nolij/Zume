@@ -15,8 +15,15 @@ ${mod_description}
 """
 
 [[dependencies.zume]]
+modId="neoforge"
+type="required"
+versionRange="${neoforge_neoforge_range}"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.zume]]
 modId="minecraft"
 type="required"
-versionRange="${neoforge_version_range}"
+versionRange="${neoforge_minecraft_range}"
 ordering="NONE"
 side="CLIENT"

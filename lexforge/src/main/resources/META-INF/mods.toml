@@ -16,8 +16,7 @@ ${mod_description}
 
 [[dependencies.zume]]
 modId="minecraft"
-type="required"
 mandatory=true
-versionRange="${lexforge_version_range}"
+versionRange="${lexforge_minecraft_range}"
 ordering="NONE"
 side="CLIENT"

@@ -41,8 +41,6 @@ repositories {
 
 dependencies {
 	"modImplementation"("zone.rong:mixinbooter:${"mixinbooter_version"()}")
-
-	implementation(project(":common"))
 }
 
 tasks.processResources {
@@ -52,7 +50,7 @@ tasks.processResources {
 
 	filteringCharset = "UTF-8"
 
-//	filesMatching("mcmod.info") {
-//		expand(rootProject.properties)
-//	}
+	filesMatching("mcmod.info") {
+		expand(rootProject.properties)
+	}
 }

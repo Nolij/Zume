@@ -26,8 +26,6 @@ unimined.minecraft {
 
 dependencies {
 	"modImplementation"(fabricApi.fabricModule("fabric-key-binding-api-v1", "modern_fabric_api_version"()))
-	
-	implementation(project(":common"))
 }
 
 tasks.processResources {

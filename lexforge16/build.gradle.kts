@@ -43,8 +43,6 @@ dependencies {
 //	annotationProcessor(mixinExtrasCommon)
 //	val mixinExtrasForge = "io.github.llamalad7:mixinextras-forge:${"mixinextras_version"()}"
 //	"minecraftLibraries"(mixinExtrasForge)
-
-	implementation(project(":common"))
 }
 
 tasks.processResources {

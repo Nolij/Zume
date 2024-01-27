@@ -34,8 +34,6 @@ tasks.withType<RemapJarTask> {
 
 dependencies {
 	"modImplementation"("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${"unimixins_version"()}:dev")
-	
-	implementation(project(":common"))
 }
 
 tasks.processResources {
@@ -45,7 +43,7 @@ tasks.processResources {
 
 	filteringCharset = "UTF-8"
 
-//	filesMatching("mcmod.info") {
-//		expand(rootProject.properties)
-//	}
+	filesMatching("mcmod.info") {
+		expand(rootProject.properties)
+	}
 }
