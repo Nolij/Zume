@@ -70,12 +70,13 @@ public class FileWatcher {
 								Files.exists(changed) && 
 								Files.isSameFile(changed, file)) {
 								callback.invoke();
+								debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
 								break;
 							}
+						} catch (NoSuchFileException ignored) {
 						} catch (IOException e) {
 							Zume.LOGGER.error("Error in config watcher: ", e);
 						} finally {
-							debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
 							if (locked)
 								unlock();
 						}
