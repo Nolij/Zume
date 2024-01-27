@@ -9,7 +9,7 @@
       "updateUrl": "",
       "authorList": ["${nolij}"],
       "credits": "",
-      "logoFile": "",
+      "logoFile": "icon_large.png",
       "screenshots": [],
       "dependencies": []
     }

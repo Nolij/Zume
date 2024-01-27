@@ -8,6 +8,7 @@ modId="zume"
 version="${mod_version}"
 displayName="${mod_name}"
 displayURL="${mod_url}"
+logoFile="icon_large.png"
 authors="${nolij}"
 description="""
 ${mod_description}
