@@ -365,7 +365,7 @@ afterEvaluate {
 			
 			username = "Zume Updates"
 			
-			avatarUrl = "https://github.com/Nolij/Zume/raw/master/common/src/main/resources/assets/zume/icon_large.png"
+			avatarUrl = "https://github.com/Nolij/Zume/raw/master/common/src/main/resources/icon_large.png"
 			
 			content = changelog.map {
 				"# Zume ${"mod_version"()} has been released!\nChangelog: ```md\n${it}\n```"
