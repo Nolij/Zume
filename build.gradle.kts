@@ -370,6 +370,8 @@ afterEvaluate {
 			content = changelog.map {
 				"# Zume ${"mod_version"()} has been released!\nChangelog: ```md\n${it}\n```"
 			}
+			
+			setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
 		}
 	}
 }
