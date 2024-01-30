@@ -17,15 +17,22 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	private static final class ModernZumeConfigScreen extends Screen {
 		
 		private final Screen parent;
+		private final boolean applyLegacyWorkarounds;
 		
-		private ModernZumeConfigScreen(Text arg, Screen parent) {
+		private ModernZumeConfigScreen(Text arg, Screen parent, boolean applyLegacyWorkarounds) {
 			super(arg);
 			this.parent = parent;
-			Zume.openConfigFile();
+			this.applyLegacyWorkarounds = applyLegacyWorkarounds;
+			
+			if (applyLegacyWorkarounds)
+				Zume.openConfigFile();
 		}
 		
 		@Override
 		public void init() {
+			if (!applyLegacyWorkarounds)
+				Zume.openConfigFile();
+			
 			MinecraftClient.getInstance().setScreen(parent);
 		}
 		
@@ -53,7 +60,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	public Function<Screen, ? extends Screen> getConfigScreenFactory() {
 		return (parent) -> {
             try {
-                return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invoke(""), parent);
+                return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invoke(""), parent, true);
             } catch (Throwable e) {
 				Zume.LOGGER.error("Error opening config screen: ", e);
 				return null;
@@ -63,7 +70,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return (parent) -> new ModernZumeConfigScreen(Text.literal(""), parent);
+		return (parent) -> new ModernZumeConfigScreen(Text.literal(""), parent, false);
 	}
 	
 }
