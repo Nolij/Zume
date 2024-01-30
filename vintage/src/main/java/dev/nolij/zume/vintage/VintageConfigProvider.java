@@ -6,7 +6,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -14,7 +13,7 @@ public class VintageConfigProvider implements IModGuiFactory {
 	
 	public static class VintageZumeConfigGUI extends GuiConfig {
 		
-		public VintageZumeConfigGUI(GuiScreen parentScreen) throws IOException {
+		public VintageZumeConfigGUI(GuiScreen parentScreen) {
 			super(parentScreen, Collections.emptyList(), Zume.MOD_ID, false, false, "config");
 			
 			Zume.openConfigFile();
@@ -30,11 +29,7 @@ public class VintageConfigProvider implements IModGuiFactory {
 	
 	@Override
 	public GuiScreen createConfigGui(GuiScreen parentScreen) {
-		try {
-			return new VintageZumeConfigGUI(parentScreen);
-		} catch (IOException e) {
-			throw new AssertionError(e);
-		}
+		return new VintageZumeConfigGUI(parentScreen);
 	}
 	
 	@Override

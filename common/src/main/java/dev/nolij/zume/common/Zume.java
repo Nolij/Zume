@@ -19,7 +19,6 @@ public class Zume {
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	public static final String CONFIG_FILE_NAME = MOD_ID + ".json5";
 	public static final ZumeVariant ZUME_VARIANT;
-	//endregion
 	
 	//region Variant Detection
 	static {
@@ -64,6 +63,24 @@ public class Zume {
 			}
 		}
 	}
+	//endregion
+	
+	public static final HostPlatform HOST_PLATFORM;
+	
+	//region Platform Detection
+	static {
+		final String OS_NAME = System.getProperty("os.name").toLowerCase();
+		
+		if (OS_NAME.contains("linux"))
+			HOST_PLATFORM = HostPlatform.LINUX;
+		else if (OS_NAME.contains("win"))
+			HOST_PLATFORM = HostPlatform.WINDOWS;
+		else if (OS_NAME.contains("mac"))
+			HOST_PLATFORM = HostPlatform.MAC_OS;
+		else
+			HOST_PLATFORM = HostPlatform.UNKNOWN;
+	}
+	//endregion
 	//endregion
 	
 	//region Helper Methods
@@ -168,8 +185,30 @@ public class Zume {
 	/**
 	 * Attempts to open the {@linkplain Zume#configFile Zume config file} in the system's text editor.
 	 */
-	public static void openConfigFile() throws IOException {
-		Desktop.getDesktop().open(Zume.configFile);
+	public static void openConfigFile() {
+		try {
+			try {
+				Desktop.getDesktop().open(configFile);
+			} catch (HeadlessException ignored) {
+				final String CONFIG_PATH = configFile.getCanonicalPath();
+				if (HOST_PLATFORM == HostPlatform.UNKNOWN) {
+					Zume.LOGGER.error("Error opening config file: Unsupported Platform!");
+					return;
+				}
+				
+				final ProcessBuilder builder = new ProcessBuilder().inheritIO();
+				
+				switch (HOST_PLATFORM) {
+					case LINUX -> builder.command("xdg-open", CONFIG_PATH);
+					case WINDOWS -> builder.command("rundll32", "url.dll,FileProtocolHandler", CONFIG_PATH);
+					case MAC_OS -> builder.command("open", "-t", CONFIG_PATH);
+				}
+				
+				builder.start();
+			}
+		} catch (IOException e) {
+			Zume.LOGGER.error("Error opening config file: ", e);
+		}
 	}
 	
 	/**

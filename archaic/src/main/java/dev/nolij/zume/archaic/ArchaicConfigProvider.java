@@ -6,7 +6,6 @@ import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -14,7 +13,7 @@ public class ArchaicConfigProvider implements IModGuiFactory {
 	
 	public static class ArchaicZumeConfigGUI extends GuiConfig {
 		
-		public ArchaicZumeConfigGUI(GuiScreen parentScreen) throws IOException {
+		public ArchaicZumeConfigGUI(GuiScreen parentScreen) {
 			super(parentScreen, Collections.emptyList(), Zume.MOD_ID, false, false, "config");
 			
 			Zume.openConfigFile();
@@ -22,7 +21,6 @@ public class ArchaicConfigProvider implements IModGuiFactory {
 		
 		@Override
 		public void initGui() {
-			this.onGuiClosed();
 			Minecraft.getMinecraft().displayGuiScreen(parentScreen);
 		}
 		

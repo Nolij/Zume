@@ -24,8 +24,16 @@ unimined.minecraft {
 	defaultRemapJar = true
 }
 
+repositories {
+	maven("https://maven.terraformersmc.com/releases/")
+}
+
 dependencies {
+	compileOnly(project(":stubs"))
+	
 	"modImplementation"(fabricApi.fabricModule("fabric-key-binding-api-v1", "modern_fabric_api_version"()))
+	
+	"modImplementation"("com.terraformersmc:modmenu:7.+")
 }
 
 tasks.processResources {

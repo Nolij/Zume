@@ -35,6 +35,8 @@ unimined.minecraft {
 //}
 
 dependencies {
+	compileOnly(project(":stubs"))
+
 	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
 
 //	val mixinExtrasCommon = "io.github.llamalad7:mixinextras-common:${"mixinextras_version"()}"

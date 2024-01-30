@@ -2,11 +2,17 @@ package dev.nolij.zume.lexforge16;
 
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -28,6 +34,30 @@ public class LexZume16 implements IZumeImplementation {
 		MinecraftForge.EVENT_BUS.addListener(this::render);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		
+		ModLoadingContext.get().registerExtensionPoint(
+			ExtensionPoint.CONFIGGUIFACTORY,
+			() -> (minecraft, parent) -> new ConfigScreen(new TextComponent(""), minecraft, parent));
+	}
+	
+	private static final class ConfigScreen extends Screen {
+		
+		private final Minecraft minecraft;
+		private final Screen parent;
+		
+		private ConfigScreen(Component title, Minecraft minecraft, Screen parent) {
+			super(title);
+			this.minecraft = minecraft;
+			this.parent = parent;
+			
+			Zume.openConfigFile();
+		}
+		
+		@Override
+		protected void init() {
+			minecraft.setScreen(parent);
+		}
+		
 	}
 	
 	@Override

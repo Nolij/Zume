@@ -2,12 +2,16 @@ package dev.nolij.zume.neoforge;
 
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.ConfigScreenHandler;
 import net.neoforged.neoforge.client.event.CalculatePlayerTurnEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -31,6 +35,18 @@ public class NeoZume implements IZumeImplementation {
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		
+		ModLoadingContext.get().registerExtensionPoint(
+			ConfigScreenHandler.ConfigScreenFactory.class,
+			() -> new ConfigScreenHandler.ConfigScreenFactory(((minecraft, parent) -> new Screen(Component.empty()) {
+				@Override
+				public void init() {
+					assert minecraft != null;
+					
+					Zume.openConfigFile();
+                    minecraft.setScreen(parent);
+				}
+			})));
 	}
 	
 	@Override

@@ -19,6 +19,9 @@
 		"client": [
 			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
+		"modmenu": [
+			"dev.nolij.zume.modern.integration.ZumeModMenuIntegration"
+		],
 		"stationapi:event_bus_client": [
 			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
 		]

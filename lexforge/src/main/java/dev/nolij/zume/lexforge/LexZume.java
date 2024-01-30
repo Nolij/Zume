@@ -2,14 +2,18 @@ package dev.nolij.zume.lexforge;
 
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -29,6 +33,18 @@ public class LexZume implements IZumeImplementation {
 		MinecraftForge.EVENT_BUS.addListener(this::render);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		
+		ModLoadingContext.get().registerExtensionPoint(
+			ConfigScreenHandler.ConfigScreenFactory.class,
+			() -> new ConfigScreenHandler.ConfigScreenFactory(((minecraft, parent) -> new Screen(Component.nullToEmpty(null)) {
+				@Override
+				public void tick() {
+					assert minecraft != null;
+					
+					Zume.openConfigFile();
+                    minecraft.setScreen(parent);
+				}
+			})));
 	}
 	
 	@Override
