@@ -7,10 +7,9 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
-import java.nio.file.Files
+import java.util.jar.JarFile
 import java.util.zip.Deflater
 import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 plugins {
@@ -293,32 +292,31 @@ tasks.shadowJar {
 	
 	doLast {
 		// re-zip the jar with highest compression level
-		val jarFile = shadowJar.archiveFile.get().asFile
-		val fileContents = mutableMapOf<String, ByteArray>()
-		ZipInputStream(jarFile.inputStream()).use { zis ->
-			var entry: ZipEntry? = zis.nextEntry
-			while (entry != null) {
+		val jar = archiveFile.get().asFile
+		val contents = linkedMapOf<String, ByteArray>()
+		JarFile(jar).use {
+			it.entries().asSequence().forEach { entry ->
 				if (!entry.isDirectory) {
-					val bytes = zis.readAllBytes()
-					fileContents[entry.name] = bytes
+					contents[entry.name] = it.getInputStream(entry).readAllBytes()
 				}
-				entry = zis.nextEntry
 			}
 		}
+		
+		jar.delete()
 
-		ZipOutputStream(Files.newOutputStream(jarFile.toPath())).use { zos ->
-			zos.setLevel(Deflater.BEST_COMPRESSION)
-			fileContents.forEach { (name, bytes) ->
+		ZipOutputStream(jar.outputStream()).use {
+			it.setLevel(Deflater.BEST_COMPRESSION)
+			contents.forEach { (name, bytes) ->
 				var newBytes = bytes
-				if(name.endsWith(".json") || name.endsWith(".mcmeta") || name.endsWith("mcmod.info")) {
+				if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
 					newBytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
 				}
-				zos.putNextEntry(ZipEntry(name))
-				zos.write(newBytes)
-				zos.closeEntry()
+				it.putNextEntry(ZipEntry(name))
+				it.write(newBytes)
+				it.closeEntry()
 			}
-			zos.finish()
-			zos.close()
+			it.finish()
+			it.close()
 		}
 	}
 }
