@@ -1,10 +1,17 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import java.nio.file.Files
+import java.util.zip.Deflater
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 plugins {
     id("java")
@@ -58,7 +65,11 @@ allprojects {
 	apply(plugin = "maven-publish")
 
 	repositories {
-		mavenCentral()
+		mavenCentral {
+			content {
+				excludeGroup("ca.weblite")
+			}
+		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		exclusiveContent {
@@ -238,12 +249,15 @@ tasks.shadowJar {
 		rename { "${it}_${"archives_base_name"()}" }
 	}
 	
-	configurations = immutableListOf(project.configurations["shade"])
-	archiveClassifier = ""
-	isPreserveFileTimestamps = false
+	exclude("*.xcf")
 	
-	uniminedImpls.forEach {
-		val remapJar = project(":${it}").tasks.withType<RemapJarTask>()["remapJar"]
+	configurations = immutableListOf(project.configurations["shade"])
+	archiveClassifier = null
+	isPreserveFileTimestamps = false
+	isReproducibleFileOrder = true
+	
+	uniminedImpls.forEach { impl ->
+		val remapJar = project(":${impl}").tasks.withType<RemapJarTask>()["remapJar"]
 		shadowJar.dependsOn(remapJar)
 		from(zipTree(remapJar.archiveFile.get())) {
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
@@ -276,9 +290,40 @@ tasks.shadowJar {
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
 		)
 	}
+	
+	doLast {
+		// re-zip the jar with highest compression level
+		val jarFile = shadowJar.archiveFile.get().asFile
+		val fileContents = mutableMapOf<String, ByteArray>()
+		ZipInputStream(jarFile.inputStream()).use { zis ->
+			var entry: ZipEntry? = zis.nextEntry
+			while (entry != null) {
+				if (!entry.isDirectory) {
+					val bytes = zis.readAllBytes()
+					fileContents[entry.name] = bytes
+				}
+				entry = zis.nextEntry
+			}
+		}
+
+		ZipOutputStream(Files.newOutputStream(jarFile.toPath())).use { zos ->
+			zos.setLevel(Deflater.BEST_COMPRESSION)
+			fileContents.forEach { (name, bytes) ->
+				var newBytes = bytes
+				if(name.endsWith(".json") || name.endsWith(".mcmeta") || name.endsWith("mcmod.info")) {
+					newBytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
+				}
+				zos.putNextEntry(ZipEntry(name))
+				zos.write(newBytes)
+				zos.closeEntry()
+			}
+			zos.finish()
+			zos.close()
+		}
+	}
 }
 
-tasks.build {
+tasks.assemble {
 	dependsOn(tasks.shadowJar)
 }
 
