@@ -289,13 +289,19 @@ tasks.shadowJar {
 	}
 }
 
-tasks.assemble {
-	dependsOn(tasks.shadowJar)
+listOf(tasks.assemble, tasks.publishMods).forEach {
+	it.configure { dependsOn(tasks.shadowJar) }
 }
 
-tasks.register("compressJar", Task::class) {
+tasks.register<Jar>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
+	
+	inputs.file(tasks.shadowJar.get().archiveFile)
+	
+	archiveFileName.set(tasks.shadowJar.get().archiveFileName)
+	destinationDirectory.set(tasks.shadowJar.get().destinationDirectory)
+	
 	doLast {
 		val jar = tasks.shadowJar.get().archiveFile.get().asFile
 		val contents = linkedMapOf<String, ByteArray>()
@@ -343,14 +349,9 @@ tasks.register("compressJar", Task::class) {
 	}
 }
 
-tasks.publishMods {
-	dependsOn(tasks.shadowJar)
-	dependsOn(tasks.named("compressJar"))
-}
-
 afterEvaluate {
 	publishMods {
-		file = tasks.shadowJar.get().archiveFile
+		file = tasks.named<Jar>("compressJar").get().archiveFile
 		type = STABLE
 		displayName = "mod_version"()
 		version = "mod_version"()
