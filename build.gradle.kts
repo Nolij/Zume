@@ -71,11 +71,9 @@ allprojects {
 		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
-		exclusiveContent {
-			forRepository {
-				maven("https://api.modrinth.com/maven")
-			}
-			filter {
+		maven {
+			url = uri("https://api.modrinth.com/maven")
+			content {
 				includeGroup("maven.modrinth")
 			}
 		}
@@ -289,10 +287,17 @@ tasks.shadowJar {
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
 		)
 	}
-	
+}
+
+tasks.assemble {
+	dependsOn(tasks.shadowJar)
+}
+
+tasks.register("compressJar", Task::class) {
+	dependsOn(tasks.shadowJar)
+	group = "build"
 	doLast {
-		// re-zip the jar with highest compression level
-		val jar = archiveFile.get().asFile
+		val jar = tasks.shadowJar.get().archiveFile.get().asFile
 		val contents = linkedMapOf<String, ByteArray>()
 		JarFile(jar).use {
 			it.entries().asSequence().forEach { entry ->
@@ -301,28 +306,46 @@ tasks.shadowJar {
 				}
 			}
 		}
-		
+
 		jar.delete()
 
-		ZipOutputStream(jar.outputStream()).use {
-			it.setLevel(Deflater.BEST_COMPRESSION)
-			contents.forEach { (name, bytes) ->
-				var newBytes = bytes
+		ZipOutputStream(jar.outputStream()).use { out ->
+			out.setLevel(Deflater.BEST_COMPRESSION)
+			contents.forEach { var (name, bytes) = it
 				if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
-					newBytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
+					bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
 				}
-				it.putNextEntry(ZipEntry(name))
-				it.write(newBytes)
-				it.closeEntry()
+
+				if (name.endsWith(".class")) {
+					val reader = ClassReader(bytes)
+					val node = ClassNode()
+					reader.accept(node, 0)
+
+					node.methods.forEach { method ->
+						method.localVariables?.clear()
+					}
+					if ("strip_source_files"().toBoolean()) {
+						node.sourceFile = null
+					}
+
+					val writer = ClassWriter(0)
+					node.accept(writer)
+					bytes = writer.toByteArray()
+				}
+
+				out.putNextEntry(ZipEntry(name))
+				out.write(bytes)
+				out.closeEntry()
 			}
-			it.finish()
-			it.close()
+			out.finish()
+			out.close()
 		}
 	}
 }
 
-tasks.assemble {
+tasks.publishMods {
 	dependsOn(tasks.shadowJar)
+	dependsOn(tasks.named("compressJar"))
 }
 
 afterEvaluate {
