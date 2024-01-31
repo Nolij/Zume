@@ -7,10 +7,10 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import java.util.jar.JarEntry
 import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
 import java.util.zip.Deflater
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 plugins {
     id("java")
@@ -293,20 +293,22 @@ listOf(tasks.assemble, tasks.publishMods).forEach {
 	it.configure { dependsOn(tasks.shadowJar) }
 }
 
-tasks.register<Jar>("compressJar") {
+val compressJar = tasks.register<Jar>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
 	
-	inputs.file(tasks.shadowJar.get().archiveFile)
+	val shadowJar = tasks.shadowJar.get()
 	
-	archiveFileName.set(tasks.shadowJar.get().archiveFileName)
-	destinationDirectory.set(tasks.shadowJar.get().destinationDirectory)
+	inputs.file(shadowJar.archiveFile)
+	
+	archiveFileName.set(shadowJar.archiveFileName)
+	destinationDirectory.set(shadowJar.destinationDirectory)
 	
 	doLast {
-		val jar = tasks.shadowJar.get().archiveFile.get().asFile
+		val jar = shadowJar.archiveFile.get().asFile
 		val contents = linkedMapOf<String, ByteArray>()
 		JarFile(jar).use {
-			it.entries().asSequence().forEach { entry ->
+			it.entries().asIterator().forEach { entry ->
 				if (!entry.isDirectory) {
 					contents[entry.name] = it.getInputStream(entry).readAllBytes()
 				}
@@ -315,7 +317,7 @@ tasks.register<Jar>("compressJar") {
 
 		jar.delete()
 
-		ZipOutputStream(jar.outputStream()).use { out ->
+		JarOutputStream(jar.outputStream()).use { out ->
 			out.setLevel(Deflater.BEST_COMPRESSION)
 			contents.forEach { var (name, bytes) = it
 				if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
@@ -339,7 +341,7 @@ tasks.register<Jar>("compressJar") {
 					bytes = writer.toByteArray()
 				}
 
-				out.putNextEntry(ZipEntry(name))
+				out.putNextEntry(JarEntry(name))
 				out.write(bytes)
 				out.closeEntry()
 			}
@@ -351,7 +353,7 @@ tasks.register<Jar>("compressJar") {
 
 afterEvaluate {
 	publishMods {
-		file = tasks.named<Jar>("compressJar").get().archiveFile
+		file = compressJar.get().archiveFile
 		type = STABLE
 		displayName = "mod_version"()
 		version = "mod_version"()
