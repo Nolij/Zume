@@ -10,16 +10,20 @@ import net.minecraft.client.util.SmoothUtil;
 
 public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
+	private MinecraftClient minecraftClient;
+	
 	@Override
 	public void onInitializeClient() {
 		Zume.LOGGER.info("Loading Legacy Zume...");
 		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
+		
+		this.minecraftClient = MinecraftClient.getInstance();
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
-		return ZumeKeyBind.ZOOM.isPressed();
+		return minecraftClient.currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -34,8 +38,8 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
-			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
+		if (Zume.config.enableCinematicZoom && !minecraftClient.options.smoothCameraEnabled) {
+			final GameRendererAccessor gameRenderer = (GameRendererAccessor) minecraftClient.gameRenderer;
 			gameRenderer.setCursorXSmoother(new SmoothUtil());
 			gameRenderer.setCursorYSmoother(new SmoothUtil());
 			gameRenderer.setCursorDeltaX(0F);
