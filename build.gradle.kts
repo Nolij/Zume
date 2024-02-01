@@ -146,10 +146,8 @@ subprojects {
 						attributes(
 							"MixinConfigs" to "zume-${implName}.mixins.json",
 						)
-					}
 					
-					if (implName in legacyForgeImpls) {
-						manifest {
+						if (implName in legacyForgeImpls) {
 							attributes(
 								"ForceLoadAsMod" to true,
 								"FMLCorePluginContainsFMLMod" to true,
