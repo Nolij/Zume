@@ -124,6 +124,8 @@ subprojects {
 		
 		afterEvaluate {
 			val platformJar = tasks.create<ShadowJar>("platformJar") {
+				group = "build"
+				
 				from("../LICENSE") {
 					rename { "${it}_${"archives_base_name"()}" }
 				}
