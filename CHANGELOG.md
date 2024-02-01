@@ -1,3 +1,3 @@
-- icon should work on Lex/NeoForge implementations now
-- added capability for platform-specific jars (for JiJ support)
-- removed Herobrine (I only have myself to blame this time)
+- made config buttons work on applicable platforms (Modern Fabric w/ Mod Menu + Neo/LexForge)
+- fixed Zoom key still applying while screens (such as inventory) are open
+- further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
