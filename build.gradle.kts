@@ -293,19 +293,25 @@ listOf(tasks.assemble, tasks.publishMods).forEach {
 	it.configure { dependsOn(tasks.shadowJar) }
 }
 
-val compressJar = tasks.register<Jar>("compressJar") {
+abstract class ProcessJarTask : DefaultTask() {
+	@get:InputFile
+	abstract val inputJar: RegularFileProperty
+	
+	@OutputFile
+	fun getOutputJar(): RegularFile {
+		return inputJar.get()
+	}
+}
+
+val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
 	
 	val shadowJar = tasks.shadowJar.get()
-	
-	inputs.file(shadowJar.archiveFile)
-	
-	archiveFileName.set(shadowJar.archiveFileName)
-	destinationDirectory.set(shadowJar.destinationDirectory)
+	inputJar.set(shadowJar.archiveFile)
 	
 	doLast {
-		val jar = shadowJar.archiveFile.get().asFile
+		val jar = inputJar.get().asFile
 		val contents = linkedMapOf<String, ByteArray>()
 		JarFile(jar).use {
 			it.entries().asIterator().forEach { entry ->
@@ -353,7 +359,7 @@ val compressJar = tasks.register<Jar>("compressJar") {
 
 afterEvaluate {
 	publishMods {
-		file = compressJar.get().archiveFile
+		file = compressJar.get().getOutputJar()
 		type = STABLE
 		displayName = "mod_version"()
 		version = "mod_version"()
