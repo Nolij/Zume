@@ -2,6 +2,7 @@ package dev.nolij.zume.lexforge;
 
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,6 +25,8 @@ import java.io.File;
 @OnlyIn(Dist.CLIENT)
 public class LexZume implements IZumeImplementation {
 	
+	private final Minecraft minecraft;
+	
 	public LexZume() {
 		Zume.LOGGER.info("Loading LexZume...");
 		
@@ -45,11 +48,13 @@ public class LexZume implements IZumeImplementation {
                     minecraft.setScreen(parent);
 				}
 			})));
+		
+		this.minecraft = Minecraft.getInstance();
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
-		return ZumeKeyBind.ZOOM.isPressed();
+		return minecraft.screen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override

@@ -22,6 +22,8 @@ import java.io.File;
 @Mod(Zume.MOD_ID)
 public class LexZume16 implements IZumeImplementation {
 	
+	private final Minecraft minecraft;
+	
 	public LexZume16() {
 		Zume.LOGGER.info("Loading LexZume16...");
 		
@@ -38,6 +40,8 @@ public class LexZume16 implements IZumeImplementation {
 		ModLoadingContext.get().registerExtensionPoint(
 			ExtensionPoint.CONFIGGUIFACTORY,
 			() -> (minecraft, parent) -> new ConfigScreen(new TextComponent(""), minecraft, parent));
+		
+		this.minecraft = Minecraft.getInstance();
 	}
 	
 	private static final class ConfigScreen extends Screen {
@@ -62,7 +66,7 @@ public class LexZume16 implements IZumeImplementation {
 	
 	@Override
 	public boolean isZoomPressed() {
-		return ZumeKeyBind.ZOOM.isPressed();
+		return minecraft.screen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
