@@ -1,3 +1,1 @@
-- icon should work on Lex/NeoForge implementations now
-- added capability for platform-specific jars (for JiJ support)
-- removed Herobrine (I only have myself to blame this time)
+- made jar smaller (thanks @rdh)

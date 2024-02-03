@@ -26,6 +26,8 @@ import java.io.File;
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeImplementation {
 	
+	private final Minecraft minecraft;
+	
 	public VintageZume() {
 		Zume.LOGGER.info("Loading Vintage Zume...");
 		
@@ -36,11 +38,13 @@ public class VintageZume implements IZumeImplementation {
 		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
 		
 		MinecraftForge.EVENT_BUS.register(this);
+		
+		this.minecraft = Minecraft.getMinecraft();
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
-		return ZumeKeyBind.ZOOM.isPressed();
+		return minecraft.currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -55,8 +59,8 @@ public class VintageZume implements IZumeImplementation {
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
-			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
+		if (Zume.config.enableCinematicZoom && !minecraft.gameSettings.smoothCamera) {
+			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) minecraft.entityRenderer;
 			entityRenderer.setMouseFilterXAxis(new MouseFilter());
 			entityRenderer.setMouseFilterYAxis(new MouseFilter());
 			entityRenderer.setSmoothCamYaw(0F);

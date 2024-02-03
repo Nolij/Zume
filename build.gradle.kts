@@ -132,6 +132,8 @@ subprojects {
 		
 		afterEvaluate {
 			val platformJar = tasks.create<ShadowJar>("platformJar") {
+				group = "build"
+				
 				from("../LICENSE") {
 					rename { "${it}_${"archives_base_name"()}" }
 				}
@@ -152,10 +154,8 @@ subprojects {
 						attributes(
 							"MixinConfigs" to "zume-${implName}.mixins.json",
 						)
-					}
 					
-					if (implName in legacyForgeImpls) {
-						manifest {
+						if (implName in legacyForgeImpls) {
 							attributes(
 								"ForceLoadAsMod" to true,
 								"FMLCorePluginContainsFMLMod" to true,
