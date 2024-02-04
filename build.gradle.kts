@@ -164,9 +164,13 @@ subprojects {
 						}
 					}
 				}
+				
+				doLast {
+					squishJar(archiveFile.get().asFile)
+				}
 			}
 
-			tasks.build {
+			tasks.assemble {
 				dependsOn(platformJar)
 			}
 		}
@@ -311,49 +315,52 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 	inputJar.set(shadowJar.archiveFile)
 	
 	doLast {
-		val jar = inputJar.get().asFile
-		val contents = linkedMapOf<String, ByteArray>()
-		JarFile(jar).use {
-			it.entries().asIterator().forEach { entry ->
-				if (!entry.isDirectory) {
-					contents[entry.name] = it.getInputStream(entry).readAllBytes()
-				}
+		squishJar(inputJar.get().asFile)
+	}
+}
+
+fun squishJar(jar: File) {
+	val contents = linkedMapOf<String, ByteArray>()
+	JarFile(jar).use {
+		it.entries().asIterator().forEach { entry ->
+			if (!entry.isDirectory) {
+				contents[entry.name] = it.getInputStream(entry).readAllBytes()
 			}
 		}
+	}
 
-		jar.delete()
+	jar.delete()
 
-		JarOutputStream(jar.outputStream()).use { out ->
-			out.setLevel(Deflater.BEST_COMPRESSION)
-			contents.forEach { var (name, bytes) = it
-				if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
-					bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
-				}
-
-				if (name.endsWith(".class")) {
-					val reader = ClassReader(bytes)
-					val node = ClassNode()
-					reader.accept(node, 0)
-
-					node.methods.forEach { method ->
-						method.localVariables?.clear()
-					}
-					if ("strip_source_files"().toBoolean()) {
-						node.sourceFile = null
-					}
-
-					val writer = ClassWriter(0)
-					node.accept(writer)
-					bytes = writer.toByteArray()
-				}
-
-				out.putNextEntry(JarEntry(name))
-				out.write(bytes)
-				out.closeEntry()
+	JarOutputStream(jar.outputStream()).use { out ->
+		out.setLevel(Deflater.BEST_COMPRESSION)
+		contents.forEach { var (name, bytes) = it
+			if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
+				bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
 			}
-			out.finish()
-			out.close()
+
+			if (name.endsWith(".class")) {
+				val reader = ClassReader(bytes)
+				val node = ClassNode()
+				reader.accept(node, 0)
+
+				node.methods.forEach { method ->
+					method.localVariables?.clear()
+				}
+				if ("strip_source_files"().toBoolean()) {
+					node.sourceFile = null
+				}
+
+				val writer = ClassWriter(0)
+				node.accept(writer)
+				bytes = writer.toByteArray()
+			}
+
+			out.putNextEntry(JarEntry(name))
+			out.write(bytes)
+			out.closeEntry()
 		}
+		out.finish()
+		out.close()
 	}
 }
 
