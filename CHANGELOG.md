@@ -1,2 +1,1 @@
-- made jar smaller (thanks @rdh)
-- fixed zoom scrolling on LexForge 20.2+
+- fixed localization issue on Vintage Forge
