@@ -60,7 +60,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	public Function<Screen, ? extends Screen> getConfigScreenFactory() {
 		return (parent) -> {
             try {
-                return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invoke(""), parent, true);
+                return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invokeExact(""), parent, true);
             } catch (Throwable e) {
 				Zume.LOGGER.error("Error opening config screen: ", e);
 				return null;
