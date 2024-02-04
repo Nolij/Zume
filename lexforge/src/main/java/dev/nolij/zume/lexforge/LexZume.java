@@ -20,6 +20,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
 
 @Mod(Zume.MOD_ID)
 @OnlyIn(Dist.CLIENT)
@@ -85,9 +88,36 @@ public class LexZume implements IZumeImplementation {
 		}
 	}
 	
+	private static final MethodHandle getScrollDelta;
+	
+	static {
+		final MethodHandles.Lookup lookup = MethodHandles.lookup();
+		Method method;
+        try {
+            method = InputEvent.MouseScrollingEvent.class.getMethod("getScrollDelta");
+        } catch (NoSuchMethodException ignored) {
+            try {
+	            //noinspection JavaReflectionMemberAccess
+	            method = InputEvent.MouseScrollingEvent.class.getMethod("getDeltaY");
+            } catch (NoSuchMethodException e) {
+                throw new AssertionError(e);
+            }
+        }
+        try {
+            getScrollDelta = lookup.unreflect(method);
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
-		final int scrollAmount = (int) event.getScrollDelta();
-		if (scrollAmount != 0 &&
+        final int scrollAmount;
+        try {
+            scrollAmount = (int) (double) getScrollDelta.invokeExact(event);
+        } catch (Throwable e) {
+            throw new AssertionError(e);
+        }
+        if (scrollAmount != 0 &&
 			Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
