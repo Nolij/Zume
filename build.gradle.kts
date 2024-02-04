@@ -449,4 +449,8 @@ afterEvaluate {
 			setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
 		}
 	}
+	
+	tasks.publishMods {
+		dependsOn(compressJar)
+	}
 }
