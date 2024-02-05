@@ -359,7 +359,7 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 
 afterEvaluate {
 	publishMods {
-		file = compressJar.get().getOutputJar()
+		file = tasks.shadowJar.get().archiveFile
 		type = STABLE
 		displayName = "mod_version"()
 		version = "mod_version"()
@@ -448,9 +448,5 @@ afterEvaluate {
 			
 			setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
 		}
-	}
-	
-	tasks.publishMods {
-		dependsOn(compressJar)
 	}
 }
