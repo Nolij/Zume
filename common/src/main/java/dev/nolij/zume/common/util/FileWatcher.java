@@ -37,15 +37,15 @@ public class FileWatcher {
 	private long debounce = 0L;
 	private final Semaphore semaphore = new Semaphore(1);
 	
-	public boolean lock() {
+	public void lock() throws InterruptedException {
 		synchronized (semaphore) {
-			return semaphore.tryAcquire();
+			semaphore.acquire();
 		}
 	}
 	
-	public boolean lock(long ms) throws InterruptedException {
+	public boolean tryLock() {
 		synchronized (semaphore) {
-			return semaphore.tryAcquire(ms, TimeUnit.MILLISECONDS);
+			return semaphore.tryAcquire();
 		}
 	}
 	
@@ -72,7 +72,7 @@ public class FileWatcher {
 						final Path changed = parent.resolve((Path) event.context());
 						boolean locked = false;
 						try {
-							if ((locked = lock()) &&
+							if ((locked = tryLock()) &&
 								System.currentTimeMillis() > debounce &&
 								Files.exists(changed) && 
 								Files.isSameFile(changed, file)) {
