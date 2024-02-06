@@ -1,1 +1,2 @@
-- fixed localization issue on Vintage Forge
+- fixed obscure bug
+- further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
