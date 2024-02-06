@@ -128,13 +128,14 @@ public class ZumeConfig {
 	private static FileWatcher watcher;
 	private static File file;
 	
-	public void modify(ConfigConsumer consumer) throws ConcurrentModificationException, InterruptedException {
+	public void modify(ConfigConsumer modifier) throws ConcurrentModificationException, InterruptedException {
 		if (!watcher.lock(500L))
 			throw new ConcurrentModificationException();
 		
 		try {
-			consumer.invoke(this);
+			modifier.invoke(this);
 			this.writeToFile(file);
+			consumer.invoke(this);
 		} finally {
 			watcher.unlock();
 		}
