@@ -1,2 +1,3 @@
 - fixed obscure bug
+- added config modification API (should enable other mods to make a proper config screen for Zume)
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience

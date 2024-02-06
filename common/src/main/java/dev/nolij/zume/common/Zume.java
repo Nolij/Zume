@@ -131,7 +131,7 @@ public class Zume {
 		Zume.implementation = implementation;
 		Zume.configFile = configFile;
 		
-		ZumeConfig.create(configFile, config -> {
+		ZumeConfig.init(configFile, config -> {
 			Zume.config = config;
 			inverseSmoothness = 1D / Zume.config.zoomSmoothnessMs;
 			toggle = false;

@@ -8,6 +8,7 @@ import dev.nolij.zume.common.Zume;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class FileWatcher {
 	
@@ -39,6 +40,12 @@ public class FileWatcher {
 	public boolean lock() {
 		synchronized (semaphore) {
 			return semaphore.tryAcquire();
+		}
+	}
+	
+	public boolean lock(long ms) throws InterruptedException {
+		synchronized (semaphore) {
+			return semaphore.tryAcquire(ms, TimeUnit.MILLISECONDS);
 		}
 	}
 	

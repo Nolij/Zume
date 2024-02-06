@@ -9,6 +9,7 @@ import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.common.util.FileWatcher;
 
 import java.io.*;
+import java.util.ConcurrentModificationException;
 
 @NonnullByDefault
 public class ZumeConfig {
@@ -77,8 +78,8 @@ public class ZumeConfig {
 	
 	
 	@FunctionalInterface
-	public interface ConfigSetter {
-		void set(ZumeConfig config);
+	public interface ConfigConsumer {
+		void invoke(ZumeConfig config);
 	}
 	
 	private static final int MAX_RETRIES = 5;
@@ -123,21 +124,43 @@ public class ZumeConfig {
 		}
 	}
 	
-	public static void create(final File configFile, final ConfigSetter setter) {		
-		ZumeConfig config = readFromFile(configFile);
-		
-		// write new options and comment updates to disk
-		config.writeToFile(configFile);
-		
-		setter.set(config);
+	private static ConfigConsumer consumer;
+	private static FileWatcher watcher;
+	private static File file;
+	
+	public void modify(ConfigConsumer consumer) throws ConcurrentModificationException, InterruptedException {
+		if (!watcher.lock(500L))
+			throw new ConcurrentModificationException();
 		
 		try {
-			FileWatcher.onFileChange(configFile.toPath(), () -> {				
+			consumer.invoke(this);
+			this.writeToFile(file);
+		} finally {
+			watcher.unlock();
+		}
+    }
+	
+	public static void init(final File configFile, final ConfigConsumer configConsumer) {
+		if (consumer != null)
+			throw new AssertionError("Config already initialized!");
+		
+		consumer = configConsumer;
+		file = configFile;
+		
+		ZumeConfig config = readFromFile(file);
+		
+		// write new options and comment updates to disk
+		config.writeToFile(file);
+		
+		consumer.invoke(config);
+		
+		try {
+			watcher = FileWatcher.onFileChange(file.toPath(), () -> {				
 				Zume.LOGGER.info("Reloading config...");
 				
-				final ZumeConfig newConfig = readFromFile(configFile);
+				final ZumeConfig newConfig = readFromFile(file);
 				
-				setter.set(newConfig);
+				consumer.invoke(newConfig);
 			});
 		} catch (IOException e) {
 			throw new RuntimeException(e);
