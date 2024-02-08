@@ -71,8 +71,7 @@ allprojects {
 		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
-		maven {
-			url = uri("https://api.modrinth.com/maven")
+		maven("https://api.modrinth.com/maven") {
 			content {
 				includeGroup("maven.modrinth")
 			}
@@ -442,8 +441,8 @@ afterEvaluate {
 			
 			avatarUrl = "https://github.com/Nolij/Zume/raw/master/common/src/main/resources/icon_large.png"
 			
-			content = changelog.map {
-				"# Zume ${"mod_version"()} has been released!\nChangelog: ```md\n${it}\n```"
+			content = changelog.map { changelog -> 
+				"# Zume ${"mod_version"()} has been released!\nChangelog: ```md\n${changelog}\n```"
 			}
 			
 			setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
