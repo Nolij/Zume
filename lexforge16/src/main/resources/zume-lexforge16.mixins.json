@@ -5,9 +5,9 @@
 	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"MouseHandlerMixin"
 	],
 	"client": [
+		"MouseHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

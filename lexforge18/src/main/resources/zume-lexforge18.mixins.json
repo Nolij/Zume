@@ -5,10 +5,10 @@
 	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"GameRendererMixin",
-		"MouseHandlerMixin"
 	],
 	"client": [
+		"GameRendererMixin",
+		"MouseHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

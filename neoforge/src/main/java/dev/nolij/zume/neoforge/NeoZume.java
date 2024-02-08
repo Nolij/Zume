@@ -22,7 +22,6 @@ import net.neoforged.neoforge.event.TickEvent;
 import java.io.File;
 
 @Mod(Zume.MOD_ID)
-@OnlyIn(Dist.CLIENT)
 public class NeoZume implements IZumeImplementation {
 	
 	public NeoZume(IEventBus modEventBus) {

@@ -25,7 +25,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 
 @Mod(Zume.MOD_ID)
-@OnlyIn(Dist.CLIENT)
 public class LexZume implements IZumeImplementation {
 	
 	private final Minecraft minecraft;
