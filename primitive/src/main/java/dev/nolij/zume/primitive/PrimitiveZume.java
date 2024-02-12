@@ -18,6 +18,7 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 		Zume.LOGGER.info("Loading Primitive Zume...");
 		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
+		if (Zume.disabled) return;
 		
 		this.minecraft = MinecraftAccessor.getInstance();
 	}

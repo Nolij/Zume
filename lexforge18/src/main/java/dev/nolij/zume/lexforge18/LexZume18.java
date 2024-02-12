@@ -25,14 +25,7 @@ public class LexZume18 implements IZumeImplementation {
 	public LexZume18() {
 		Zume.LOGGER.info("Loading LexZume18...");
 		
-		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
-			ClientRegistry.registerKeyBinding(keyBind.value);
-		}
-		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
-		
-		MinecraftForge.EVENT_BUS.addListener(this::render);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		this.minecraft = Minecraft.getInstance();
 		
 		ModLoadingContext.get().registerExtensionPoint(
 			ConfigGuiHandler.ConfigGuiFactory.class,
@@ -46,7 +39,15 @@ public class LexZume18 implements IZumeImplementation {
 				}
 			})));
 		
-		this.minecraft = Minecraft.getInstance();
+		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		if (Zume.disabled) return;
+		
+		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
+			ClientRegistry.registerKeyBinding(keyBind.value);
+		}
+		
+		MinecraftForge.EVENT_BUS.addListener(this::render);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
 	@Override

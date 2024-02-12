@@ -26,16 +26,17 @@ import java.io.File;
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeImplementation {
 	
-	private final Minecraft minecraft;
+	private Minecraft minecraft;
 	
 	public VintageZume() {
 		Zume.LOGGER.info("Loading Vintage Zume...");
 		
+		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
+		if (Zume.disabled) return;
+		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			ClientRegistry.registerKeyBinding(keyBind.value);
 		}
-		
-		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
 		
 		MinecraftForge.EVENT_BUS.register(this);
 		

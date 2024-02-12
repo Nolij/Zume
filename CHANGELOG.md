@@ -1,4 +1,5 @@
 - fixed obscure bug
 - added config modification API (should enable other mods to make a proper config screen for Zume)
+- added disable option (for modpacks containing mods that JiJ Zume)
 - made Zume not cause a crash if used on servers (to be clear, there is no reason to use Zume on a server, and absolutely no support will ever be provided for bugs caused by using Zume on a server)
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience

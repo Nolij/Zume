@@ -17,6 +17,7 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		Zume.LOGGER.info("Loading Legacy Zume...");
 		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
+		if (Zume.disabled) return;
 		
 		this.minecraftClient = MinecraftClient.getInstance();
 	}

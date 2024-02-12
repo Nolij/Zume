@@ -27,14 +27,6 @@ public class NeoZume implements IZumeImplementation {
 	public NeoZume(IEventBus modEventBus) {
 		Zume.LOGGER.info("Loading NeoZume...");
 		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
-		
-		modEventBus.addListener(this::registerKeyBindings);
-		NeoForge.EVENT_BUS.addListener(this::render);
-		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
-		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
-		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
-		
 		ModLoadingContext.get().registerExtensionPoint(
 			ConfigScreenHandler.ConfigScreenFactory.class,
 			() -> new ConfigScreenHandler.ConfigScreenFactory(((minecraft, parent) -> new Screen(Component.empty()) {
@@ -43,9 +35,18 @@ public class NeoZume implements IZumeImplementation {
 					assert minecraft != null;
 					
 					Zume.openConfigFile();
-                    minecraft.setScreen(parent);
+					minecraft.setScreen(parent);
 				}
 			})));
+		
+		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		if (Zume.disabled) return;
+		
+		modEventBus.addListener(this::registerKeyBindings);
+		NeoForge.EVENT_BUS.addListener(this::render);
+		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
+		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
+		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
 	@Override

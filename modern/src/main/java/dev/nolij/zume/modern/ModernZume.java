@@ -15,11 +15,12 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	public void onInitializeClient() {
 		Zume.LOGGER.info("Loading Modern Zume...");
 		
+		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
+		if (Zume.disabled) return;
+		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
 		}
-		
-		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
 		
 		this.minecraftClient = MinecraftClient.getInstance();
 	}

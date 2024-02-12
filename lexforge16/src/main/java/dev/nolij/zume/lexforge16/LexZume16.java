@@ -27,21 +27,22 @@ public class LexZume16 implements IZumeImplementation {
 	public LexZume16() {
 		Zume.LOGGER.info("Loading LexZume16...");
 		
-		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
-			ClientRegistry.registerKeyBinding(keyBind.value);
-		}
-		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
-		
-		MinecraftForge.EVENT_BUS.addListener(this::render);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		this.minecraft = Minecraft.getInstance();
 		
 		ModLoadingContext.get().registerExtensionPoint(
 			ExtensionPoint.CONFIGGUIFACTORY,
 			() -> (minecraft, parent) -> new ConfigScreen(new TextComponent(""), minecraft, parent));
 		
-		this.minecraft = Minecraft.getInstance();
+		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		if (Zume.disabled) return;
+		
+		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
+			ClientRegistry.registerKeyBinding(keyBind.value);
+		}
+		
+		MinecraftForge.EVENT_BUS.addListener(this::render);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
 	private static final class ConfigScreen extends Screen {

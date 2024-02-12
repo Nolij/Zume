@@ -97,6 +97,7 @@ public class Zume {
 	public static IZumeImplementation implementation;
 	public static ZumeConfig config;
 	public static File configFile;
+	public static boolean disabled = false;
 	//endregion
 	
 	//region Private Members
@@ -136,6 +137,8 @@ public class Zume {
 			inverseSmoothness = 1D / Zume.config.zoomSmoothnessMs;
 			toggle = false;
 		});
+		
+		disabled = config.disable;
 	}
 	//endregion
 	
@@ -235,9 +238,8 @@ public class Zume {
 	 * {@return The new cinematic camera state, transformed by Zume}
 	 */
 	public static boolean transformCinematicCamera(final boolean original) {
-		if (Zume.config.enableCinematicZoom && isEnabled()) {
+		if (Zume.config.enableCinematicZoom && isEnabled())
 			return true;
-		}
 		
 		return original;
 	}
@@ -282,7 +284,7 @@ public class Zume {
 	 * Returns `true` if Zume is active.
 	 */
 	public static boolean isEnabled() {
-		if (implementation == null)
+		if (disabled || implementation == null)
 			return false;
 		
 		if (config.toggleMode)
@@ -299,6 +301,9 @@ public class Zume {
 	 * {@linkplain Zume#isEnabled()}.
 	 */
 	public static boolean isFOVModified() {
+		if (disabled)
+			return false;
+		
 		return isEnabled() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
 	}
 	
@@ -308,6 +313,9 @@ public class Zume {
 	 * via use of {@linkplain Zume#interceptScroll(int)}.
 	 */
 	public static void render() {
+		if (disabled)
+			return;
+		
 		final long timestamp = System.currentTimeMillis();
 		final boolean held = implementation.isZoomPressed();
 		final boolean zooming = isEnabled();

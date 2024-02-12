@@ -32,11 +32,12 @@ public class ArchaicZume implements IZumeImplementation {
 	public void preInit(FMLPreInitializationEvent event) {
 		Zume.LOGGER.info("Loading Archaic Zume...");
 		
+		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
+		if (Zume.disabled) return;
+		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			ClientRegistry.registerKeyBinding(keyBind.value);
 		}
-		
-		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
 		
 		MinecraftForge.EVENT_BUS.register(this);
 		

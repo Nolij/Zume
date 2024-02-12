@@ -32,12 +32,7 @@ public class LexZume implements IZumeImplementation {
 	public LexZume() {
 		Zume.LOGGER.info("Loading LexZume...");
 		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
-		
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);
-		MinecraftForge.EVENT_BUS.addListener(this::render);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		this.minecraft = Minecraft.getInstance();
 		
 		ModLoadingContext.get().registerExtensionPoint(
 			ConfigScreenHandler.ConfigScreenFactory.class,
@@ -47,11 +42,17 @@ public class LexZume implements IZumeImplementation {
 					assert minecraft != null;
 					
 					Zume.openConfigFile();
-                    minecraft.setScreen(parent);
+					minecraft.setScreen(parent);
 				}
 			})));
 		
-		this.minecraft = Minecraft.getInstance();
+		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		if (Zume.disabled) return;
+		
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);
+		MinecraftForge.EVENT_BUS.addListener(this::render);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 	}
 	
 	@Override

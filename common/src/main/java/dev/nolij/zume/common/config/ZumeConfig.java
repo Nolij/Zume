@@ -9,7 +9,6 @@ import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.common.util.FileWatcher;
 
 import java.io.*;
-import java.util.ConcurrentModificationException;
 
 @NonnullByDefault
 public class ZumeConfig {
@@ -75,6 +74,12 @@ public class ZumeConfig {
 		\nMinimum zoom FOV.
 		DEFAULT: `1.0`""")
 	public double minFOV = 1D;
+	
+	@Comment("""
+		\nIf `true`, the mod will be disabled (on some platforms, key binds will still show in game options; they won't do anything if this is set to `true`).
+		Requires re-launch to take effect.
+		DEFAULT: `false`""")
+	public boolean disable = false;
 	
 	
 	@FunctionalInterface
@@ -161,6 +166,9 @@ public class ZumeConfig {
 				
 				consumer.invoke(newConfig);
 			});
+			
+			if (config.disable)
+				watcher.stop();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
