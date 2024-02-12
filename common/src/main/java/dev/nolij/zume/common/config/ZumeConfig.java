@@ -11,7 +11,7 @@ import dev.nolij.zume.common.util.FileWatcher;
 import java.io.*;
 
 @NonnullByDefault
-public class ZumeConfig {
+public class ZumeConfig implements Cloneable {
 	
 	@Comment("""
 		\nEnable Cinematic Camera while zooming.
@@ -133,15 +133,29 @@ public class ZumeConfig {
 	private static FileWatcher watcher;
 	private static File file;
 	
-	public void modify(ConfigConsumer modifier) throws InterruptedException {
+	@Override
+	public ZumeConfig clone() {
+		try {
+			return (ZumeConfig) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError(e);
+		}
+	}
+	
+	public static void replace(final ZumeConfig newConfig) throws InterruptedException {
 		try {
 			watcher.lock();
-			modifier.invoke(this);
-			this.writeToFile(file);
-			consumer.invoke(this);
+			newConfig.writeToFile(file);
+			consumer.invoke(newConfig);
 		} finally {
 			watcher.unlock();
 		}
+	}
+	
+	public void modify(ConfigConsumer modifier) throws InterruptedException {
+		final ZumeConfig newConfig = this.clone();
+		modifier.invoke(newConfig);
+		replace(newConfig);
     }
 	
 	public static void init(final File configFile, final ConfigConsumer configConsumer) {
