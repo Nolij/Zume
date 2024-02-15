@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 
-@Mixin(Mouse.class)
+@Mixin(value = Mouse.class, priority = 500)
 public class MouseMixin {
 	
 	@Dynamic
