@@ -357,6 +357,24 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 }
 
 afterEvaluate {
+	publishing {
+		publications {
+			create<MavenPublication>("archives_base_name"()) {
+				artifact(tasks.shadowJar)
+				uniminedImpls.forEach { implName ->
+					artifact(project(":${implName}").tasks.named("platformJar"))
+				}
+			}
+		}
+	}
+
+	tasks.withType<AbstractPublishToMaven> {
+		dependsOn(tasks.shadowJar)
+		uniminedImpls.forEach { implName ->
+			dependsOn(project(":${implName}").tasks.named("platformJar"))
+		}
+	}
+	
 	publishMods {
 		file = tasks.shadowJar.get().archiveFile
 		type = STABLE
