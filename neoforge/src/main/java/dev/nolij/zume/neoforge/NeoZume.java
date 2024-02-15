@@ -89,8 +89,7 @@ public class NeoZume implements IZumeImplementation {
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
 		final int scrollAmount = (int) event.getScrollDeltaY();
-		if (scrollAmount != 0 &&
-			Zume.interceptScroll(scrollAmount)) {
+		if (Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

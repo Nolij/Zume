@@ -73,8 +73,7 @@ public class LexZume18 implements IZumeImplementation {
 	
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
-		if (scrollAmount != 0 &&
-			Zume.interceptScroll(scrollAmount)) {
+		if (Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

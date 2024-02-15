@@ -273,7 +273,7 @@ public class Zume {
 	 * {@return `true` if the invoker should prevent further handling of this scroll event}
 	 */
 	public static boolean interceptScroll(final int scrollDelta) {
-        if (!shouldCancelScroll())
+        if (!shouldCancelScroll() || scrollDelta == 0)
             return false;
 		
         Zume.scrollDelta += sign(scrollDelta);

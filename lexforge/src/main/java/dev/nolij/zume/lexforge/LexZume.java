@@ -117,8 +117,7 @@ public class LexZume implements IZumeImplementation {
         } catch (Throwable e) {
             throw new AssertionError(e);
         }
-        if (scrollAmount != 0 &&
-			Zume.interceptScroll(scrollAmount)) {
+        if (Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

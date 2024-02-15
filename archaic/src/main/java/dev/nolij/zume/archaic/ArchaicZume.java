@@ -76,8 +76,7 @@ public class ArchaicZume implements IZumeImplementation {
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) {
 		final int scrollAmount = mouseEvent.dwheel;
-		if (scrollAmount != 0 &&
-			Zume.interceptScroll(scrollAmount)) {
+		if (Zume.interceptScroll(scrollAmount)) {
 			mouseEvent.setCanceled(true);
 		}
 	}
