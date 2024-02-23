@@ -228,7 +228,7 @@ public class Zume {
 			zoom *= zoom;
 		}
 		
-		return config.minFOV + ((Math.max(config.maxFOV, original) - config.minFOV) * zoom);
+		return config.minFOV + ((original - config.minFOV) * zoom);
 	}
 	
 	/**

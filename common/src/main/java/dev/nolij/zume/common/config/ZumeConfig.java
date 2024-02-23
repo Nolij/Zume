@@ -66,11 +66,6 @@ public class ZumeConfig implements Cloneable {
 	public boolean toggleMode = false;
 	
 	@Comment("""
-		\nMaximum zoom FOV.
-		DEFAULT: `60.0`""")
-	public double maxFOV = 60D;
-	
-	@Comment("""
 		\nMinimum zoom FOV.
 		DEFAULT: `1.0`""")
 	public double minFOV = 1D;
