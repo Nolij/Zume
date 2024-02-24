@@ -11,11 +11,12 @@ jobs:
                     distribution: temurin
                     java-version: 17
             -   name: Setup Gradle
-                uses: gradle/gradle-build-action@v2.4.2
+                uses: gradle/actions/setup-gradle@v3
                 with:
+                    cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
                     cache-read-only: true
             -   name: :build
-                run: ./gradlew build
+                run: ./gradlew build --configuration-cache
             -   name: Upload artifacts
                 uses: actions/upload-artifact@v3
                 with:
