@@ -9,6 +9,7 @@ import net.minecraft.text.*;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
@@ -49,9 +50,11 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 		final MethodHandles.Lookup lookup = MethodHandles.lookup();
 		MethodHandle methodHandle = null;
         try {
-			final Constructor<?> literalTextInit = LiteralTextContent.class.getConstructor(String.class);
-			methodHandle = lookup.unreflectConstructor(literalTextInit);
-        } catch (NoSuchMethodException | IllegalAccessException ignored) {}
+			final Class<?> literalTextContent = Class.forName("net.minecraft.class_2585");
+			final Constructor<?> literalTextInit = literalTextContent.getConstructor(String.class);
+			methodHandle = lookup.unreflectConstructor(literalTextInit)
+				.asType(MethodType.methodType(Text.class, String.class));
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ignored) {}
         
         LITERALTEXT_INIT = methodHandle;
     }
