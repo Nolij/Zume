@@ -1,5 +1,2 @@
-- improved compatibility on Fabric implementations with other mods hooking mouse scrolling
-- de-duplicated some logic
-- bumped Fabric Loader version
-- removed `maxFOV` config option (this hasn't really had much of an effect for several versions now, and it causes bugs on lower FOV values)
+- fixed Mod Menu integration on Fabric 20.3+
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
