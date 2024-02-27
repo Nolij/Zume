@@ -1,7 +1,7 @@
 package dev.nolij.zume.modern.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Mouse;
 import net.minecraft.entity.player.PlayerInventory;
