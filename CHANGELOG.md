@@ -1,2 +1,4 @@
 - fixed Mod Menu integration on Fabric 20.3+
+- fixed `NullPointerException` on Archaic Forge mod incompatibility screen
+- release JARs are now properly compressed (thanks @rdh)
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
