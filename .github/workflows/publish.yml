@@ -15,15 +15,8 @@ jobs:
                 with:
                     cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
                     cache-read-only: true
-            -   name: :build
-                run: ./gradlew build
-            -   name: Upload artifacts
-                uses: actions/upload-artifact@v3
-                with:
-                    name: zume
-                    path: "**/zume-*.jar"
             -   name: :publishMods
-                run: ./gradlew publishMods
+                run: ./gradlew publishMods -Prelease=true
                 env:
                     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
                     MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}

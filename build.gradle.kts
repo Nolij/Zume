@@ -1,6 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
@@ -23,6 +24,8 @@ plugins {
 operator fun String.invoke(): String {
 	return (rootProject.properties[this] as String?)!!
 }
+
+val isRelease = rootProject.hasProperty("release")
 
 group = "maven_group"()
 version = "mod_version"()
@@ -376,14 +379,14 @@ afterEvaluate {
 	}
 	
 	publishMods {
-		file = tasks.shadowJar.get().archiveFile
+		file = compressJar.get().getOutputJar()
 		type = STABLE
 		displayName = "mod_version"()
 		version = "mod_version"()
 		changelog = file("CHANGELOG.md").readText()
 		
 		modLoaders.addAll("fabric", "forge", "neoforge")
-		dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
+		dryRun = !isRelease
 		
 		github {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
@@ -465,5 +468,9 @@ afterEvaluate {
 			
 			setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
 		}
+	}
+	
+	tasks.withType<PublishModTask> {
+		dependsOn(compressJar)
 	}
 }
