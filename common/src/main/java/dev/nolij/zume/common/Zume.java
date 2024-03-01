@@ -301,7 +301,7 @@ public class Zume {
 	 * {@linkplain Zume#isEnabled()}.
 	 */
 	public static boolean isFOVModified() {
-		if (disabled)
+		if (disabled || implementation == null)
 			return false;
 		
 		return isEnabled() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
@@ -313,7 +313,7 @@ public class Zume {
 	 * via use of {@linkplain Zume#interceptScroll(int)}.
 	 */
 	public static void render() {
-		if (disabled)
+		if (disabled || implementation == null)
 			return;
 		
 		final long timestamp = System.currentTimeMillis();
