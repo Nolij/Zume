@@ -1,4 +1,5 @@
-- fixed Mod Menu integration on Fabric 20.3+
-- fixed `NullPointerException` on Archaic Forge mod incompatibility screen
-- release JARs are now properly compressed (thanks @rdh)
+- added third-person zoom (zoom behaviour will be different in third-person)
+- bumped minimum NeoForge version for NeoZume to 20.4.195
+- fixed Mod Menu config bug on Fabric 16.5
+- user no longer needs to press escape after opening config from Mod Menu on Fabric 14.4
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
