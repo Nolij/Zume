@@ -19,21 +19,39 @@ public class EntityRendererMixin {
 	
 	@Inject(method = "getFOVModifier", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.isFOVModified()) {
+		if (Zume.shouldHookFOV()) {
 			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}
 
-	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, at = @At(value = "FIELD",
-		target = "Lnet/minecraft/client/settings/GameSettings;smoothCamera:Z"))
+	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, 
+		at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;smoothCamera:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
 		return Zume.transformCinematicCamera(original);
 	}
 
-	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, at = @At(value = "FIELD", 
-		target = "Lnet/minecraft/client/settings/GameSettings;mouseSensitivity:F"))
+	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, 
+		at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;mouseSensitivity:F"))
 	public float zume$updateMouse$mouseSensitivity(float original) {
 		return (float) Zume.transformMouseSensitivity(original);
+	}
+	
+	@ModifyExpressionValue(method = "orientCamera", 
+		at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/EntityRenderer;thirdPersonDistance:F"))
+	public float zume$orientCamera$thirdPersonDistance(float original) {
+		if (Zume.shouldHook())
+			return (float) Zume.transformThirdPersonDistance(original);
+		
+		return original;
+	}
+	
+	@ModifyExpressionValue(method = "orientCamera", 
+		at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/EntityRenderer;thirdPersonDistanceTemp:F"))
+	public float zume$orientCamera$thirdPersonDistanceTemp(float original) {
+		if (Zume.shouldHook())
+			return (float) Zume.transformThirdPersonDistance(original);
+		
+		return original;
 	}
 
 }

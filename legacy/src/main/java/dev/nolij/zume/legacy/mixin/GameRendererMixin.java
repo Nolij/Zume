@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -24,7 +25,7 @@ public class GameRendererMixin {
 	
 	@Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
 	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.isFOVModified()) {
+		if (Zume.shouldHookFOV()) {
 			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}
@@ -45,6 +46,14 @@ public class GameRendererMixin {
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;sensitivity:F"))
 	public float zume$mouseSensitivity(float original) {
 		return (float) Zume.transformMouseSensitivity(original);
+	}
+	
+	@ModifyVariable(method = "transformCamera", at = @At("STORE"), ordinal = 3)
+	public double zume$transformCamera$thirdPersonDistance(double original) {
+		if (Zume.shouldHook())
+			return Zume.transformThirdPersonDistance(original);
+		
+		return original;
 	}
 	
 }

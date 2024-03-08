@@ -71,6 +71,18 @@ public class ZumeConfig implements Cloneable {
 	public double minFOV = 1D;
 	
 	@Comment("""
+        \nMaximum third-person zoom distance (in blocks).
+        Set to `0.0` to disable third-person zoom.
+        DEFAULT: `15.0`""")
+	public double maxThirdPersonZoomDistance = 15D;
+	
+	@Comment("""
+        \nMinimum third-person zoom distance (in blocks).
+        Set to `0.0` to mimic vanilla.
+        DEFAULT: `0.5`""")
+	public double minThirdPersonZoomDistance = 0.5D;
+	
+	@Comment("""
 		\nIf `true`, the mod will be disabled (on some platforms, key binds will still show in game options; they won't do anything if this is set to `true`).
 		Requires re-launch to take effect.
 		DEFAULT: `false`""")

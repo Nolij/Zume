@@ -12,10 +12,7 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.ConfigScreenHandler;
-import net.neoforged.neoforge.client.event.CalculatePlayerTurnEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 
@@ -24,8 +21,12 @@ import java.io.File;
 @Mod(Zume.MOD_ID)
 public class NeoZume implements IZumeImplementation {
 	
+	private final Minecraft minecraft;
+	
 	public NeoZume(IEventBus modEventBus) {
 		Zume.LOGGER.info("Loading NeoZume...");
+		
+		this.minecraft = Minecraft.getInstance();
 		
 		ModLoadingContext.get().registerExtensionPoint(
 			ConfigScreenHandler.ConfigScreenFactory.class,
@@ -47,6 +48,7 @@ public class NeoZume implements IZumeImplementation {
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateDetachedCameraDistance);
 	}
 	
 	@Override
@@ -82,7 +84,7 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
-		if (Zume.isFOVModified()) {
+		if (Zume.shouldHookFOV()) {
 			event.setFOV(Zume.transformFOV(event.getFOV()));
 		}
 	}
@@ -96,6 +98,12 @@ public class NeoZume implements IZumeImplementation {
 		final int scrollAmount = (int) event.getScrollDeltaY();
 		if (Zume.interceptScroll(scrollAmount)) {
 			event.setCanceled(true);
+		}
+	}
+	
+	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
+		if (Zume.shouldHook()) {
+			event.setDistance(Zume.transformThirdPersonDistance(event.getDistance()));
 		}
 	}
 	

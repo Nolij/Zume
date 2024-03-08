@@ -1,6 +1,7 @@
 package dev.nolij.zume.common;
 
 import dev.nolij.zume.common.config.ZumeConfig;
+import dev.nolij.zume.common.util.LerpedDouble;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -101,11 +102,8 @@ public class Zume {
 	//endregion
 	
 	//region Private Members
-	private static double inverseSmoothness = 1D;
-	private static double fromZoom = -1D;
-	private static double zoom = 1D;
-	private static long tweenStart = 0L;
-	private static long tweenEnd = 0L;
+	private static final LerpedDouble zoom = new LerpedDouble(1D);
+	private static final LerpedDouble thirdPersonZoomMinimum = new LerpedDouble();
 	private static int scrollDelta = 0;
 	private static boolean toggle = false;
 	private static boolean wasHeld = false;
@@ -134,7 +132,8 @@ public class Zume {
 		
 		ZumeConfig.init(configFile, config -> {
 			Zume.config = config;
-			inverseSmoothness = 1D / Zume.config.zoomSmoothnessMs;
+			zoom.update(config.zoomSmoothnessMs, config.easingExponent);
+			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.easingExponent);
 			toggle = false;
 		});
 		
@@ -144,43 +143,28 @@ public class Zume {
 	
 	//region Zoom Mutation Methods
 	private static double getZoom() {
-		if (tweenEnd != 0L && config.zoomSmoothnessMs != 0) {
-			final long timestamp = System.currentTimeMillis();
-			
-			if (tweenEnd >= timestamp) {
-				final long delta = timestamp - tweenStart;
-				final double progress = 1 - delta * inverseSmoothness;
-				
-				var easedProgress = progress;
-				for (var i = 1; i < config.easingExponent; i++)
-					easedProgress *= progress;
-				easedProgress = 1 - easedProgress;
-				
-				return fromZoom + ((zoom - fromZoom) * easedProgress);
-			}
-		}
-		
-		return zoom;
+		return zoom.getLerped();
 	}
 	
 	private static void setZoom(final double targetZoom) {
-		if (config.zoomSmoothnessMs == 0) {
-			setZoomNoTween(targetZoom);
-			return;
-		}
-		
-		final double currentZoom = getZoom();
-		tweenStart = System.currentTimeMillis();
-		tweenEnd = tweenStart + config.zoomSmoothnessMs;
-		fromZoom = currentZoom;
-		zoom = clamp(targetZoom);
+		zoom.set(clamp(targetZoom));
 	}
 	
-	private static void setZoomNoTween(final double targetZoom) {
-		tweenStart = 0L;
-		tweenEnd = 0L;
-		fromZoom = -1D;
-		zoom = clamp(targetZoom);
+	private static void onZoomActivate() {
+		implementation.onZoomActivate();
+		setZoom(switch (implementation.getCameraPerspective()) {
+            case FIRST_PERSON -> config.defaultZoom;
+            case THIRD_PERSON -> 0D;
+            case THIRD_PERSON_FLIPPED -> 1D;
+        });
+		if (config.minThirdPersonZoomDistance > 0)
+			thirdPersonZoomMinimum.set(LerpedDouble.PLACEHOLDER, config.minThirdPersonZoomDistance);
+	}
+	
+	private static void onZoomDeactivate() {
+		setZoom(1D);
+		if (config.minThirdPersonZoomDistance > 0)
+			thirdPersonZoomMinimum.set(config.minThirdPersonZoomDistance, LerpedDouble.PLACEHOLDER);
 	}
 	//endregion
 	
@@ -215,7 +199,7 @@ public class Zume {
 	}
 	
 	/**
-	 * ONLY INVOKE THIS METHOD WHEN {@linkplain Zume#isFOVModified()} RETURNS `true`. This check was explicitly excluded 
+	 * ONLY INVOKE THIS METHOD WHEN {@linkplain Zume#shouldHookFOV()} RETURNS `true`. This check was explicitly excluded 
 	 * for efficiency and for mixin compatibility. The {@linkplain IZumeImplementation} is responsible for this check.
 	 * 
 	 * @param original The unmodified FOV value
@@ -229,6 +213,29 @@ public class Zume {
 		}
 		
 		return config.minFOV + ((original - config.minFOV) * zoom);
+	}
+	
+	/**
+	 * This method assumes the perspective is third-person. If it is not, you will encounter bugs.
+	 * 
+	 * @param original The vanilla third-person camera distance
+	 * @return The new third-person camera distance
+	 */
+	public static double transformThirdPersonDistance(final double original) {
+		if (config.maxThirdPersonZoomDistance == 0)
+			return original;
+		
+		final double zoom = getZoom();
+		
+		thirdPersonZoomMinimum.fillPlaceholder(original);
+		final double min = config.minThirdPersonZoomDistance > 0 
+		                   ? Math.min(original, thirdPersonZoomMinimum.getLerped()) 
+		                   : original;
+		final double max = config.maxThirdPersonZoomDistance > 4 
+		                   ? original / 4D * config.maxThirdPersonZoomDistance 
+		                   : original;
+		
+		return min + ((max - min) * (1 - zoom));
 	}
 	
 	/**
@@ -251,7 +258,7 @@ public class Zume {
 	 * {@return The new mouse sensitivity, transformed by Zume}
 	 */
 	public static double transformMouseSensitivity(final double original) {
-		if (!isEnabled())
+		if (!isEnabled() || implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON)
 			return original;
 		
 		final double zoom = getZoom();
@@ -300,11 +307,15 @@ public class Zume {
 	 * determine whether the user's FOV and camera values should be hooked. For other scenarios, use
 	 * {@linkplain Zume#isEnabled()}.
 	 */
-	public static boolean isFOVModified() {
+	public static boolean shouldHook() {
 		if (disabled || implementation == null)
 			return false;
 		
-		return isEnabled() || (zoom == 1D && tweenEnd != 0L && System.currentTimeMillis() < tweenEnd);
+		return isEnabled() || zoom.isLerping();
+	}
+	
+	public static boolean shouldHookFOV() {
+		return shouldHook() && implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON;
 	}
 	
 	/**
@@ -325,24 +336,25 @@ public class Zume {
 		
 		if (zooming) {
 			if (!wasZooming) {
-				implementation.onZoomActivate();
-				setZoom(config.defaultZoom);
+				onZoomActivate();
 			}
 			
 			final long timeDelta = timestamp - prevRenderTimestamp;
 			
+			final double reversedFactor = implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON ? -1D : 1D;
+			
 			if (config.enableZoomScrolling && scrollDelta != 0) {
-				setZoom(zoom - scrollDelta * config.zoomSpeed * 4E-3D);
+				setZoom(zoom.getTarget() - reversedFactor * (scrollDelta * config.zoomSpeed * 4E-3D));
 			} else if (implementation.isZoomInPressed() ^ implementation.isZoomOutPressed()) {
 				final double interpolatedIncrement = config.zoomSpeed * 1E-4D * timeDelta;
 				
 				if (implementation.isZoomInPressed())
-					setZoom(zoom - interpolatedIncrement);
+					setZoom(zoom.getTarget() - reversedFactor * interpolatedIncrement);
 				else if (implementation.isZoomOutPressed())
-					setZoom(zoom + interpolatedIncrement);
+					setZoom(zoom.getTarget() + reversedFactor * interpolatedIncrement);
 			}
 		} else if (wasZooming) {
-			setZoom(1D);
+			onZoomDeactivate();
 		}
 		
 		scrollDelta = 0;

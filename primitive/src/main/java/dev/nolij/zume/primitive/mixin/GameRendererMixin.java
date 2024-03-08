@@ -19,7 +19,7 @@ public class GameRendererMixin {
 	
 	@Inject(method = "method_1848", at = @At("TAIL"), cancellable = true)
 	public void zume$getFov$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.isFOVModified()) {
+		if (Zume.shouldHookFOV()) {
 			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
 		}
 	}
@@ -32,6 +32,22 @@ public class GameRendererMixin {
 	@ModifyExpressionValue(method = "method_1844", at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;mouseSensitivity:F"))
 	public float zume$updateMouse$mouseSensitivity(float original) {
 		return (float) Zume.transformMouseSensitivity(original);
+	}
+	
+	@ModifyExpressionValue(method = "method_1851", at = @At(value = "FIELD", target = "Lnet/minecraft/class_555;field_2359:F"))
+	public float zume$transformCamera$thirdPersonDistance(float original) {
+		if (Zume.shouldHook())
+			return (float) Zume.transformThirdPersonDistance(original);
+		
+		return original;
+	}
+	
+	@ModifyExpressionValue(method = "method_1851", at = @At(value = "FIELD", target = "Lnet/minecraft/class_555;field_2360:F"))
+	public float zume$transformCamera$lastThirdPersonDistance(float original) {
+		if (Zume.shouldHook())
+			return (float) Zume.transformThirdPersonDistance(original);
+		
+		return original;
 	}
 	
 }
