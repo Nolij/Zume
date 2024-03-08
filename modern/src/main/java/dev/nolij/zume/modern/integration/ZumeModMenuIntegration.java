@@ -15,28 +15,41 @@ import java.util.function.Function;
 
 public class ZumeModMenuIntegration implements ModMenuApi {
 	
+	private static final MethodHandle LITERALTEXT_INIT;
+	
+	static {
+		final MethodHandles.Lookup lookup = MethodHandles.lookup();
+		
+		MethodHandle methodHandle = null;
+		
+		try {
+			final Class<?> literalTextContent = Class.forName("net.minecraft.class_2585");
+			final Constructor<?> literalTextInit = literalTextContent.getConstructor(String.class);
+			methodHandle = lookup.unreflectConstructor(literalTextInit)
+				.asType(MethodType.methodType(Text.class, String.class));
+		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ignored) {}
+		
+		LITERALTEXT_INIT = methodHandle;
+	}
+	
 	private static final class ModernZumeConfigScreen extends Screen {
-		
 		private final Screen parent;
-		private final boolean applyLegacyWorkarounds;
 		
-		private ModernZumeConfigScreen(Text arg, Screen parent, boolean applyLegacyWorkarounds) {
+		private ModernZumeConfigScreen(Text arg, Screen parent) {
 			super(arg);
 			this.parent = parent;
-			this.applyLegacyWorkarounds = applyLegacyWorkarounds;
-			
-			if (applyLegacyWorkarounds)
-				Zume.openConfigFile();
 		}
 		
 		@Override
 		public void init() {
-			if (!applyLegacyWorkarounds)
-				Zume.openConfigFile();
+			Zume.openConfigFile();
 			
 			MinecraftClient.getInstance().setScreen(parent);
 		}
 		
+		public void render(int mouseX, int mouseY, float delta) {
+			init();
+		}
 	}
 	
 	@Override
@@ -44,26 +57,11 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 		return Zume.MOD_ID;
 	}
 	
-	private static final MethodHandle LITERALTEXT_INIT;
-	
-	static {
-		final MethodHandles.Lookup lookup = MethodHandles.lookup();
-		MethodHandle methodHandle = null;
-        try {
-			final Class<?> literalTextContent = Class.forName("net.minecraft.class_2585");
-			final Constructor<?> literalTextInit = literalTextContent.getConstructor(String.class);
-			methodHandle = lookup.unreflectConstructor(literalTextInit)
-				.asType(MethodType.methodType(Text.class, String.class));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ignored) {}
-        
-        LITERALTEXT_INIT = methodHandle;
-    }
-	
 	@Override
 	public Function<Screen, ? extends Screen> getConfigScreenFactory() {
 		return (parent) -> {
             try {
-                return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invokeExact(""), parent, true);
+                return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invokeExact(""), parent);
             } catch (Throwable e) {
 				Zume.LOGGER.error("Error opening config screen: ", e);
 				return null;
@@ -73,7 +71,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return (parent) -> new ModernZumeConfigScreen(Text.literal(""), parent, false);
+		return (parent) -> new ModernZumeConfigScreen(Text.literal(""), parent);
 	}
 	
 }
