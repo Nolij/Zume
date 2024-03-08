@@ -1,5 +1,6 @@
 package dev.nolij.zume.legacy;
 
+import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.legacy.mixin.GameRendererAccessor;
@@ -35,6 +36,11 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	@Override
+	public CameraPerspective getCameraPerspective() {
+		return CameraPerspective.values()[minecraftClient.options.perspective];
 	}
 	
 	@Override

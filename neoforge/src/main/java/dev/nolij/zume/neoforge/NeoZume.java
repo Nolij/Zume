@@ -1,11 +1,11 @@
 package dev.nolij.zume.neoforge;
 
+import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
@@ -62,6 +62,11 @@ public class NeoZume implements IZumeImplementation {
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	@Override
+	public CameraPerspective getCameraPerspective() {
+		return CameraPerspective.values()[minecraft.options.getCameraType().ordinal()];
 	}
 	
 	private void registerKeyBindings(RegisterKeyMappingsEvent event) {

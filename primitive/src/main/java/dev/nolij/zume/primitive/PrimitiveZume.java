@@ -1,5 +1,6 @@
 package dev.nolij.zume.primitive;
 
+import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.primitive.mixin.GameRendererAccessor;
@@ -36,6 +37,11 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	@Override
+	public CameraPerspective getCameraPerspective() {
+		return minecraft.options.thirdPerson ? CameraPerspective.THIRD_PERSON : CameraPerspective.FIRST_PERSON;
 	}
 	
 	@Override

@@ -3,6 +3,7 @@ package dev.nolij.zume.archaic;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import dev.nolij.zume.archaic.mixin.EntityRendererAccessor;
+import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.Constants;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
@@ -57,6 +58,11 @@ public class ArchaicZume implements IZumeImplementation {
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	@Override
+	public CameraPerspective getCameraPerspective() {
+		return CameraPerspective.values()[minecraft.gameSettings.thirdPersonView];
 	}
 	
 	@Override

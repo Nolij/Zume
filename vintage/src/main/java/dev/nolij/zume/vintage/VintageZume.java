@@ -1,5 +1,6 @@
 package dev.nolij.zume.vintage;
 
+import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.Constants;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.vintage.mixin.EntityRendererAccessor;
@@ -56,6 +57,11 @@ public class VintageZume implements IZumeImplementation {
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	@Override
+	public CameraPerspective getCameraPerspective() {
+		return CameraPerspective.values()[minecraft.gameSettings.thirdPersonView];
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package dev.nolij.zume.lexforge16;
 
+import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
@@ -78,6 +79,11 @@ public class LexZume16 implements IZumeImplementation {
 	@Override
 	public boolean isZoomOutPressed() {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
+	}
+	
+	@Override
+	public CameraPerspective getCameraPerspective() {
+		return CameraPerspective.values()[minecraft.options.getCameraType().ordinal()];
 	}
 	
 	private void render(TickEvent.RenderTickEvent event) {

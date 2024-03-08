@@ -6,6 +6,8 @@ public interface IZumeImplementation {
 	boolean isZoomInPressed();
 	boolean isZoomOutPressed();
 	
+	CameraPerspective getCameraPerspective();
+	
 	default void onZoomActivate() {}
 	
 }
