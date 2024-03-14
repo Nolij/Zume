@@ -4,7 +4,6 @@ import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -25,7 +24,7 @@ import java.lang.reflect.Method;
 public class LexZume implements IZumeImplementation {
 	
 	public LexZume() {
-		if (FMLEnvironment.dist != Dist.CLIENT)
+		if (!FMLEnvironment.dist.isClient())
 			return;
 		
 		Zume.LOGGER.info("Loading LexZume...");

@@ -4,7 +4,6 @@ import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -20,7 +19,7 @@ import java.io.File;
 public class NeoZume implements IZumeImplementation {
 	
 	public NeoZume(IEventBus modEventBus) {
-		if (FMLEnvironment.dist != Dist.CLIENT)
+		if (!FMLEnvironment.dist.isClient())
 			return;
 		
 		Zume.LOGGER.info("Loading NeoZume...");
