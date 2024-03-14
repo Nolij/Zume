@@ -7,6 +7,21 @@ public enum EasingMethod {
 		public double apply(double value) {
 			return value;
 		}
+		
+		@Override
+		public double easeOut(double start, double end, double progress) {
+			return start + ((end - start) * progress);
+		}
+		
+		@Override
+		public double easeIn(double start, double end, double progress) {
+			return easeOut(start, end, progress);
+		}
+		
+		@Override
+		public double easeInOut(double start, double end, double progress) {
+			return easeOut(start, end, progress);
+		}
 	},
 	QUADRATIC {
 		@Override
