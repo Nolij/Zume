@@ -1,5 +1,7 @@
-- added third-person zoom (zoom behaviour will be different in third-person)
-- bumped minimum NeoForge version for NeoZume to 20.4.195
-- fixed Mod Menu config bug on Fabric 16.5
-- user no longer needs to press escape after opening config from Mod Menu on Fabric 14.4
+- refactored easing (again)
+- added easing to third-person zoom
+- buffed JAR compression
+- made `defaultZoom` config value more intuitive (`0.7` is now 70% zoom, not 30% zoom)
+- Zume should do nothing on servers now (hopefully)
+- performed Herobrine summoning ritual (thanks @basdxz)
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
