@@ -1,13 +1,13 @@
 package dev.nolij.zume.primitive.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.class_555;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(class_555.class)
 public class GameRendererMixin {
@@ -17,11 +17,12 @@ public class GameRendererMixin {
 		Zume.render();
 	}
 	
-	@Inject(method = "method_1848", at = @At("TAIL"), cancellable = true)
-	public void zume$getFov$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.shouldHookFOV()) {
-			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
-		}
+	@ModifyReturnValue(method = "method_1848", at = @At("TAIL"))
+	public float zume$getFov$TAIL(float original) {
+		if (Zume.shouldHookFOV())
+			return (float) Zume.transformFOV(original);
+		
+		return original;
 	}
 	
 	@ModifyExpressionValue(method = "method_1844", at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;cinematicMode:Z"))

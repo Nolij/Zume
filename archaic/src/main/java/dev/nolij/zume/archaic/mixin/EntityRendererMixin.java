@@ -1,13 +1,13 @@
 package dev.nolij.zume.archaic.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public class EntityRendererMixin {
@@ -17,11 +17,12 @@ public class EntityRendererMixin {
 		Zume.render();
 	}
 	
-	@Inject(method = "getFOVModifier", at = @At("TAIL"), cancellable = true)
-	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.shouldHookFOV()) {
-			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
-		}
+	@ModifyReturnValue(method = "getFOVModifier", at = @At("TAIL"))
+	public float zume$getFOV$TAIL(float original) {
+		if (Zume.shouldHookFOV())
+			return (float) Zume.transformFOV(original);
+		
+		return original;
 	}
 
 	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, 

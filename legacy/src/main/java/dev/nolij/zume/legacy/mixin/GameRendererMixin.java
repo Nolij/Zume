@@ -1,6 +1,7 @@
 package dev.nolij.zume.legacy.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.render.GameRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
@@ -9,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
@@ -23,11 +23,12 @@ public class GameRendererMixin {
 		Zume.render();
 	}
 	
-	@Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
-	public void zume$getFOV$TAIL(CallbackInfoReturnable<Float> cir) {
-		if (Zume.shouldHookFOV()) {
-			cir.setReturnValue((float) Zume.transformFOV(cir.getReturnValueF()));
-		}
+	@ModifyReturnValue(method = "getFov", at = @At("TAIL"))
+	public float zume$getFOV$TAIL(float original) {
+		if (Zume.shouldHookFOV())
+			return (float) Zume.transformFOV(original);
+		
+		return original;
 	}
 	
 	@Dynamic
