@@ -2,6 +2,7 @@ package dev.nolij.zume.common;
 
 import dev.nolij.zume.common.config.ZumeConfig;
 import dev.nolij.zume.common.easing.EasedDouble;
+import dev.nolij.zume.common.easing.EasingMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -152,17 +153,20 @@ public class Zume {
 	
 	private static void onZoomActivate() {
 		implementation.onZoomActivate();
+		
 		setZoom(switch (implementation.getCameraPerspective()) {
             case FIRST_PERSON -> 1 - config.defaultZoom;
             case THIRD_PERSON -> 0D;
             case THIRD_PERSON_FLIPPED -> 1D;
         });
+		
 		if (config.minThirdPersonZoomDistance > 0)
 			thirdPersonZoomMinimum.set(EasedDouble.PLACEHOLDER, config.minThirdPersonZoomDistance);
 	}
 	
 	private static void onZoomDeactivate() {
 		setZoom(1D);
+		
 		if (config.minThirdPersonZoomDistance > 0)
 			thirdPersonZoomMinimum.set(config.minThirdPersonZoomDistance, EasedDouble.PLACEHOLDER);
 	}
@@ -177,11 +181,12 @@ public class Zume {
 			try {
 				Desktop.getDesktop().open(configFile);
 			} catch (HeadlessException ignored) {
-				final String CONFIG_PATH = configFile.getCanonicalPath();
 				if (HOST_PLATFORM == HostPlatform.UNKNOWN) {
 					Zume.LOGGER.error("Error opening config file: Unsupported Platform!");
 					return;
 				}
+				
+				final String CONFIG_PATH = configFile.getCanonicalPath();
 				
 				final ProcessBuilder builder = new ProcessBuilder().inheritIO();
 				
@@ -253,12 +258,7 @@ public class Zume {
 		if (!isEnabled() || implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON)
 			return original;
 		
-		final double zoom = getZoom();
-		var result = original;
-		
-		result *= config.mouseSensitivityFloor + (zoom * (1 - config.mouseSensitivityFloor));
-		
-		return result;
+		return original * EasingMethod.LINEAR.easeOut(config.mouseSensitivityFloor, 1D, getZoom());
 	}
 	
 	public static boolean shouldCancelScroll() {
