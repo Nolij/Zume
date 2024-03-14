@@ -6,6 +6,7 @@ import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.annotation.NonnullByDefault;
 import blue.endless.jankson.api.SyntaxError;
 import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.common.easing.EasingMethod;
 import dev.nolij.zume.common.util.FileWatcher;
 
 import java.io.*;
@@ -43,17 +44,18 @@ public class ZumeConfig implements Cloneable {
 	public short zoomSmoothnessMs = 150;
 	
 	@Comment("""
-		\nSmoothing animation progress will be raised to this exponent for easing. Higher numbers will feel faster.
-		It is recommended to also increase `zoomSmoothnessMs` when increasing this.
-		Set to `1` to disable.
-		DEFAULT: `4`""")
-	public short easingExponent = 4;
+		\nThe algorithm responsible easing animations.
+		You should probably leave this at the default if you don't understand what it does.
+		OPTIONS: `LINEAR`, `QUADRATIC`, `QUARTIC`, `QUINTIC`
+		DEFAULT: `QUART`""")
+	public EasingMethod animationEasingMethod = EasingMethod.QUARTIC;
 	
 	@Comment("""
-		\nZoom percentage will be squared before being applied if `true`.
-		Makes differences in FOV more uniform. You should probably keep this on if you don't understand what it does.
-		DEFAULT: `true`""")
-	public boolean useQuadratic = true;
+		\nThe algorithm responsible for making differences in FOV more uniform.
+		You should probably leave this at the default if you don't understand what it does.
+		OPTIONS: `LINEAR`, `QUADRATIC`, `QUARTIC`, `QUINTIC`
+		DEFAULT: `QUADRATIC`""")
+	public EasingMethod zoomEasingMethod = EasingMethod.QUADRATIC;
 	
 	@Comment("""
 		\nDefault starting zoom percentage.

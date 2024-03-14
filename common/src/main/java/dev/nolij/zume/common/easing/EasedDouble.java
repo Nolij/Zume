@@ -1,13 +1,13 @@
-package dev.nolij.zume.common.util;
+package dev.nolij.zume.common.easing;
 
-public class LerpedDouble {
+public class EasedDouble {
 	
 	public static final double PLACEHOLDER = Double.NaN;
 	
 	private short duration;
 	private double inverseDuration;
 	
-	private short easingExponent;
+	private EasingMethod easingMethod;
 	
 	private double fromValue = PLACEHOLDER;
 	private double targetValue;
@@ -16,39 +16,25 @@ public class LerpedDouble {
 	private long endTimestamp = 0L;
 	
 	
-	public LerpedDouble() {
+	public EasedDouble() {
 		this(PLACEHOLDER);
 	}
 	
-	public LerpedDouble(final double value) {
+	public EasedDouble(final double value) {
 		this.targetValue = value;
 	}
 	
-	private double easeProgress(final double inversedProgress) {
-		var easedProgress = inversedProgress;
-		
-		for (int i = 0; i < easingExponent; i++) {
-			easedProgress *= inversedProgress;
-		}
-		
-		return 1 - easedProgress;
-	}
-	
-	private double lerp(final double start, final double end, final double progress) {
-		return start + ((end - start) * easeProgress(1 - progress * inverseDuration));
-	}
-	
-	public void update(final short duration, final short easingExponent) {
+	public void update(final short duration, final EasingMethod easingMethod) {
 		this.duration = duration;
 		this.inverseDuration = 1D / duration;
-		this.easingExponent = easingExponent;
+		this.easingMethod = easingMethod;
 	}
 	
-	public double getLerped() {
-		if (isLerping()) {
+	public double getEased() {
+		if (isEasing()) {
 			final long delta = System.currentTimeMillis() - startTimestamp;
 			
-			return lerp(fromValue, targetValue, delta);
+			return easingMethod.easeIn(fromValue, targetValue, delta * inverseDuration);
 		}
 		
 		return targetValue;
@@ -68,7 +54,7 @@ public class LerpedDouble {
 	public void setInstant(double target) {
 		this.startTimestamp = 0L;
 		this.endTimestamp = 0L;
-		this.fromValue = -1D;
+		this.fromValue = PLACEHOLDER;
 		this.targetValue = target;
 	}
 	
@@ -85,10 +71,10 @@ public class LerpedDouble {
 	}
 	
 	public void set(double target) {		
-		set(getLerped(), target);
+		set(getEased(), target);
 	}
 	
-	public boolean isLerping() {
+	public boolean isEasing() {
 		return duration != 0 && endTimestamp != 0L && System.currentTimeMillis() < endTimestamp;
 	}
 	

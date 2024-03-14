@@ -1,7 +1,7 @@
 package dev.nolij.zume.common;
 
 import dev.nolij.zume.common.config.ZumeConfig;
-import dev.nolij.zume.common.util.LerpedDouble;
+import dev.nolij.zume.common.easing.EasedDouble;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -102,8 +102,8 @@ public class Zume {
 	//endregion
 	
 	//region Private Members
-	private static final LerpedDouble zoom = new LerpedDouble(1D);
-	private static final LerpedDouble thirdPersonZoomMinimum = new LerpedDouble();
+	private static final EasedDouble zoom = new EasedDouble(1D);
+	private static final EasedDouble thirdPersonZoomMinimum = new EasedDouble();
 	private static int scrollDelta = 0;
 	private static boolean toggle = false;
 	private static boolean wasHeld = false;
@@ -132,8 +132,8 @@ public class Zume {
 		
 		ZumeConfig.init(configFile, config -> {
 			Zume.config = config;
-			zoom.update(config.zoomSmoothnessMs, config.easingExponent);
-			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.easingExponent);
+			zoom.update(config.zoomSmoothnessMs, config.animationEasingMethod);
+			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.animationEasingMethod);
 			toggle = false;
 		});
 		
@@ -143,7 +143,7 @@ public class Zume {
 	
 	//region Zoom Mutation Methods
 	private static double getZoom() {
-		return zoom.getLerped();
+		return zoom.getEased();
 	}
 	
 	private static void setZoom(final double targetZoom) {
@@ -153,18 +153,18 @@ public class Zume {
 	private static void onZoomActivate() {
 		implementation.onZoomActivate();
 		setZoom(switch (implementation.getCameraPerspective()) {
-            case FIRST_PERSON -> config.defaultZoom;
+            case FIRST_PERSON -> 1 - config.defaultZoom;
             case THIRD_PERSON -> 0D;
             case THIRD_PERSON_FLIPPED -> 1D;
         });
 		if (config.minThirdPersonZoomDistance > 0)
-			thirdPersonZoomMinimum.set(LerpedDouble.PLACEHOLDER, config.minThirdPersonZoomDistance);
+			thirdPersonZoomMinimum.set(EasedDouble.PLACEHOLDER, config.minThirdPersonZoomDistance);
 	}
 	
 	private static void onZoomDeactivate() {
 		setZoom(1D);
 		if (config.minThirdPersonZoomDistance > 0)
-			thirdPersonZoomMinimum.set(config.minThirdPersonZoomDistance, LerpedDouble.PLACEHOLDER);
+			thirdPersonZoomMinimum.set(config.minThirdPersonZoomDistance, EasedDouble.PLACEHOLDER);
 	}
 	//endregion
 	
@@ -206,13 +206,7 @@ public class Zume {
 	 * {@return The new FOV transformed by Zume}
 	 */
 	public static double transformFOV(final double original) {
-		var zoom = getZoom();
-		
-		if (config.useQuadratic) {
-			zoom *= zoom;
-		}
-		
-		return config.minFOV + ((original - config.minFOV) * zoom);
+		return config.zoomEasingMethod.easeOut(config.minFOV, original, getZoom());
 	}
 	
 	/**
@@ -225,17 +219,15 @@ public class Zume {
 		if (config.maxThirdPersonZoomDistance == 0)
 			return original;
 		
-		final double zoom = getZoom();
-		
 		thirdPersonZoomMinimum.fillPlaceholder(original);
 		final double min = config.minThirdPersonZoomDistance > 0 
-		                   ? Math.min(original, thirdPersonZoomMinimum.getLerped()) 
+		                   ? Math.min(original, thirdPersonZoomMinimum.getEased()) 
 		                   : original;
 		final double max = config.maxThirdPersonZoomDistance > 4 
 		                   ? original / 4D * config.maxThirdPersonZoomDistance 
 		                   : original;
 		
-		return min + ((max - min) * (1 - zoom));
+		return config.zoomEasingMethod.easeOut(min, max, 1 - getZoom());
 	}
 	
 	/**
@@ -311,7 +303,7 @@ public class Zume {
 		if (disabled || implementation == null)
 			return false;
 		
-		return isEnabled() || zoom.isLerping();
+		return isEnabled() || zoom.isEasing();
 	}
 	
 	public static boolean shouldHookFOV() {
