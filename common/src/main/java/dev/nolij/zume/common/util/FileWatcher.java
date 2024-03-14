@@ -8,7 +8,6 @@ import dev.nolij.zume.common.Zume;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 public class FileWatcher {
 	
@@ -27,7 +26,6 @@ public class FileWatcher {
 	public static FileWatcher onFileChange(Path file, Callback callback) throws IOException {
 		final FileWatcher watcher = new FileWatcher();
 		watcher.start(file, callback);
-		Runtime.getRuntime().addShutdownHook(new Thread(watcher::stop));
 		
 		return watcher;
 	}
@@ -98,6 +96,7 @@ public class FileWatcher {
 				}
 			}
 		});
+		thread.setDaemon(true);
 		thread.start();
 	}
 	
