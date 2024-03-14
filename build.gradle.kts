@@ -309,6 +309,14 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
 	
+	val stripLVTs = "strip_lvts"().toBoolean()
+	val stripSourceFiles = "strip_source_files"().toBoolean()
+	
+	inputs.property("strip_lvts", stripLVTs)
+	inputs.property("strip_source_files", stripSourceFiles)
+	
+	val processClassFiles = stripLVTs || stripSourceFiles
+	
 	val shadowJar = tasks.shadowJar.get()
 	inputJar.set(shadowJar.archiveFile)
 	
@@ -332,20 +340,23 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 					bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
 				}
 
-				if (name.endsWith(".class")) {
+				if (processClassFiles && name.endsWith(".class")) {
 					val reader = ClassReader(bytes)
-					val node = ClassNode()
-					reader.accept(node, 0)
+					val classNode = ClassNode()
+					reader.accept(classNode, 0)
 
-					node.methods.forEach { method ->
-						method.localVariables?.clear()
+					if (stripLVTs) {
+						classNode.methods.forEach { methodNode ->
+							methodNode.localVariables?.clear()
+							methodNode.parameters?.clear()
+						}
 					}
-					if ("strip_source_files"().toBoolean()) {
-						node.sourceFile = null
+					if (stripSourceFiles) {
+						classNode.sourceFile = null
 					}
 
 					val writer = ClassWriter(0)
-					node.accept(writer)
+					classNode.accept(writer)
 					bytes = writer.toByteArray()
 				}
 
