@@ -5,27 +5,26 @@ import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.legacy.mixin.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SmoothUtil;
 
 public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
-	private MinecraftClient minecraftClient;
-	
 	@Override
 	public void onInitializeClient() {
+		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+			return;
+		
 		Zume.LOGGER.info("Loading Legacy Zume...");
 		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
-		if (Zume.disabled) return;
-		
-		this.minecraftClient = MinecraftClient.getInstance();
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
-		return minecraftClient.currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
+		return MinecraftClient.getInstance().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -40,13 +39,13 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
-		return CameraPerspective.values()[minecraftClient.options.perspective];
+		return CameraPerspective.values()[MinecraftClient.getInstance().options.perspective];
 	}
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !minecraftClient.options.smoothCameraEnabled) {
-			final GameRendererAccessor gameRenderer = (GameRendererAccessor) minecraftClient.gameRenderer;
+		if (Zume.config.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
+			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
 			gameRenderer.setCursorXSmoother(new SmoothUtil());
 			gameRenderer.setCursorYSmoother(new SmoothUtil());
 			gameRenderer.setCursorDeltaX(0F);

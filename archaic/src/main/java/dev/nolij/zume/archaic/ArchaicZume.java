@@ -2,6 +2,7 @@ package dev.nolij.zume.archaic;
 
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import dev.nolij.zume.archaic.mixin.EntityRendererAccessor;
 import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.Constants;
@@ -27,27 +28,27 @@ import java.io.File;
 	dependencies = "required-after:unimixins@[0.1.15,)")
 public class ArchaicZume implements IZumeImplementation {
 	
-	private Minecraft minecraft;
-	
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
+		if (!FMLLaunchHandler.side().isClient())
+			return;
+		
 		Zume.LOGGER.info("Loading Archaic Zume...");
 		
 		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
-		if (Zume.disabled) return;
+		if (Zume.disabled)
+			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			ClientRegistry.registerKeyBinding(keyBind.value);
 		}
 		
 		MinecraftForge.EVENT_BUS.register(this);
-		
-		this.minecraft = Minecraft.getMinecraft();
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
-		return minecraft.currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
+		return Minecraft.getMinecraft().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -62,13 +63,13 @@ public class ArchaicZume implements IZumeImplementation {
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
-		return CameraPerspective.values()[minecraft.gameSettings.thirdPersonView];
+		return CameraPerspective.values()[Minecraft.getMinecraft().gameSettings.thirdPersonView];
 	}
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !minecraft.gameSettings.smoothCamera) {
-			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) minecraft.entityRenderer;
+		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
+			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
 			entityRenderer.setMouseFilterXAxis(new MouseFilter());
 			entityRenderer.setMouseFilterYAxis(new MouseFilter());
 			entityRenderer.setSmoothCamYaw(0F);

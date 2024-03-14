@@ -4,16 +4,18 @@ import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 
 public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	
-	private MinecraftClient minecraftClient;
-	
 	@Override
 	public void onInitializeClient() {
+		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
+			return;
+		
 		Zume.LOGGER.info("Loading Modern Zume...");
 		
 		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
@@ -22,13 +24,11 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
 		}
-		
-		this.minecraftClient = MinecraftClient.getInstance();
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
-		return minecraftClient.currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
+		return MinecraftClient.getInstance().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -43,7 +43,7 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
-		return CameraPerspective.values()[minecraftClient.options.getPerspective().ordinal()];
+		return CameraPerspective.values()[MinecraftClient.getInstance().options.getPerspective().ordinal()];
 	}
 	
 }

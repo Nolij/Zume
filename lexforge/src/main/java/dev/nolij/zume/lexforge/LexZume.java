@@ -4,18 +4,16 @@ import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
@@ -26,27 +24,17 @@ import java.lang.reflect.Method;
 @Mod(Zume.MOD_ID)
 public class LexZume implements IZumeImplementation {
 	
-	private final Minecraft minecraft;
-	
 	public LexZume() {
+		if (FMLEnvironment.dist != Dist.CLIENT)
+			return;
+		
 		Zume.LOGGER.info("Loading LexZume...");
 		
-		this.minecraft = Minecraft.getInstance();
-		
-		ModLoadingContext.get().registerExtensionPoint(
-			ConfigScreenHandler.ConfigScreenFactory.class,
-			() -> new ConfigScreenHandler.ConfigScreenFactory(((minecraft, parent) -> new Screen(Component.nullToEmpty(null)) {
-				@Override
-				public void tick() {
-					assert minecraft != null;
-					
-					Zume.openConfigFile();
-					minecraft.setScreen(parent);
-				}
-			})));
+		LexZumeConfigScreen.register();
 		
 		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
-		if (Zume.disabled) return;
+		if (Zume.disabled)
+			return;
 		
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);
 		MinecraftForge.EVENT_BUS.addListener(this::render);
@@ -56,7 +44,7 @@ public class LexZume implements IZumeImplementation {
 	
 	@Override
 	public boolean isZoomPressed() {
-		return minecraft.screen == null && ZumeKeyBind.ZOOM.isPressed();
+		return Minecraft.getInstance().screen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -71,7 +59,7 @@ public class LexZume implements IZumeImplementation {
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
-		return CameraPerspective.values()[minecraft.options.getCameraType().ordinal()];
+		return CameraPerspective.values()[Minecraft.getInstance().options.getCameraType().ordinal()];
 	}
 	
 	private void registerKeyBindings(RegisterKeyMappingsEvent event) {
