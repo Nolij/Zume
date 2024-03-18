@@ -1,7 +1,4 @@
-- refactored easing (again)
-- added easing to third-person zoom
-- buffed JAR compression
-- made `defaultZoom` config value more intuitive (`0.7` is now 70% zoom, not 30% zoom)
-- Zume should do nothing on servers now (hopefully)
-- performed Herobrine summoning ritual (thanks @basdxz)
+- added new easing options: `SINE`, `CUBIC`, `CIRCULAR`, `EXPONENTIAL`
+- made many internal easing improvements
+- streamlined release process
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
