@@ -559,42 +559,35 @@ afterEvaluate {
 		}
 	}
 
-	val publishDevBuild = tasks.register("publishDevBuild") {
-		group = "publishing"
-		dependsOn(tasks.publishMods)
-		mustRunAfter(tasks.publishMods)
-		
-		doLast {
-			val http = HttpUtils()
-			
-			val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
-			val changelog = getChangelog()
-			val file = getFileForPublish()
-
-			val webhook = DiscordAPI.Webhook(
-				"<@&1167481420583817286> https://github.com/Nolij/Zume/releases/tag/release/${version}\n" +
-					"```md\n${changelog}\n```",
-				"Zume Test Builds",
-				"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
-			)
-
-			val bodyBuilder = MultipartBody.Builder()
-				.setType(MultipartBody.FORM)
-				.addFormDataPart("payload_json", http.json.encodeToString(webhook))
-				.addFormDataPart("files[0]", file.name, file.asRequestBody("application/java-archive".toMediaTypeOrNull()))
-
-			val requestBuilder = Request.Builder()
-				.url(webhookUrl.get())
-				.post(bodyBuilder.build())
-				.header("Content-Type", "multipart/form-data")
-
-			http.httpClient.newCall(requestBuilder.build()).execute().close()
-		}
-	}
-
 	tasks.publishMods {
 		dependsOn(getTaskForPublish())
-		if (releaseChannel.releaseType == null)
-			dependsOn(publishDevBuild)
+		if (releaseChannel.releaseType == null) {
+			doLast {
+				val http = HttpUtils()
+
+				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+				val changelog = getChangelog()
+				val file = getFileForPublish()
+
+				val webhook = DiscordAPI.Webhook(
+					"<@&1167481420583817286> https://github.com/Nolij/Zume/releases/tag/release/${version}\n" +
+						"```md\n${changelog}\n```",
+					"Zume Test Builds",
+					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
+				)
+
+				val bodyBuilder = MultipartBody.Builder()
+					.setType(MultipartBody.FORM)
+					.addFormDataPart("payload_json", http.json.encodeToString(webhook))
+					.addFormDataPart("files[0]", file.name, file.asRequestBody("application/java-archive".toMediaTypeOrNull()))
+
+				val requestBuilder = Request.Builder()
+					.url(webhookUrl.get())
+					.post(bodyBuilder.build())
+					.header("Content-Type", "multipart/form-data")
+
+				http.httpClient.newCall(requestBuilder.build()).execute().close()
+			}
+		}
 	}
 }
