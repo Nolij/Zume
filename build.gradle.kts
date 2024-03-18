@@ -465,8 +465,8 @@ afterEvaluate {
 	publishMods {
 		file = getFileForPublish()
 		type = releaseChannel.releaseType ?: ALPHA
-		displayName = rootProject.version.toString()
-		version = rootProject.version.toString()
+		displayName = Zume.version!!
+		version = Zume.version!!
 		changelog = getChangelog()
 		
 		modLoaders.addAll("fabric", "forge", "neoforge")
@@ -476,7 +476,7 @@ afterEvaluate {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
 			repository = "Nolij/Zume"
 			commitish = "master"
-			tagName = "release/${version}"
+			tagName = "release/${Zume.version!!}"
 		}
 		
 		if (dryRun.get() || releaseChannel.releaseType != null) {
@@ -552,7 +552,7 @@ afterEvaluate {
 				avatarUrl = "https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
 
 				content = changelog.map { changelog ->
-					"# Zume $version has been released!\nChangelog: ```md\n${changelog}\n```"
+					"# Zume ${Zume.version!!} has been released!\nChangelog: ```md\n${changelog}\n```"
 				}
 
 				setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
@@ -574,7 +574,7 @@ afterEvaluate {
 				val file = getFileForPublish().asFile
 
 				val webhook = DiscordAPI.Webhook(
-					"<@&1167481420583817286> https://github.com/Nolij/Zume/releases/tag/release/${version}\n" +
+					"<@&1167481420583817286> https://github.com/Nolij/Zume/releases/tag/release/${Zume.version!!}\n" +
 						"```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
