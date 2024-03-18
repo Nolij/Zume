@@ -454,11 +454,11 @@ afterEvaluate {
 			tasks.shadowJar
 	}
 	
-	fun getFileForPublish(): File {
+	fun getFileForPublish(): RegularFile {
 		return if (releaseChannel.compress)
-			compressJar.get().getOutputJar().asFile
+			compressJar.get().getOutputJar()
 		else
-			tasks.shadowJar.get().archiveFile.get().asFile
+			tasks.shadowJar.get().archiveFile.get()
 	}
 	
 	publishMods {
