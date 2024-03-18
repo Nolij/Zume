@@ -9,18 +9,18 @@ public enum EasingMethod {
 		}
 		
 		@Override
-		public double easeOut(double start, double end, double progress) {
+		public double easeIn(double start, double end, double progress) {
 			return start + ((end - start) * progress);
 		}
 		
 		@Override
-		public double easeIn(double start, double end, double progress) {
-			return easeOut(start, end, progress);
+		public double easeOut(double start, double end, double progress) {
+			return easeIn(start, end, progress);
 		}
 		
 		@Override
 		public double easeInOut(double start, double end, double progress) {
-			return easeOut(start, end, progress);
+			return easeIn(start, end, progress);
 		}
 	},
 	QUADRATIC {
@@ -46,16 +46,16 @@ public enum EasingMethod {
 	
 	public abstract double apply(double value);
 	
-	public double easeOut(double start, double end, double progress) {
+	public double easeIn(double start, double end, double progress) {
 		return start + ((end - start) * apply(progress));
 	}
 	
-	public double easeIn(double start, double end, double progress) {
+	public double easeOut(double start, double end, double progress) {
 		return start + ((end - start) * (1 - apply(1 - progress)));
 	}
 	
 	public double easeInOut(double start, double end, double progress) {
-		return LINEAR.easeOut(start, end, LINEAR.easeOut(apply(progress), 1 - apply(1 - progress), progress));
+		return LINEAR.easeIn(start, end, LINEAR.easeIn(apply(progress), 1 - apply(1 - progress), progress));
 	}
 	
 }

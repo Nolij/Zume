@@ -211,7 +211,7 @@ public class Zume {
 	 * {@return The new FOV transformed by Zume}
 	 */
 	public static double transformFOV(final double original) {
-		return config.zoomEasingMethod.easeOut(config.minFOV, original, getZoom());
+		return config.zoomEasingMethod.easeIn(config.minFOV, original, getZoom());
 	}
 	
 	/**
@@ -232,7 +232,7 @@ public class Zume {
 		                   ? original / 4D * config.maxThirdPersonZoomDistance 
 		                   : original;
 		
-		return config.zoomEasingMethod.easeOut(min, max, 1 - getZoom());
+		return config.zoomEasingMethod.easeIn(min, max, 1 - getZoom());
 	}
 	
 	/**
@@ -258,7 +258,7 @@ public class Zume {
 		if (!isEnabled() || implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON)
 			return original;
 		
-		return original * EasingMethod.LINEAR.easeOut(config.mouseSensitivityFloor, 1D, getZoom());
+		return original * EasingMethod.LINEAR.easeIn(config.mouseSensitivityFloor, 1D, getZoom());
 	}
 	
 	public static boolean shouldCancelScroll() {
