@@ -3,6 +3,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.PublishModTask
 import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
 import me.modmuss50.mpp.platforms.discord.DiscordAPI
@@ -446,6 +447,13 @@ afterEvaluate {
 	fun getChangelog(): String {
 		return file("CHANGELOG.md").readText()
 	}
+
+	fun getTaskForPublish(): TaskProvider<out DefaultTask> {
+		return if (releaseChannel.compress)
+			compressJar
+		else
+			tasks.shadowJar
+	}
 	
 	fun getFileForPublish(): RegularFile {
 		return if (releaseChannel.compress)
@@ -551,12 +559,12 @@ afterEvaluate {
 			}
 		}
 	}
+	
+	tasks.withType<PublishModTask> {
+		dependsOn(getTaskForPublish())
+	}
 
 	tasks.publishMods {
-		dependsOn(tasks.shadowJar)
-		if (releaseChannel.compress)
-			dependsOn(compressJar)
-		
 		if (releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
