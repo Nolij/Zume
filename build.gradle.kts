@@ -446,13 +446,6 @@ afterEvaluate {
 	fun getChangelog(): String {
 		return file("CHANGELOG.md").readText()
 	}
-
-	fun getTaskForPublish(): TaskProvider<out DefaultTask> {
-		return if (releaseChannel.compress)
-			compressJar
-		else
-			tasks.shadowJar
-	}
 	
 	fun getFileForPublish(): RegularFile {
 		return if (releaseChannel.compress)
@@ -560,7 +553,10 @@ afterEvaluate {
 	}
 
 	tasks.publishMods {
-		dependsOn(getTaskForPublish())
+		dependsOn(tasks.shadowJar)
+		if (releaseChannel.compress)
+			dependsOn(compressJar)
+		
 		if (releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
