@@ -567,7 +567,7 @@ afterEvaluate {
 
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val changelog = getChangelog()
-				val file = getFileForPublish()
+				val file = getFileForPublish().asFile
 
 				val webhook = DiscordAPI.Webhook(
 					"<@&1167481420583817286> https://github.com/Nolij/Zume/releases/tag/release/${version}\n" +
