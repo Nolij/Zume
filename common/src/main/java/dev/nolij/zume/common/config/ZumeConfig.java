@@ -46,14 +46,14 @@ public class ZumeConfig implements Cloneable {
 	@Comment("""
 		\nThe algorithm responsible easing animations.
 		You should probably leave this at the default if you don't understand what it does.
-		OPTIONS: `LINEAR`, `QUADRATIC`, `QUARTIC`, `QUINTIC`
+		OPTIONS: `SINE`, `LINEAR`, `QUADRATIC`, `CUBIC`, `QUARTIC`, `QUINTIC`, `CIRCULAR`, `EXPONENTIAL`
 		DEFAULT: `QUART`""")
 	public EasingMethod animationEasingMethod = EasingMethod.QUARTIC;
 	
 	@Comment("""
 		\nThe algorithm responsible for making differences in FOV more uniform.
 		You should probably leave this at the default if you don't understand what it does.
-		OPTIONS: `LINEAR`, `QUADRATIC`, `QUARTIC`, `QUINTIC`
+		OPTIONS: `SINE`, `LINEAR`, `QUADRATIC`, `CUBIC`, `QUARTIC`, `QUINTIC`, `CIRCULAR`, `EXPONENTIAL`
 		DEFAULT: `QUADRATIC`""")
 	public EasingMethod zoomEasingMethod = EasingMethod.QUADRATIC;
 	

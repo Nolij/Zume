@@ -23,10 +23,22 @@ public enum EasingMethod {
 			return easeIn(start, end, progress);
 		}
 	},
+	SINE {
+		@Override
+		public double apply(double value) {
+			return 1 - Math.sin(value * Math.PI / 2);
+		}
+	},
 	QUADRATIC {
 		@Override
 		public double apply(double value) {
 			return value * value;
+		}
+	},
+	CUBIC {
+		@Override
+		public double apply(double value) {
+			return Math.pow(value, 3);
 		}
 	},
 	QUARTIC {
@@ -39,6 +51,18 @@ public enum EasingMethod {
 		@Override
 		public double apply(double value) {
 			return Math.pow(value, 5);
+		}
+	},
+	CIRCULAR {
+		@Override
+		public double apply(double value) {
+			return 1 - Math.sqrt(1 - value * value);
+		}
+	},
+	EXPONENTIAL {
+		@Override
+		public double apply(double value) {
+			return Math.pow(2, 10 * (value - 1));
 		}
 	},
 	
