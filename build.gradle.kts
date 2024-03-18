@@ -1,8 +1,15 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import me.modmuss50.mpp.PublishModTask
+import kotlinx.serialization.encodeToString
+import me.modmuss50.mpp.HttpUtils
+import me.modmuss50.mpp.ReleaseType
 import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
+import me.modmuss50.mpp.platforms.discord.DiscordAPI
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -19,16 +26,51 @@ plugins {
 	id("com.github.johnrengelman.shadow")
 	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
+	id("org.ajoberstar.grgit")
 }
 
 operator fun String.invoke(): String {
 	return (rootProject.properties[this] as String?)!!
 }
 
-val isRelease = rootProject.hasProperty("release")
+enum class ReleaseChannel(
+	val suffix: String? = null,
+	val releaseType: ReleaseType? = null,
+	val compress: Boolean,
+	) {
+	DEV_BUILD(suffix = "dev", compress = false),
+	PRE_RELEASE(suffix = "pre", compress = false),
+	RELEASE_CANDIDATE(suffix = "rc", compress = true),
+	RELEASE(releaseType = ReleaseType.STABLE, compress = true),
+}
 
-group = "maven_group"()
-version = "mod_version"()
+val isRelease = rootProject.hasProperty("release_channel")
+val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
+
+var versionString = "mod_version"()
+
+if (releaseChannel.suffix != null) {
+	versionString += "-${releaseChannel.suffix}"
+	
+	if (isRelease) {
+		versionString += "."
+		val tagPrefix = "release/${versionString}"
+
+		val tags = grgit.tag.list().filter { tag -> tag.name.startsWith(tagPrefix) }
+
+		versionString +=
+			if (tags.any()) {
+				(tags.maxOf { it.name.substring(tagPrefix.length).toInt() } + 1).toString()
+			} else {
+				"1"
+			}
+	}
+}
+
+Zume.version = versionString
+
+rootProject.group = "maven_group"()
+rootProject.version = Zume.version!!
 
 base {
 	archivesName = "archives_base_name"()
@@ -97,16 +139,31 @@ allprojects {
 		annotationProcessor(jabelDependency)
 		compileOnly(jabelDependency)
 	}
+
+	tasks.processResources {
+		inputs.file(rootDir.resolve("gradle.properties"))
+		inputs.property("version", Zume.version!!)
+
+		filteringCharset = "UTF-8"
+
+		val props = mutableMapOf<String, String>()
+		props.putAll(rootProject.properties
+			.filterValues { value -> value is String }
+			.mapValues { entry -> entry.value as String })
+		props["mod_version"] = Zume.version!!
+
+		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")) {
+			expand(props)
+		}
+	}
 }
 
 subprojects {
 	val subProject = this
 	val implName = subProject.name
 	
-	apply(plugin = "xyz.wagyourtail.unimined")
-	
 	group = "maven_group"()
-	version = "mod_version"()
+	version = Zume.version!!
 	
 	base {
 		archivesName = "${"archives_base_name"()}-${subProject.name}"
@@ -117,6 +174,7 @@ subprojects {
 	}
 
 	if (implName in uniminedImpls) {
+		apply(plugin = "xyz.wagyourtail.unimined")
 		apply(plugin = "com.github.johnrengelman.shadow")
 
 		configurations {
@@ -130,6 +188,10 @@ subprojects {
 			"shade"("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
 
 			"shade"(project(":common")) { isTransitive = false }
+		}
+		
+		tasks.processResources {
+			from("common/src/main/resources")
 		}
 		
 		afterEvaluate {
@@ -228,14 +290,6 @@ dependencies {
 
 tasks.processResources {
 	from("common/src/main/resources")
-
-	inputs.file("gradle.properties")
-	
-	filteringCharset = "UTF-8"
-
-	filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")) {
-		expand(rootProject.properties)
-	}
 }
 
 tasks.jar {
@@ -291,8 +345,8 @@ tasks.shadowJar {
 	}
 }
 
-listOf(tasks.assemble, tasks.publishMods).forEach {
-	it.configure { dependsOn(tasks.shadowJar) }
+tasks.assemble {
+	dependsOn(tasks.shadowJar)
 }
 
 abstract class ProcessJarTask : DefaultTask() {
@@ -389,12 +443,30 @@ afterEvaluate {
 		}
 	}
 	
+	fun getChangelog(): String {
+		return file("CHANGELOG.md").readText()
+	}
+
+	fun getTaskForPublish(): TaskProvider<out DefaultTask> {
+		return if (releaseChannel.compress)
+			compressJar
+		else
+			tasks.shadowJar
+	}
+	
+	fun getFileForPublish(): File {
+		return if (releaseChannel.compress)
+			compressJar.get().getOutputJar().asFile
+		else
+			tasks.shadowJar.get().archiveFile.get().asFile
+	}
+	
 	publishMods {
-		file = compressJar.get().getOutputJar()
-		type = STABLE
-		displayName = "mod_version"()
-		version = "mod_version"()
-		changelog = file("CHANGELOG.md").readText()
+		file = getFileForPublish()
+		type = releaseChannel.releaseType ?: ALPHA
+		displayName = rootProject.version.toString()
+		version = rootProject.version.toString()
+		changelog = getChangelog()
 		
 		modLoaders.addAll("fabric", "forge", "neoforge")
 		dryRun = !isRelease
@@ -403,85 +475,126 @@ afterEvaluate {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
 			repository = "Nolij/Zume"
 			commitish = "master"
-			tagName = "release/${"mod_version"()}"
+			tagName = "release/${version}"
 		}
 		
-		modrinth {
-			accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-			projectId = "o6qsdrrQ"
-			
-			minecraftVersionRange {
-				start = "1.14.4"
-				end = "latest"
-				
-				includeSnapshots = true
-			}
-			
-			minecraftVersionRange {
-				start = "1.7.10"
-				end = "1.12.2"
-				
-				includeSnapshots = true
-			}
-			
-			minecraftVersions.add("b1.7.3")
-		}
-		
-		curseforge {
-			val cfAccessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-			accessToken = cfAccessToken
-			projectId = "927564"
-			projectSlug = "zume"
-			
-			minecraftVersionRange {
-				start = "1.14.4"
-				end = "latest"
-			}
-	
-			minecraftVersionRange {
-				start = "1.7.10"
-				end = "1.12.2"
+		if (dryRun.get() || releaseChannel.releaseType != null) {
+			modrinth {
+				accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+				projectId = "o6qsdrrQ"
+
+				minecraftVersionRange {
+					start = "1.14.4"
+					end = "latest"
+
+					includeSnapshots = true
+				}
+
+				minecraftVersionRange {
+					start = "1.7.10"
+					end = "1.12.2"
+
+					includeSnapshots = true
+				}
+
+				minecraftVersions.add("b1.7.3")
 			}
 
-			if (cfAccessToken.orNull != null) {
-				val cfAPI = CurseforgeApi(cfAccessToken.get(), apiEndpoint.get())
+			curseforge {
+				val cfAccessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+				accessToken = cfAccessToken
+				projectId = "927564"
+				projectSlug = "zume"
+
+				minecraftVersionRange {
+					start = "1.14.4"
+					end = "latest"
+				}
+
+				minecraftVersionRange {
+					start = "1.7.10"
+					end = "1.12.2"
+				}
 				
-				val mcVersions = minecraftVersions.get().map {
-					"${it}-Snapshot"
-				}.toHashSet()
+				minecraftVersions.add("Beta 1.7.3")
 				
-				@Suppress("UnstableApiUsage")
-				minecraftVersions.addAll(providerFactory.provider {
-					cfAPI.getGameVersions().map {
-						it.name
-					}.filter {
-						it.endsWith("-Snapshot")
-					}.filter { cfVersion ->
-						mcVersions.contains(cfVersion)
+				val snapshots: Set<String>
+				if (cfAccessToken.orNull != null) {
+					val cfAPI = CurseforgeApi(cfAccessToken.get(), apiEndpoint.get())
+
+					val mcVersions = minecraftVersions.get().map {
+						"${it}-Snapshot"
 					}.toHashSet()
-				})
+
+					snapshots = 
+						cfAPI.getGameVersions().map {
+							it.name
+						}.filter {
+							it.endsWith("-Snapshot")
+						}.filter { cfVersion ->
+							mcVersions.contains(cfVersion)
+						}.toHashSet()
+				} else {
+					snapshots = HashSet()
+				}
+				
+				snapshots.add("1.20.5-Snapshot")
+				
+				minecraftVersions.addAll(snapshots)
 			}
 
-			minecraftVersions.add("1.20.5-Snapshot")
-			minecraftVersions.add("Beta 1.7.3")
-		}
-		
-		discord {
-			webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
-			
-			username = "Zume Updates"
-			
-			avatarUrl = "https://github.com/Nolij/Zume/raw/master/common/src/main/resources/icon_large.png"
-			
-			content = changelog.map { changelog -> 
-				"# Zume ${"mod_version"()} has been released!\nChangelog: ```md\n${changelog}\n```"
+			discord {
+				webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+
+				username = "Zume Releases"
+
+				avatarUrl = "https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
+
+				content = changelog.map { changelog ->
+					"# Zume $version has been released!\nChangelog: ```md\n${changelog}\n```"
+				}
+
+				setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
 			}
-			
-			setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
 		}
 	}
-	
-	tasks.withType<PublishModTask> {
-		dependsOn(compressJar)
+
+	val publishDevBuild = tasks.register("publishDevBuild") {
+		group = "publishing"
+		dependsOn(tasks.publishMods)
+		mustRunAfter(tasks.publishMods)
+		
+		doLast {
+			val http = HttpUtils()
+			
+			val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+			val changelog = getChangelog()
+			val file = getFileForPublish()
+
+			val webhook = DiscordAPI.Webhook(
+				"<@&1167481420583817286> https://github.com/Nolij/Zume/releases/tag/release/${version}\n" +
+					"```md\n${changelog}\n```",
+				"Zume Test Builds",
+				"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
+			)
+
+			val bodyBuilder = MultipartBody.Builder()
+				.setType(MultipartBody.FORM)
+				.addFormDataPart("payload_json", http.json.encodeToString(webhook))
+				.addFormDataPart("files[0]", file.name, file.asRequestBody("application/java-archive".toMediaTypeOrNull()))
+
+			val requestBuilder = Request.Builder()
+				.url(webhookUrl.get())
+				.post(bodyBuilder.build())
+				.header("Content-Type", "multipart/form-data")
+
+			http.httpClient.newCall(requestBuilder.build()).execute().close()
+		}
+	}
+
+	tasks.publishMods {
+		dependsOn(getTaskForPublish())
+		if (releaseChannel.releaseType == null)
+			dependsOn(publishDevBuild)
 	}
 }

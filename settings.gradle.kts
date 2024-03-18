@@ -26,6 +26,7 @@ plugins {
 	id("com.github.gmazzo.buildconfig") version("5.2.0") apply(false)
 	id("com.github.johnrengelman.shadow") version("8.1.1") apply(false)
 	id("me.modmuss50.mod-publish-plugin") version("0.4.5") apply(false)
+	id("org.ajoberstar.grgit") version("5.2.2") apply(false)
 }
 
 rootProject.name = "zume"

@@ -26,15 +26,3 @@ unimined.minecraft {
 dependencies {
     "modImplementation"(fabricApi.legacyFabricModule("legacy-fabric-keybindings-api-v1-common", "legacy_fabric_api_version"()))
 }
-
-tasks.processResources {
-	from("common/src/main/resources")
-
-	inputs.file("../gradle.properties")
-
-	filteringCharset = "UTF-8"
-
-	filesMatching("fabric.mod.json") {
-		expand(rootProject.properties)
-	}
-}

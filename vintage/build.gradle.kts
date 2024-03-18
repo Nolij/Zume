@@ -42,15 +42,3 @@ repositories {
 dependencies {
 	"modImplementation"("zone.rong:mixinbooter:${"mixinbooter_version"()}")
 }
-
-tasks.processResources {
-	from("common/src/main/resources")
-
-	inputs.file("../gradle.properties")
-
-	filteringCharset = "UTF-8"
-
-	filesMatching("mcmod.info") {
-		expand(rootProject.properties)
-	}
-}

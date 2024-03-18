@@ -54,15 +54,3 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.8.0-beta4")
     implementation("org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0")
 }
-
-tasks.processResources {
-	from("common/src/main/resources")
-
-	inputs.file("../gradle.properties")
-
-	filteringCharset = "UTF-8"
-
-	filesMatching("fabric.mod.json") {
-		expand(rootProject.properties)
-	}
-}

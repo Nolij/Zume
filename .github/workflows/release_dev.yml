@@ -1,8 +1,8 @@
-name: build
-on: [ push ]
+name: release_dev
+on: [ workflow_dispatch ]
 
 jobs:
-    build:
+    publish:
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v4
@@ -14,10 +14,9 @@ jobs:
                 uses: gradle/actions/setup-gradle@v3
                 with:
                     cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-            -   name: :build
-                run: ./gradlew build
-            -   name: Upload artifacts
-                uses: actions/upload-artifact@v3
-                with:
-                    name: zume
-                    path: "**/zume-*.jar"
+                    cache-read-only: true
+            -   name: :publishMods
+                run: ./gradlew publishMods -Prelease_channel=DEV_BUILD
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEV_WEBHOOK }}

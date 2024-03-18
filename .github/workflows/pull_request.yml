@@ -1,4 +1,4 @@
-name: pr
+name: pull_request
 on: [ pull_request ]
 
 jobs:
@@ -14,6 +14,7 @@ jobs:
                 uses: gradle/actions/setup-gradle@v3
                 with:
                     cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY_PR }}
+                    cache-read-only: true
             -   name: :build
                 run: ./gradlew build
             -   name: Upload artifacts

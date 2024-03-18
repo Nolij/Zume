@@ -30,15 +30,3 @@ dependencies {
 	
 	"minecraftLibraries"(project(":common"))
 }
-
-tasks.processResources {
-	from("common/src/main/resources")
-
-	inputs.file("../gradle.properties")
-
-	filteringCharset = "UTF-8"
-	
-	filesMatching("META-INF/mods.toml") {
-		expand(rootProject.properties)
-	}
-}

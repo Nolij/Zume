@@ -35,15 +35,3 @@ tasks.withType<RemapJarTask> {
 dependencies {
 	"modImplementation"("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${"unimixins_version"()}:dev")
 }
-
-tasks.processResources {
-	from("common/src/main/resources")
-
-	inputs.file("../gradle.properties")
-
-	filteringCharset = "UTF-8"
-
-	filesMatching("mcmod.info") {
-		expand(rootProject.properties)
-	}
-}

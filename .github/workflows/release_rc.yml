@@ -1,4 +1,4 @@
-name: publish
+name: release_rc
 on: [ workflow_dispatch ]
 
 jobs:
@@ -16,9 +16,7 @@ jobs:
                     cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
                     cache-read-only: true
             -   name: :publishMods
-                run: ./gradlew publishMods -Prelease=true
+                run: ./gradlew publishMods -Prelease_channel=RELEASE_CANDIDATE
                 env:
                     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-                    MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-                    CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEV_WEBHOOK }}
