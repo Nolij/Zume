@@ -12,6 +12,7 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
+import org.ajoberstar.grgit.operation.FetchOp.TagMode
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -51,7 +52,7 @@ val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) 
 var versionString = "mod_version"()
 versionString += "."
 
-grgit.fetch()
+grgit.fetch(mapOf("tagMode" to TagMode.ALL))
 val minorTagPrefix = "release/${versionString}"
 val versionHistory = grgit.tag.list()
 	.map { tag -> tag.name }
