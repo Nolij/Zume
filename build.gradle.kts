@@ -49,6 +49,26 @@ val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
 var versionString = "mod_version"()
+versionString += "."
+
+grgit.fetch()
+val minorTagPrefix = "release/${versionString}"
+val versionHistory = grgit.tag.list()
+	.map { tag -> tag.name }
+	.filter { name -> name.startsWith(minorTagPrefix) }
+	.map { name -> name.substring(minorTagPrefix.length) }
+
+val maxPatch = versionHistory.maxOfOrNull { it.substringBefore('-').toInt() }
+val patch =
+	if (maxPatch != null)
+		if (versionHistory.any { it == maxPatch.toString() })
+			maxPatch + 1
+		else
+			maxPatch
+	else
+		0
+
+versionString += patch.toString()
 
 if (releaseChannel.suffix != null) {
 	versionString += "-${releaseChannel.suffix}"
