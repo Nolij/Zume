@@ -54,21 +54,19 @@ versionString += "."
 
 grgit.fetch(mapOf("tagMode" to TagMode.ALL))
 val minorTagPrefix = "release/${versionString}"
-val versionHistory = grgit.tag.list()
+val patchHistory = grgit.tag.list()
 	.map { tag -> tag.name }
 	.filter { name -> name.startsWith(minorTagPrefix) }
 	.map { name -> name.substring(minorTagPrefix.length) }
 
-val maxPatch = versionHistory.maxOfOrNull { it.substringBefore('-').toInt() }
+val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
 val patch =
-	if (maxPatch != null)
-		if (versionHistory.any { it == maxPatch.toString() })
-			maxPatch + 1
-		else
-			maxPatch
-	else
-		0
-
+	maxPatch?.plus(
+		if (patchHistory.contains(maxPatch.toString())) 
+			1 
+		else 
+			0
+	) ?: 0
 versionString += patch.toString()
 
 if (releaseChannel.suffix != null) {
@@ -76,16 +74,14 @@ if (releaseChannel.suffix != null) {
 	
 	if (isRelease) {
 		versionString += "."
-		val tagPrefix = "release/${versionString}"
-
-		val tags = grgit.tag.list().filter { tag -> tag.name.startsWith(tagPrefix) }
-
-		versionString +=
-			if (tags.any()) {
-				(tags.maxOf { it.name.substring(tagPrefix.length).toInt() } + 1).toString()
-			} else {
-				"1"
-			}
+		
+		val prefix = versionString.removePrefix("${"mod_version"()}.")
+		val maxBuild = patchHistory
+			.mapNotNull { it.removePrefix(prefix).toIntOrNull() }
+			.maxOrNull()
+		
+		val build = (maxBuild?.plus(1)) ?: 1
+		versionString += build.toString()
 	}
 }
 
