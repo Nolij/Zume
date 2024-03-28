@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.concurrent.Semaphore;
 
-public class FileWatcher {
+public class FileWatcher implements IFileWatcher {
 	
 	@FunctionalInterface
 	public interface Callback {
@@ -35,18 +35,21 @@ public class FileWatcher {
 	private long debounce = 0L;
 	private final Semaphore semaphore = new Semaphore(1);
 	
+	@Override
 	public void lock() throws InterruptedException {
 		synchronized (semaphore) {
 			semaphore.acquire();
 		}
 	}
 	
+	@Override
 	public boolean tryLock() {
 		synchronized (semaphore) {
 			return semaphore.tryAcquire();
 		}
 	}
 	
+	@Override
 	public void unlock() {
 		synchronized (semaphore) {
 			if (semaphore.availablePermits() > 0)

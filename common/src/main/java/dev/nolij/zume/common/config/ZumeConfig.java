@@ -3,15 +3,17 @@ package dev.nolij.zume.common.config;
 import blue.endless.jankson.Comment;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
-import blue.endless.jankson.annotation.NonnullByDefault;
 import blue.endless.jankson.api.SyntaxError;
 import dev.nolij.zume.common.Zume;
 import dev.nolij.zume.common.easing.EasingMethod;
 import dev.nolij.zume.common.util.FileWatcher;
+import dev.nolij.zume.common.util.IFileWatcher;
 
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-@NonnullByDefault
 public class ZumeConfig implements Cloneable {
 	
 	@Comment("""
@@ -90,6 +92,10 @@ public class ZumeConfig implements Cloneable {
 		DEFAULT: `false`""")
 	public boolean disable = false;
 	
+	private static final int EXPECTED_VERSION = 0;
+	@Comment("Used internally. Don't modify this.")
+	public int configVersion = EXPECTED_VERSION;
+	
 	
 	@FunctionalInterface
 	public interface ConfigConsumer {
@@ -103,33 +109,48 @@ public class ZumeConfig implements Cloneable {
 		.build();
 	
 	private static ZumeConfig readFromFile(final File configFile) {
-		if (!configFile.exists())
-			return new ZumeConfig();
+		if (configFile == null || !configFile.exists())
+			return null;
 		
 		int i = 0;
 		while (true) {
 			try {
 				return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfig.class);
             } catch (SyntaxError e) {
-				if (i++ < MAX_RETRIES) {
+				if (++i < MAX_RETRIES) {
                     try {
 	                    //noinspection BusyWait
 	                    Thread.sleep(i * 200L);
 						continue;
                     } catch (InterruptedException ignored) {
-                        return new ZumeConfig();
+                        return null;
                     }
                 }
 				Zume.LOGGER.error("Error parsing config after " + i + " retries: ", e);
-				return new ZumeConfig();
+				return null;
 			} catch (IOException e) {
 				Zume.LOGGER.error("Error reading config: ", e);
-				return new ZumeConfig();
+				return null;
             }
         }
 	}
 	
+	private static ZumeConfig readHighestPriorityConfigFile() {
+		ZumeConfig result = readFromFile(getConfigFile());
+		if (result == null && CONFIG_PATH_OVERRIDE == null && instanceFile != null && instanceFile.exists())
+			result = readFromFile(instanceFile);
+		
+		if (result == null && globalFile != null && globalFile.exists())
+			result = readFromFile(globalFile);
+		
+		if (result == null)
+			result = new ZumeConfig();
+		
+		return result;
+	}
+	
 	private void writeToFile(final File configFile) {
+		this.configVersion = EXPECTED_VERSION;
 		try (final FileWriter configWriter = new FileWriter(configFile)) {
 			JANKSON.toJson(this).toJson(configWriter, JSON_GRAMMAR, 0);
 			configWriter.flush();
@@ -139,8 +160,10 @@ public class ZumeConfig implements Cloneable {
 	}
 	
 	private static ConfigConsumer consumer;
-	private static FileWatcher watcher;
-	private static File file;
+	private static IFileWatcher instanceWatcher;
+	private static IFileWatcher globalWatcher;
+	private static File instanceFile = null;
+	private static File globalFile = null;
 	
 	@Override
 	public ZumeConfig clone() {
@@ -153,11 +176,17 @@ public class ZumeConfig implements Cloneable {
 	
 	public static void replace(final ZumeConfig newConfig) throws InterruptedException {
 		try {
-			watcher.lock();
-			newConfig.writeToFile(file);
-			consumer.invoke(newConfig);
+			instanceWatcher.lock();
+			try {
+				globalWatcher.lock();
+				
+				newConfig.writeToFile(getConfigFile());
+				consumer.invoke(newConfig);
+			} finally {
+				globalWatcher.unlock();
+			}
 		} finally {
-			watcher.unlock();
+			instanceWatcher.unlock();
 		}
 	}
 	
@@ -167,31 +196,88 @@ public class ZumeConfig implements Cloneable {
 		replace(newConfig);
     }
 	
-	public static void init(final File configFile, final ConfigConsumer configConsumer) {
+	
+	private static final String CONFIG_PATH_OVERRIDE = System.getProperty("zume.configPathOverride");
+	private static final Path GLOBAL_CONFIG_PATH;
+	
+	static {
+		final Path dotMinecraft = switch (Zume.HOST_PLATFORM) {
+			case LINUX, UNKNOWN -> FileSystems.getDefault().getPath(System.getProperty("user.home"), ".minecraft");
+			case WINDOWS -> FileSystems.getDefault().getPath(System.getenv("APPDATA"), ".minecraft");
+			case MAC_OS -> FileSystems.getDefault().getPath(System.getProperty("user.home"), "Library", "Application Support", "minecraft");
+		};
+		
+		GLOBAL_CONFIG_PATH = dotMinecraft.resolve("global");
+		if (Files.notExists(GLOBAL_CONFIG_PATH)) {
+            try {
+                Files.createDirectories(GLOBAL_CONFIG_PATH);
+            } catch (IOException e) {
+                Zume.LOGGER.error("Failed to create global config path: ", e);
+            }
+        }
+	}
+	
+	public static File getConfigFile() {
+		if (CONFIG_PATH_OVERRIDE != null) {
+			return new File(CONFIG_PATH_OVERRIDE);
+		}
+		
+		if (instanceFile != null && instanceFile.exists()) {
+			return instanceFile;
+		}
+		
+		return globalFile;
+	}
+	
+	public static void reloadConfig() {
+		Zume.LOGGER.info("Reloading config...");
+		
+		final ZumeConfig newConfig = readHighestPriorityConfigFile();
+		
+		consumer.invoke(newConfig);
+	}
+	
+	public static void init(final Path instanceConfigPath, final String fileName, final ConfigConsumer configConsumer) {
 		if (consumer != null)
 			throw new AssertionError("Config already initialized!");
 		
 		consumer = configConsumer;
-		file = configFile;
+		if (CONFIG_PATH_OVERRIDE == null) {
+			instanceFile = instanceConfigPath.resolve(fileName).toFile();
+			globalFile = GLOBAL_CONFIG_PATH.resolve(fileName).toFile();
+		}
 		
-		ZumeConfig config = readFromFile(file);
+		ZumeConfig config = readHighestPriorityConfigFile();
 		
 		// write new options and comment updates to disk
-		config.writeToFile(file);
+		config.writeToFile(getConfigFile());
 		
 		consumer.invoke(config);
 		
 		try {
-			watcher = FileWatcher.onFileChange(file.toPath(), () -> {				
-				Zume.LOGGER.info("Reloading config...");
+			final IFileWatcher nullWatcher = new IFileWatcher() {
+				@Override
+				public void lock() throws InterruptedException {}
 				
-				final ZumeConfig newConfig = readFromFile(file);
+				@Override
+				public boolean tryLock() {
+					return true;
+				}
 				
-				consumer.invoke(newConfig);
-			});
+				@Override
+				public void unlock() {}
+			};
 			
-			if (config.disable)
-				watcher.stop();
+			if (config.disable) {
+				instanceWatcher = nullWatcher;
+				globalWatcher = nullWatcher;
+			} else if (CONFIG_PATH_OVERRIDE == null) {
+				instanceWatcher = FileWatcher.onFileChange(instanceFile.toPath(), ZumeConfig::reloadConfig);
+				globalWatcher = FileWatcher.onFileChange(globalFile.toPath(), ZumeConfig::reloadConfig);
+			} else {
+				instanceWatcher = nullWatcher;
+				globalWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfig::reloadConfig);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

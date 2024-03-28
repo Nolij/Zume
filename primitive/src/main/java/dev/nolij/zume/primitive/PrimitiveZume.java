@@ -8,7 +8,6 @@ import dev.nolij.zume.primitive.mixin.MinecraftAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.SmoothUtil;
 
 public class PrimitiveZume implements ClientModInitializer, IZumeImplementation {
@@ -20,7 +19,7 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 		
 		Zume.LOGGER.info("Loading Primitive Zume...");
 		
-		Zume.init(this, FabricLoader.getInstance().getConfigDir().resolve(Zume.CONFIG_FILE_NAME).toFile());
+		Zume.init(this, FabricLoader.getInstance().getConfigDir());
 	}
 	
 	@Override

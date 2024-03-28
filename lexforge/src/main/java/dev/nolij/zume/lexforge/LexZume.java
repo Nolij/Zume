@@ -15,7 +15,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 
-import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
@@ -31,7 +30,7 @@ public class LexZume implements IZumeImplementation {
 		
 		LexZumeConfigScreen.register();
 		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		Zume.init(this, FMLPaths.CONFIGDIR.get());
 		if (Zume.disabled)
 			return;
 		

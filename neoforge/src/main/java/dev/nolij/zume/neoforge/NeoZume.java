@@ -13,8 +13,6 @@ import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 
-import java.io.File;
-
 @Mod(Zume.MOD_ID)
 public class NeoZume implements IZumeImplementation {
 	
@@ -26,7 +24,7 @@ public class NeoZume implements IZumeImplementation {
 		
 		NeoZumeConfigScreen.register();
 		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		Zume.init(this, FMLPaths.CONFIGDIR.get());
 		if (Zume.disabled)
 			return;
 		

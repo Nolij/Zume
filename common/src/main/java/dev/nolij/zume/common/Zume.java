@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 
 public class Zume {
 	
@@ -98,7 +99,6 @@ public class Zume {
 	//region Public Members
 	public static IZumeImplementation implementation;
 	public static ZumeConfig config;
-	public static File configFile;
 	public static boolean disabled = false;
 	//endregion
 	
@@ -122,16 +122,15 @@ public class Zume {
 	 * Invoke this in the initializer of your Zume implementation. 
 	 * 
 	 * @param implementation The {@linkplain IZumeImplementation} Zume should use. 
-	 * @param configFile The {@linkplain File} Zume should use for storing the config.
+	 * @param instanceConfigPath The {@linkplain Path} Zume should use for storing the instance-specific config.
 	 */
-	public static void init(final IZumeImplementation implementation, final File configFile) {
+	public static void init(final IZumeImplementation implementation, final Path instanceConfigPath) {
 		if (Zume.implementation != null)
 			throw new AssertionError("Zume already initialized!");
 		
 		Zume.implementation = implementation;
-		Zume.configFile = configFile;
 		
-		ZumeConfig.init(configFile, config -> {
+		ZumeConfig.init(instanceConfigPath, CONFIG_FILE_NAME, config -> {
 			Zume.config = config;
 			zoom.update(config.zoomSmoothnessMs, config.animationEasingMethod);
 			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.animationEasingMethod);
@@ -174,9 +173,10 @@ public class Zume {
 	
 	//region API Methods
 	/**
-	 * Attempts to open the {@linkplain Zume#configFile Zume config file} in the system's text editor.
+	 * Attempts to open Zume's config file in the system's text editor.
 	 */
 	public static void openConfigFile() {
+		final File configFile = ZumeConfig.getConfigFile();
 		try {
 			try {
 				Desktop.getDesktop().open(configFile);

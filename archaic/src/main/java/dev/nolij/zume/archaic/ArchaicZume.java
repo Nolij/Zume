@@ -17,8 +17,6 @@ import net.minecraft.util.MouseFilter;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.io.File;
-
 @Mod(
 	modid = Zume.MOD_ID,
 	name = Constants.MOD_NAME,
@@ -35,7 +33,7 @@ public class ArchaicZume implements IZumeImplementation {
 		
 		Zume.LOGGER.info("Loading Archaic Zume...");
 		
-		Zume.init(this, new File(Launch.minecraftHome, "config" + File.separator + Zume.CONFIG_FILE_NAME));
+		Zume.init(this, Launch.minecraftHome.toPath().resolve("config"));
 		if (Zume.disabled)
 			return;
 		

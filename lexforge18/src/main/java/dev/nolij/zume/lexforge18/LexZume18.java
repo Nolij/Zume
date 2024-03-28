@@ -13,8 +13,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 
-import java.io.File;
-
 @Mod(Zume.MOD_ID)
 public class LexZume18 implements IZumeImplementation {
 	
@@ -26,7 +24,7 @@ public class LexZume18 implements IZumeImplementation {
 		
 		LexZume18ConfigScreen.register();
 		
-		Zume.init(this, new File(FMLPaths.CONFIGDIR.get().toFile(), Zume.CONFIG_FILE_NAME));
+		Zume.init(this, FMLPaths.CONFIGDIR.get());
 		if (Zume.disabled)
 			return;
 		
