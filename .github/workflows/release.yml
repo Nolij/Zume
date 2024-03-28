@@ -18,7 +18,7 @@ jobs:
             -   name: :publishMods
                 run: ./gradlew publishMods -Prelease_channel=RELEASE
                 env:
-                    GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                     MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
                     CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
                     DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
