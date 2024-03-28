@@ -16,7 +16,7 @@ pluginManagement {
 
 buildscript {
 	dependencies {
-		classpath("org.ow2.asm:asm-tree:9.6")
+		classpath("org.ow2.asm:asm-tree:9.7")
 	}
 }
 

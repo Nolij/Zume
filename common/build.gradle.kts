@@ -13,7 +13,7 @@ buildConfig {
 	useJavaOutput()
 
 	// the below errors shown by IntelliJ can be safely ignored; Jabel works around this
-	buildConfigField("MOD_VERSION", Zume.version!!)
+	buildConfigField("MOD_VERSION", Zume.version)
 	buildConfigField("MOD_NAME", "mod_name"())
 	buildConfigField("ARCHAIC_VERSION_RANGE", "archaic_minecraft_range"())
 	buildConfigField("VINTAGE_VERSION_RANGE", "vintage_minecraft_range"())
@@ -24,9 +24,8 @@ repositories {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-	compileOnly("org.apache.logging.log4j:log4j-core:2.22.0")
+	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
-	compileOnly("org.ow2.asm:asm-tree:9.6")
-	compileOnly("org.spongepowered:mixin:0.8.5")
+	compileOnly("org.ow2.asm:asm-tree:${"asm_version"()}")
+	compileOnly("org.spongepowered:mixin:${"mixin_version"()}")
 }

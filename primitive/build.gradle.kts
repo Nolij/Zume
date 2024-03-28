@@ -51,6 +51,6 @@ dependencies {
 	
 	implementation("io.github.llamalad7:mixinextras-fabric:${"mixinextras_version"()}")
 
-    implementation("org.slf4j:slf4j-api:1.8.0-beta4")
-    implementation("org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0")
+    implementation("org.slf4j:slf4j-api:${"slf4j_version"()}")
+    implementation("org.apache.logging.log4j:log4j-slf4j18-impl:${"log4j_slf4j_version"()}")
 }

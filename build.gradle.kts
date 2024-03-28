@@ -60,11 +60,11 @@ val patchHistory = grgit.tag.list()
 	.map { name -> name.substring(minorTagPrefix.length) }
 
 val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
-val patch =
+val patch = 
 	maxPatch?.plus(
-		if (patchHistory.contains(maxPatch.toString())) 
-			1 
-		else 
+		if (patchHistory.contains(maxPatch.toString()))
+			1
+		else
 			0
 	) ?: 0
 versionString += patch.toString()
@@ -86,9 +86,10 @@ if (releaseChannel.suffix != null) {
 }
 
 Zume.version = versionString
+println("Zume Version: ${Zume.version}")
 
 rootProject.group = "maven_group"()
-rootProject.version = Zume.version!!
+rootProject.version = Zume.version
 
 base {
 	archivesName = "archives_base_name"()
@@ -160,7 +161,7 @@ allprojects {
 
 	tasks.processResources {
 		inputs.file(rootDir.resolve("gradle.properties"))
-		inputs.property("version", Zume.version!!)
+		inputs.property("version", Zume.version)
 
 		filteringCharset = "UTF-8"
 
@@ -168,7 +169,7 @@ allprojects {
 		props.putAll(rootProject.properties
 			.filterValues { value -> value is String }
 			.mapValues { entry -> entry.value as String })
-		props["mod_version"] = Zume.version!!
+		props["mod_version"] = Zume.version
 
 		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")) {
 			expand(props)
@@ -181,7 +182,7 @@ subprojects {
 	val implName = subProject.name
 	
 	group = "maven_group"()
-	version = Zume.version!!
+	version = Zume.version
 	
 	base {
 		archivesName = "${"archives_base_name"()}-${subProject.name}"
@@ -294,8 +295,7 @@ configurations {
 dependencies {
 	"shade"("blue.endless:jankson:${"jankson_version"()}")
 
-	// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-	compileOnly("org.apache.logging.log4j:log4j-core:2.22.0")
+	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
 	compileOnly(project(":stubs"))
 	
@@ -482,8 +482,8 @@ afterEvaluate {
 	publishMods {
 		file = getFileForPublish()
 		type = releaseChannel.releaseType ?: ALPHA
-		displayName = Zume.version!!
-		version = Zume.version!!
+		displayName = Zume.version
+		version = Zume.version
 		changelog = getChangelog()
 		
 		modLoaders.addAll("fabric", "forge", "neoforge")
@@ -493,7 +493,7 @@ afterEvaluate {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
 			repository = "Nolij/Zume"
 			commitish = "master"
-			tagName = "release/${Zume.version!!}"
+			tagName = "release/${Zume.version}"
 		}
 		
 		if (dryRun.get() || releaseChannel.releaseType != null) {
@@ -569,7 +569,7 @@ afterEvaluate {
 				avatarUrl = "https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
 
 				content = changelog.map { changelog ->
-					"# Zume ${Zume.version!!} has been released!\nChangelog: ```md\n${changelog}\n```"
+					"# Zume ${Zume.version} has been released!\nChangelog: ```md\n${changelog}\n```"
 				}
 
 				setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
@@ -591,7 +591,7 @@ afterEvaluate {
 				val file = getFileForPublish().asFile
 
 				val webhook = DiscordAPI.Webhook(
-					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version!!}>\n" +
+					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
 						"```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
