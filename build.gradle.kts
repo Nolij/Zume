@@ -49,11 +49,13 @@ enum class ReleaseChannel(
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
+grgit.fetch(mapOf("tagMode" to TagMode.ALL))
+val releaseTagPrefix = "release/"
+
 var versionString = "mod_version"()
 versionString += "."
 
-grgit.fetch(mapOf("tagMode" to TagMode.ALL))
-val minorTagPrefix = "release/${versionString}"
+val minorTagPrefix = releaseTagPrefix + versionString
 val patchHistory = grgit.tag.list()
 	.map { tag -> tag.name }
 	.filter { name -> name.startsWith(minorTagPrefix) }
@@ -493,7 +495,7 @@ afterEvaluate {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
 			repository = "Nolij/Zume"
 			commitish = "master"
-			tagName = "release/${Zume.version}"
+			tagName = releaseTagPrefix + Zume.version
 		}
 		
 		if (dryRun.get() || releaseChannel.releaseType != null) {
