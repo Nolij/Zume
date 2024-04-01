@@ -279,6 +279,12 @@ public class Zume {
         return true;
     }
 	
+	private static boolean getToggleMode() {
+		return implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON 
+		       ? config.toggleMode 
+		       : config.thirdPersonToggleMode;
+	}
+	
 	/**
 	 * Returns `true` if Zume is active.
 	 */
@@ -286,7 +292,7 @@ public class Zume {
 		if (disabled || implementation == null)
 			return false;
 		
-		if (config.toggleMode)
+		if (getToggleMode())
 			return toggle;
 		
 		return implementation.isZoomPressed();
@@ -323,8 +329,10 @@ public class Zume {
 		final boolean held = implementation.isZoomPressed();
 		final boolean zooming = isEnabled();
 		
-		if (config.toggleMode && held && !wasHeld)
+		if (getToggleMode() && held && !wasHeld)
 			toggle = !toggle;
+		else if (!getToggleMode())
+			toggle = zooming;
 		
 		if (zooming) {
 			if (!wasZooming) {

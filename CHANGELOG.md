@@ -1,5 +1,6 @@
 - added global config (stored in `.minecraft/global/zume.json5`) (overridden by old config file if present)
 - added config path override (use JVM argument `-Dzume.configPathOverride="path/to/zume.json5"`)
+- added `thirdPersonToggleMode` config option
 - added new easing options: `SINE`, `CUBIC`, `CIRCULAR`, `EXPONENTIAL`
 - made many internal easing improvements
 - streamlined release process
