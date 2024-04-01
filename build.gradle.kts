@@ -53,10 +53,9 @@ grgit.fetch(mapOf("tagMode" to TagMode.ALL))
 val branchName = grgit.branch.current().name
 val releaseTagPrefix = "release/"
 
-var versionString = "mod_version"()
-versionString += "."
+val minorVersion = "mod_version"()
+val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
 
-val minorTagPrefix = releaseTagPrefix + versionString
 val patchHistory = grgit.tag.list()
 	.map { tag -> tag.name }
 	.filter { name -> name.startsWith(minorTagPrefix) }
@@ -70,25 +69,24 @@ val patch =
 		else
 			0
 	) ?: 0
-versionString += patch.toString()
+var patchAndSuffix = patch.toString()
 
 if (releaseChannel.suffix != null) {
-	versionString += "-${releaseChannel.suffix}"
+	patchAndSuffix += "-${releaseChannel.suffix}"
 	
 	if (isRelease) {
-		versionString += "."
+		patchAndSuffix += "."
 		
-		val prefix = versionString.removePrefix("${"mod_version"()}.")
 		val maxBuild = patchHistory
-			.mapNotNull { it.removePrefix(prefix).toIntOrNull() }
+			.mapNotNull { it.removePrefix(patchAndSuffix).toIntOrNull() }
 			.maxOrNull()
 		
 		val build = (maxBuild?.plus(1)) ?: 1
-		versionString += build.toString()
+		patchAndSuffix += build.toString()
 	}
 }
 
-Zume.version = versionString
+Zume.version = "${minorVersion}.${patchAndSuffix}"
 println("Zume Version: ${Zume.version}")
 
 rootProject.group = "maven_group"()
