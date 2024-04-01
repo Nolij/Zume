@@ -135,13 +135,8 @@ public class ZumeConfig implements Cloneable {
         }
 	}
 	
-	private static ZumeConfig readHighestPriorityConfigFile() {
+	private static ZumeConfig readConfigFile() {
 		ZumeConfig result = readFromFile(getConfigFile());
-		if (result == null && CONFIG_PATH_OVERRIDE == null && instanceFile != null && instanceFile.exists())
-			result = readFromFile(instanceFile);
-		
-		if (result == null && globalFile != null && globalFile.exists())
-			result = readFromFile(globalFile);
 		
 		if (result == null)
 			result = new ZumeConfig();
@@ -232,7 +227,7 @@ public class ZumeConfig implements Cloneable {
 	public static void reloadConfig() {
 		Zume.LOGGER.info("Reloading config...");
 		
-		final ZumeConfig newConfig = readHighestPriorityConfigFile();
+		final ZumeConfig newConfig = readConfigFile();
 		
 		consumer.invoke(newConfig);
 	}
@@ -247,7 +242,7 @@ public class ZumeConfig implements Cloneable {
 			globalFile = GLOBAL_CONFIG_PATH.resolve(fileName).toFile();
 		}
 		
-		ZumeConfig config = readHighestPriorityConfigFile();
+		ZumeConfig config = readConfigFile();
 		
 		// write new options and comment updates to disk
 		config.writeToFile(getConfigFile());
