@@ -181,17 +181,12 @@ public class Zume {
 			try {
 				Desktop.getDesktop().open(configFile);
 			} catch (HeadlessException ignored) {
-				if (HOST_PLATFORM == HostPlatform.UNKNOWN) {
-					Zume.LOGGER.error("Error opening config file: Unsupported Platform!");
-					return;
-				}
-				
 				final String CONFIG_PATH = configFile.getCanonicalPath();
 				
 				final ProcessBuilder builder = new ProcessBuilder().inheritIO();
 				
 				switch (HOST_PLATFORM) {
-					case LINUX -> builder.command("xdg-open", CONFIG_PATH);
+					case LINUX, UNKNOWN -> builder.command("xdg-open", CONFIG_PATH);
 					case WINDOWS -> builder.command("rundll32", "url.dll,FileProtocolHandler", CONFIG_PATH);
 					case MAC_OS -> builder.command("open", "-t", CONFIG_PATH);
 				}
