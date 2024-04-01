@@ -50,6 +50,7 @@ val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
 grgit.fetch(mapOf("tagMode" to TagMode.ALL))
+val branchName = grgit.branch.current().name
 val releaseTagPrefix = "release/"
 
 var versionString = "mod_version"()
@@ -494,7 +495,7 @@ afterEvaluate {
 		github {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
 			repository = "Nolij/Zume"
-			commitish = "master"
+			commitish = branchName
 			tagName = releaseTagPrefix + Zume.version
 		}
 		
