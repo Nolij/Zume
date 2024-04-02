@@ -47,13 +47,13 @@ public class ZumeConfig implements Cloneable {
 	@Comment("""
 		\nThe exponent used for easing animations.
 		You should probably leave this at the default if you don't understand what it does.
-		DEFAULT: `QUARTIC`""")
+		DEFAULT: `4.0`""")
 	public double animationEasingExponent = 4D;
 	
 	@Comment("""
 		\nThe exponent used for making differences in FOV more uniform.
 		You should probably leave this at the default if you don't understand what it does.
-		DEFAULT: `QUADRATIC`""")
+		DEFAULT: `2.0`""")
 	public double zoomEasingExponent = 2D;
 	
 	@Comment("""
@@ -84,7 +84,7 @@ public class ZumeConfig implements Cloneable {
 	
 	@Comment("""
         \nMinimum third-person zoom distance (in blocks).
-        Set to `0.0` to mimic vanilla.
+        Set to `4.0` to mimic vanilla.
         DEFAULT: `0.5`""")
 	public double minThirdPersonZoomDistance = 0.5D;
 	
