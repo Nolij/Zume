@@ -34,7 +34,7 @@ public class EasedDouble {
 		if (isEasing()) {
 			final long delta = System.currentTimeMillis() - startTimestamp;
 			
-			return EasingHelper.easeIn(fromValue, targetValue, delta * inverseDuration, exponent);
+			return EasingHelper.in(fromValue, targetValue, delta * inverseDuration, exponent);
 		}
 		
 		return targetValue;

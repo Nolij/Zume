@@ -105,8 +105,8 @@ public class Zume {
 	//region Private Members
 	private static final EasedDouble zoom = new EasedDouble(1D);
 	private static int scrollDelta = 0;
-	private static boolean toggle = false;
 	private static boolean wasHeld = false;
+	private static boolean zooming = false;
 	private static boolean wasZooming = false;
 	private static long prevRenderTimestamp;
 	//endregion
@@ -132,7 +132,6 @@ public class Zume {
 		ZumeConfig.init(instanceConfigPath, CONFIG_FILE_NAME, config -> {
 			Zume.config = config;
 			zoom.update(config.zoomSmoothnessMs, config.animationEasingExponent);
-			toggle = false;
 		});
 		
 		disabled = config.disable;
@@ -153,7 +152,7 @@ public class Zume {
 	}
 	
 	private static double getThirdPersonStartZoom() {
-		return EasingHelper.inverseEaseOut(
+		return EasingHelper.inverseOut(
 			config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, 
 			4D, config.zoomEasingExponent);
 	}
@@ -161,16 +160,14 @@ public class Zume {
 	private static void onZoomActivate() {
 		implementation.onZoomActivate();
 		
-		final CameraPerspective perspective = implementation.getCameraPerspective();
-		
-		if (perspective == CameraPerspective.FIRST_PERSON)
-			setZoom(1 - config.defaultZoom);
+		if (shouldUseFirstPersonZoom())
+			setZoom(1D, 1 - config.defaultZoom);
 		else
-			setZoom(getThirdPersonStartZoom(), perspective == CameraPerspective.THIRD_PERSON ? 1D : 0D);
+			setZoom(getThirdPersonStartZoom(), implementation.getCameraPerspective() == CameraPerspective.THIRD_PERSON ? 1D : 0D);
 	}
 	
 	private static void onZoomDeactivate() {
-		if (implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON)
+		if (shouldUseFirstPersonZoom())
 			setZoom(1D);
 		else
 			setZoom(getThirdPersonStartZoom());
@@ -212,7 +209,7 @@ public class Zume {
 	 * {@return The new FOV transformed by Zume}
 	 */
 	public static double transformFOV(final double original) {
-		return EasingHelper.easeOut(config.minFOV, original, getZoom(), config.zoomEasingExponent);
+		return EasingHelper.out(config.minFOV, original, getZoom(), config.zoomEasingExponent);
 	}
 	
 	/**
@@ -222,10 +219,10 @@ public class Zume {
 	 * @return The new third-person camera distance
 	 */
 	public static double transformThirdPersonDistance(final double original) {
-		if (config.maxThirdPersonZoomDistance == 0 || !shouldHook())
+		if (shouldUseFirstPersonZoom() || !shouldHook())
 			return original;
 		
-		return original * 0.25D * EasingHelper.easeOut(config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, getZoom(), config.zoomEasingExponent);
+		return original * 0.25D * EasingHelper.out(config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, getZoom(), config.zoomEasingExponent);
 	}
 	
 	/**
@@ -248,10 +245,10 @@ public class Zume {
 	 * {@return The new mouse sensitivity, transformed by Zume}
 	 */
 	public static double transformMouseSensitivity(final double original) {
-		if (!isEnabled() || implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON)
+		if (!isEnabled() || !shouldUseFirstPersonZoom())
 			return original;
 		
-		return original * EasingHelper.easeOut(config.mouseSensitivityFloor, 1D, getZoom(), 1);
+		return original * EasingHelper.out(config.mouseSensitivityFloor, 1D, getZoom(), 1);
 	}
 	
 	public static boolean shouldCancelScroll() {
@@ -273,8 +270,8 @@ public class Zume {
     }
 	
 	private static boolean getToggleMode() {
-		return implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON 
-		       ? config.toggleMode 
+		return shouldUseFirstPersonZoom()
+		       ? config.toggleMode
 		       : config.thirdPersonToggleMode;
 	}
 	
@@ -285,10 +282,7 @@ public class Zume {
 		if (disabled || implementation == null)
 			return false;
 		
-		if (getToggleMode())
-			return toggle;
-		
-		return implementation.isZoomPressed();
+		return zooming;
 	}
 	
 	/**
@@ -305,8 +299,13 @@ public class Zume {
 		return isEnabled() || zoom.isEasing();
 	}
 	
+	public static boolean shouldUseFirstPersonZoom() {
+		return config.maxThirdPersonZoomDistance == 0 || 
+			implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON;
+	}
+	
 	public static boolean shouldHookFOV() {
-		return shouldHook() && implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON;
+		return shouldHook() && shouldUseFirstPersonZoom();
 	}
 	
 	/**
@@ -320,12 +319,12 @@ public class Zume {
 		
 		final long timestamp = System.currentTimeMillis();
 		final boolean held = implementation.isZoomPressed();
-		final boolean zooming = isEnabled();
+		final boolean toggleMode = getToggleMode();
 		
-		if (getToggleMode() && held && !wasHeld)
-			toggle = !toggle;
-		else if (!getToggleMode())
-			toggle = zooming;
+		if (toggleMode && held && !wasHeld)
+			zooming = !Zume.zooming;
+		else if (!toggleMode)
+			zooming = held;
 		
 		if (zooming) {
 			if (!wasZooming)
