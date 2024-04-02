@@ -3,6 +3,7 @@
 - added `thirdPersonToggleMode` config option
 - fixed bounce when deactivating third-person zoom
 - fixed Vintage implementation bug with some mixin loaders
+- fixed single-frame flicker when deactivating zoom
 - easing now uses exponent instead of named methods
 - streamlined release process
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
