@@ -40,19 +40,13 @@ public class EntityRendererMixin {
 	@ModifyExpressionValue(method = "orientCamera", 
 		at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/EntityRenderer;thirdPersonDistance:F"))
 	public float zume$orientCamera$thirdPersonDistance(float original) {
-		if (Zume.shouldHook())
-			return (float) Zume.transformThirdPersonDistance(original);
-		
-		return original;
+		return (float) Zume.transformThirdPersonDistance(original);
 	}
 	
 	@ModifyExpressionValue(method = "orientCamera", 
 		at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/EntityRenderer;thirdPersonDistanceTemp:F"))
 	public float zume$orientCamera$thirdPersonDistanceTemp(float original) {
-		if (Zume.shouldHook())
-			return (float) Zume.transformThirdPersonDistance(original);
-		
-		return original;
+		return (float) Zume.transformThirdPersonDistance(original);
 	}
 
 }

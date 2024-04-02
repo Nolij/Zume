@@ -37,18 +37,12 @@ public class GameRendererMixin {
 	
 	@ModifyExpressionValue(method = "method_1851", at = @At(value = "FIELD", target = "Lnet/minecraft/class_555;field_2359:F"))
 	public float zume$transformCamera$thirdPersonDistance(float original) {
-		if (Zume.shouldHook())
-			return (float) Zume.transformThirdPersonDistance(original);
-		
-		return original;
+        return (float) Zume.transformThirdPersonDistance(original);
 	}
 	
 	@ModifyExpressionValue(method = "method_1851", at = @At(value = "FIELD", target = "Lnet/minecraft/class_555;field_2360:F"))
 	public float zume$transformCamera$lastThirdPersonDistance(float original) {
-		if (Zume.shouldHook())
-			return (float) Zume.transformThirdPersonDistance(original);
-		
-		return original;
+        return (float) Zume.transformThirdPersonDistance(original);
 	}
 	
 }

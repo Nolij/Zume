@@ -11,10 +11,7 @@ public class CameraMixin {
 	
 	@ModifyArg(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;clipToSpace(D)D"))
 	public double zume$update$clipToSpace(double original) {
-		if (Zume.shouldHook())
-			return Zume.transformThirdPersonDistance(original);
-		
-		return original;
+        return Zume.transformThirdPersonDistance(original);
 	}
 	
 }

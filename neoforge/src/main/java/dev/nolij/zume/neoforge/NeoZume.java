@@ -87,9 +87,7 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-		if (Zume.shouldHook()) {
-			event.setDistance(Zume.transformThirdPersonDistance(event.getDistance()));
-		}
+        event.setDistance(Zume.transformThirdPersonDistance(event.getDistance()));
 	}
 	
 }

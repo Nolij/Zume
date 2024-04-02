@@ -104,7 +104,6 @@ public class Zume {
 	
 	//region Private Members
 	private static final EasedDouble zoom = new EasedDouble(1D);
-	private static final EasedDouble thirdPersonZoomMinimum = new EasedDouble();
 	private static int scrollDelta = 0;
 	private static boolean toggle = false;
 	private static boolean wasHeld = false;
@@ -133,7 +132,6 @@ public class Zume {
 		ZumeConfig.init(instanceConfigPath, CONFIG_FILE_NAME, config -> {
 			Zume.config = config;
 			zoom.update(config.zoomSmoothnessMs, config.animationEasingExponent);
-			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.animationEasingExponent);
 			toggle = false;
 		});
 		
@@ -150,24 +148,32 @@ public class Zume {
 		zoom.set(clamp(targetZoom));
 	}
 	
+	private static void setZoom(final double fromZoom, final double targetZoom) {
+		zoom.set(clamp(fromZoom), clamp(targetZoom));
+	}
+	
+	private static double getThirdPersonStartZoom() {
+		return EasingHelper.inverseEaseOut(
+			config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, 
+			4D, config.zoomEasingExponent);
+	}
+	
 	private static void onZoomActivate() {
 		implementation.onZoomActivate();
 		
-		setZoom(switch (implementation.getCameraPerspective()) {
-            case FIRST_PERSON -> 1 - config.defaultZoom;
-            case THIRD_PERSON -> 0D;
-            case THIRD_PERSON_FLIPPED -> 1D;
-        });
+		final CameraPerspective perspective = implementation.getCameraPerspective();
 		
-		if (config.minThirdPersonZoomDistance > 0)
-			thirdPersonZoomMinimum.set(EasedDouble.PLACEHOLDER, config.minThirdPersonZoomDistance);
+		if (perspective == CameraPerspective.FIRST_PERSON)
+			setZoom(1 - config.defaultZoom);
+		else
+			setZoom(getThirdPersonStartZoom(), perspective == CameraPerspective.THIRD_PERSON ? 1D : 0D);
 	}
 	
 	private static void onZoomDeactivate() {
-		setZoom(1D);
-		
-		if (config.minThirdPersonZoomDistance > 0)
-			thirdPersonZoomMinimum.set(config.minThirdPersonZoomDistance, EasedDouble.PLACEHOLDER);
+		if (implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON)
+			setZoom(1D);
+		else
+			setZoom(getThirdPersonStartZoom());
 	}
 	//endregion
 	
@@ -216,18 +222,10 @@ public class Zume {
 	 * @return The new third-person camera distance
 	 */
 	public static double transformThirdPersonDistance(final double original) {
-		if (config.maxThirdPersonZoomDistance == 0)
+		if (config.maxThirdPersonZoomDistance == 0 || !shouldHook())
 			return original;
 		
-		thirdPersonZoomMinimum.fillPlaceholder(original);
-		final double min = config.minThirdPersonZoomDistance > 0 
-		                   ? Math.min(original, thirdPersonZoomMinimum.getEased()) 
-		                   : original;
-		final double max = config.maxThirdPersonZoomDistance > 4 
-		                   ? original / 4D * config.maxThirdPersonZoomDistance 
-		                   : original;
-		
-		return EasingHelper.easeOut(min, max, 1 - getZoom(), config.zoomEasingExponent);
+		return original * 0.25D * EasingHelper.easeOut(config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, getZoom(), config.zoomEasingExponent);
 	}
 	
 	/**
@@ -330,23 +328,20 @@ public class Zume {
 			toggle = zooming;
 		
 		if (zooming) {
-			if (!wasZooming) {
+			if (!wasZooming)
 				onZoomActivate();
-			}
 			
 			final long timeDelta = timestamp - prevRenderTimestamp;
 			
-			final double reversedFactor = implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON ? -1D : 1D;
-			
 			if (config.enableZoomScrolling && scrollDelta != 0) {
-				setZoom(zoom.getTarget() - reversedFactor * (scrollDelta * config.zoomSpeed * 4E-3D));
+				setZoom(zoom.getTarget() - (scrollDelta * config.zoomSpeed * 4E-3D));
 			} else if (implementation.isZoomInPressed() ^ implementation.isZoomOutPressed()) {
 				final double interpolatedIncrement = config.zoomSpeed * 1E-4D * timeDelta;
 				
 				if (implementation.isZoomInPressed())
-					setZoom(zoom.getTarget() - reversedFactor * interpolatedIncrement);
+					setZoom(zoom.getTarget() - interpolatedIncrement);
 				else if (implementation.isZoomOutPressed())
-					setZoom(zoom.getTarget() + reversedFactor * interpolatedIncrement);
+					setZoom(zoom.getTarget() + interpolatedIncrement);
 			}
 		} else if (wasZooming) {
 			onZoomDeactivate();

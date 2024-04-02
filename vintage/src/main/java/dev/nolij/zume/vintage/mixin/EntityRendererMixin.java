@@ -24,10 +24,7 @@ public class EntityRendererMixin {
 	
 	@ModifyVariable(method = "orientCamera", at = @At("STORE"), ordinal = 3)
 	public double zume$orientCamera$thirdPersonDistance(double original) {
-		if (Zume.shouldHook())
-			return Zume.transformThirdPersonDistance(original);
-		
-		return original;
+        return Zume.transformThirdPersonDistance(original);
 	}
 
 }
