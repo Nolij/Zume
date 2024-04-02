@@ -2,7 +2,7 @@ package dev.nolij.zume.common;
 
 import dev.nolij.zume.common.config.ZumeConfig;
 import dev.nolij.zume.common.easing.EasedDouble;
-import dev.nolij.zume.common.easing.EasingMethod;
+import dev.nolij.zume.common.easing.EasingHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -132,8 +132,8 @@ public class Zume {
 		
 		ZumeConfig.init(instanceConfigPath, CONFIG_FILE_NAME, config -> {
 			Zume.config = config;
-			zoom.update(config.zoomSmoothnessMs, config.animationEasingMethod);
-			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.animationEasingMethod);
+			zoom.update(config.zoomSmoothnessMs, config.animationEasingExponent);
+			thirdPersonZoomMinimum.update(config.zoomSmoothnessMs, config.animationEasingExponent);
 			toggle = false;
 		});
 		
@@ -206,7 +206,7 @@ public class Zume {
 	 * {@return The new FOV transformed by Zume}
 	 */
 	public static double transformFOV(final double original) {
-		return config.zoomEasingMethod.easeIn(config.minFOV, original, getZoom());
+		return EasingHelper.easeOut(config.minFOV, original, getZoom(), config.zoomEasingExponent);
 	}
 	
 	/**
@@ -227,7 +227,7 @@ public class Zume {
 		                   ? original / 4D * config.maxThirdPersonZoomDistance 
 		                   : original;
 		
-		return config.zoomEasingMethod.easeIn(min, max, 1 - getZoom());
+		return EasingHelper.easeOut(min, max, 1 - getZoom(), config.zoomEasingExponent);
 	}
 	
 	/**
@@ -253,7 +253,7 @@ public class Zume {
 		if (!isEnabled() || implementation.getCameraPerspective() != CameraPerspective.FIRST_PERSON)
 			return original;
 		
-		return original * EasingMethod.LINEAR.easeIn(config.mouseSensitivityFloor, 1D, getZoom());
+		return original * EasingHelper.easeOut(config.mouseSensitivityFloor, 1D, getZoom(), 1);
 	}
 	
 	public static boolean shouldCancelScroll() {

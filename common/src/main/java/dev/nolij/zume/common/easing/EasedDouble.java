@@ -7,7 +7,7 @@ public class EasedDouble {
 	private short duration;
 	private double inverseDuration;
 	
-	private EasingMethod easingMethod;
+	private double exponent;
 	
 	private double fromValue = PLACEHOLDER;
 	private double targetValue;
@@ -24,17 +24,17 @@ public class EasedDouble {
 		this.targetValue = value;
 	}
 	
-	public void update(final short duration, final EasingMethod easingMethod) {
+	public void update(final short duration, final double exponent) {
 		this.duration = duration;
 		this.inverseDuration = 1D / duration;
-		this.easingMethod = easingMethod;
+		this.exponent = exponent;
 	}
 	
 	public double getEased() {
 		if (isEasing()) {
 			final long delta = System.currentTimeMillis() - startTimestamp;
 			
-			return easingMethod.easeOut(fromValue, targetValue, delta * inverseDuration);
+			return EasingHelper.easeIn(fromValue, targetValue, delta * inverseDuration, exponent);
 		}
 		
 		return targetValue;
@@ -75,7 +75,7 @@ public class EasedDouble {
 	}
 	
 	public boolean isEasing() {
-		return duration != 0 && endTimestamp != 0L && System.currentTimeMillis() < endTimestamp;
+		return System.currentTimeMillis() < endTimestamp;
 	}
 	
 }

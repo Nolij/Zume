@@ -5,7 +5,6 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.api.SyntaxError;
 import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.common.easing.EasingMethod;
 import dev.nolij.zume.common.util.FileWatcher;
 import dev.nolij.zume.common.util.IFileWatcher;
 
@@ -46,18 +45,16 @@ public class ZumeConfig implements Cloneable {
 	public short zoomSmoothnessMs = 150;
 	
 	@Comment("""
-		\nThe algorithm responsible easing animations.
+		\nThe exponent used for easing animations.
 		You should probably leave this at the default if you don't understand what it does.
-		OPTIONS: `SINE`, `LINEAR`, `QUADRATIC`, `CUBIC`, `QUARTIC`, `QUINTIC`, `CIRCULAR`, `EXPONENTIAL`
-		DEFAULT: `QUART`""")
-	public EasingMethod animationEasingMethod = EasingMethod.QUARTIC;
+		DEFAULT: `QUARTIC`""")
+	public double animationEasingExponent = 4D;
 	
 	@Comment("""
-		\nThe algorithm responsible for making differences in FOV more uniform.
+		\nThe exponent used for making differences in FOV more uniform.
 		You should probably leave this at the default if you don't understand what it does.
-		OPTIONS: `SINE`, `LINEAR`, `QUADRATIC`, `CUBIC`, `QUARTIC`, `QUINTIC`, `CIRCULAR`, `EXPONENTIAL`
 		DEFAULT: `QUADRATIC`""")
-	public EasingMethod zoomEasingMethod = EasingMethod.QUADRATIC;
+	public double zoomEasingExponent = 2D;
 	
 	@Comment("""
 		\nDefault starting zoom percentage.
@@ -97,7 +94,7 @@ public class ZumeConfig implements Cloneable {
 		DEFAULT: `false`""")
 	public boolean disable = false;
 	
-	private static final int EXPECTED_VERSION = 0;
+	private static final int EXPECTED_VERSION = 1;
 	@Comment("Used internally. Don't modify this.")
 	public int configVersion = EXPECTED_VERSION;
 	
