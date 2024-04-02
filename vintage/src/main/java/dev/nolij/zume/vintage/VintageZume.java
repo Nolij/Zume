@@ -3,11 +3,9 @@ package dev.nolij.zume.vintage;
 import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.Constants;
 import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.vintage.mixin.EntityRendererAccessor;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.util.MouseFilter;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -61,20 +59,6 @@ public class VintageZume implements IZumeImplementation {
 	@Override
 	public CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[Minecraft.getMinecraft().gameSettings.thirdPersonView];
-	}
-	
-	@Override
-	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
-			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
-			entityRenderer.setMouseFilterXAxis(new MouseFilter());
-			entityRenderer.setMouseFilterYAxis(new MouseFilter());
-			entityRenderer.setSmoothCamYaw(0F);
-			entityRenderer.setSmoothCamPitch(0F);
-			entityRenderer.setSmoothCamFilterX(0F);
-			entityRenderer.setSmoothCamFilterY(0F);
-			entityRenderer.setSmoothCamPartialTicks(0F);
-		}
 	}
 	
 	@SubscribeEvent

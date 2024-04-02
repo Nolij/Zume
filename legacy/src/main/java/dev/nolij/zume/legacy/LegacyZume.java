@@ -10,6 +10,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SmoothUtil;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+
 public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
@@ -42,9 +45,23 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		return CameraPerspective.values()[MinecraftClient.getInstance().options.perspective];
 	}
 	
+	private static final boolean USE_CINEMATIC_CAMERA_WORKAROUND;
+	
+	static {
+		var useWorkaround = true;
+		try {
+			//noinspection JavaReflectionMemberAccess
+			SmoothUtil.class.getMethod("method_10852");
+			useWorkaround = false;
+		} catch (NoSuchMethodException ignored) { }
+		
+		USE_CINEMATIC_CAMERA_WORKAROUND = useWorkaround;
+    }
+	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
+		if (USE_CINEMATIC_CAMERA_WORKAROUND && 
+			Zume.config.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
 			gameRenderer.setCursorXSmoother(new SmoothUtil());
 			gameRenderer.setCursorYSmoother(new SmoothUtil());
