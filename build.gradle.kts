@@ -53,8 +53,8 @@ grgit.fetch(mapOf("tagMode" to TagMode.ALL))
 val currentTag = grgit.describe {
 	tags = true
 	abbrev = 0
-}
-val branchName = grgit.branch.current().name
+}!!
+val branchName = grgit.branch.current().name!!
 val releaseTagPrefix = "release/"
 
 val minorVersion = "mod_version"()
@@ -594,7 +594,7 @@ afterEvaluate {
 				val commitList = grgit.log {
 					range(currentTag, "HEAD")
 				}.joinToString("\n") { commit ->
-					"${commit.abbreviatedId}: ${commit.shortMessage} - ${commit.author.name}"
+					"${commit.abbreviatedId}: ${commit.shortMessage}"
 				}
 
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
@@ -603,7 +603,7 @@ afterEvaluate {
 
 				val webhook = DiscordAPI.Webhook(
 					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
-						"Changes since ${currentTag.removePrefix(releaseTagPrefix)}: ```md\n${commitList}\n```\n" +
+						"Changes since `${currentTag.removePrefix(releaseTagPrefix)}`: ```md\n${commitList}\n```\n" +
 						"Changes since last release: ```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
