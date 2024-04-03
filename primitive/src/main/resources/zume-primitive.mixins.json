@@ -2,7 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.primitive.mixin",
-	"plugin": "dev.nolij.zume.primitive.PrimitiveZumeMixinPlugin",
+	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 	],
