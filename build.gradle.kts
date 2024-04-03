@@ -50,11 +50,11 @@ val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
 grgit.fetch(mapOf("tagMode" to TagMode.ALL))
-val currentTag: String? = grgit.describe {
+val currentTag = grgit.describe {
 	tags = true
 	abbrev = 0
 }
-val branchName: String? = grgit.branch.current().name
+val branchName = grgit.branch.current().name
 val releaseTagPrefix = "release/"
 
 val minorVersion = "mod_version"()
@@ -567,7 +567,7 @@ afterEvaluate {
 			}
 
 			discord {
-				webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+				webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK").orElse("")
 
 				username = "Zume Releases"
 
@@ -603,8 +603,8 @@ afterEvaluate {
 
 				val webhook = DiscordAPI.Webhook(
 					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
-						"New in this build: ```md\n${commitList}\n```\n" +
-						"Pending Changelog: ```md\n${changelog}\n```",
+						"Changes since ${currentTag.removePrefix(releaseTagPrefix)}: ```md\n${commitList}\n```\n" +
+						"Changes since last release: ```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
 				)
