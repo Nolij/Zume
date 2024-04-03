@@ -16,6 +16,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
+import java.io.File;
+
 @Mod(
 	modid = Zume.MOD_ID,
 	name = Constants.MOD_NAME,
@@ -30,7 +32,7 @@ public class VintageZume implements IZumeImplementation {
 		
 		Zume.LOGGER.info("Loading Vintage Zume...");
 		
-		Zume.init(this, Launch.minecraftHome.toPath().resolve("config"));
+		Zume.init(this, new File(Launch.minecraftHome, "config").toPath());
 		if (Zume.disabled)
 			return;
 		
