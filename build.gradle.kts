@@ -49,11 +49,9 @@ enum class ReleaseChannel(
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
-grgit.fetch(mapOf("tagMode" to TagMode.ALL))
-val currentTag = grgit.describe {
-	tags = true
-	abbrev = 0
-}!!
+grgit.fetch {
+	setTagMode(TagMode.ALL.name)
+}
 val branchName = grgit.branch.current().name!!
 val releaseTagPrefix = "release/"
 
@@ -590,6 +588,11 @@ afterEvaluate {
 		if (releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
+				
+				val currentTag = grgit.describe {
+					tags = true
+					abbrev = 0
+				}!!
 
 				val commitList = grgit.log {
 					range(currentTag, "HEAD")
