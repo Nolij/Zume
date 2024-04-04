@@ -54,12 +54,6 @@ project.exec {
 	commandLine("git", "fetch", "--all", "--tags")
 }
 
-val currentTagOutputStream = ByteArrayOutputStream()
-project.exec {
-	commandLine("git", "describe", "--tags", "--abbrev=0")
-	standardOutput = currentTagOutputStream
-}
-val currentTag = currentTagOutputStream.toString(Charsets.UTF_8).trim()
 val branchName = grgit.branch.current().name!!
 val releaseTagPrefix = "release/"
 
@@ -84,7 +78,7 @@ var patchAndSuffix = patch.toString()
 if (releaseChannel.suffix != null) {
 	patchAndSuffix += "-${releaseChannel.suffix}"
 	
-	if (isRelease) {
+//	if (isRelease) {
 		patchAndSuffix += "."
 		
 		val maxBuild = patchHistory
@@ -93,7 +87,7 @@ if (releaseChannel.suffix != null) {
 		
 		val build = (maxBuild?.plus(1)) ?: 1
 		patchAndSuffix += build.toString()
-	}
+//	}
 }
 
 Zume.version = "${minorVersion}.${patchAndSuffix}"
@@ -597,8 +591,11 @@ afterEvaluate {
 			doLast {
 				val http = HttpUtils()
 				
+				val tags = grgit.tag.list().sortedByDescending { it.commit.dateTime }.map { it.commit.id }
+				val prevTag: String = tags.getOrNull(1) ?: grgit.log().minBy { it.dateTime }.id
+
 				val commitList = grgit.log {
-					range(currentTag, "HEAD")
+					range(prevTag, "HEAD")
 				}.joinToString("\n") { commit ->
 					"${commit.abbreviatedId}: ${commit.shortMessage}"
 				}
@@ -609,7 +606,7 @@ afterEvaluate {
 
 				val webhook = DiscordAPI.Webhook(
 					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
-						"Changes since `${currentTag.removePrefix(releaseTagPrefix)}`: ```md\n${commitList}\n```\n" +
+						"Changes since last build: ```md\n${commitList}\n```\n" +
 						"Changes since last release: ```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
