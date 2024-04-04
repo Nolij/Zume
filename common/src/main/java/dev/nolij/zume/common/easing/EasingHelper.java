@@ -19,7 +19,7 @@ public final class EasingHelper {
 	}
 	
 	public static double out(double start, double end, double progress, double exponent) {
-		return start + ((end - start) * out(progress, exponent));
+		return linear(start, end, out(progress, exponent));
 	}
 	
 	public static double inverseOut(double start, double end, double value, double exponent) {
@@ -35,7 +35,7 @@ public final class EasingHelper {
 	}
 	
 	public static double in(double start, double end, double progress, double exponent) {
-		return start + ((end - start) * in(progress, exponent));
+		return linear(start, end, in(progress, exponent));
 	}
 	
 	public static double inverseIn(double start, double end, double value, double exponent) {
@@ -43,11 +43,13 @@ public final class EasingHelper {
 	}
 	
 	public static double inOut(double progress, double exponent) {
-		return linear(in(progress, exponent), out(progress, exponent), progress);
+		return (progress < 0.5 ? out(progress, exponent) : in(progress, exponent)) * Math.pow(2, exponent - 1);
 	}
 	
 	public static double inverseInOut(double progress, double exponent) {
-		return 0.5D - Math.sin(Math.asin(1D - 2D * progress) / 3D); // TODO: use exponent
+		return progress < 0.5
+		       ? Math.pow(progress / Math.pow(2, exponent - 1), 1D / exponent)
+		       : -Math.pow((1 - progress) / Math.pow(2, exponent - 1), 1D / exponent) + 1;
 	}
 	
 	public static double inOut(double start, double end, double progress, double exponent) {
@@ -55,7 +57,7 @@ public final class EasingHelper {
 	}
 	
 	public static double inverseInOut(double start, double end, double value, double exponent) {
-		return inverseInOut(inverseLinear(start, end, value), exponent); // TODO: use exponent
+		return inverseInOut(inverseLinear(start, end, value), exponent);
 	}
 	
 }
