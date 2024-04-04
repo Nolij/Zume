@@ -595,7 +595,7 @@ afterEvaluate {
 				val http = HttpUtils()
 				
 				val tags = grgit.tag.list().sortedByDescending { it.commit.dateTime }.map { it.commit.id }
-				val prevTag: String = tags.getOrNull(1) ?: grgit.log().minBy { it.dateTime }.id
+				val prevTag: String = tags[1]
 
 				val commitList = grgit.log {
 					range(prevTag, "HEAD")
