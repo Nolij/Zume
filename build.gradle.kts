@@ -78,7 +78,7 @@ var patchAndSuffix = patch.toString()
 if (releaseChannel.suffix != null) {
 	patchAndSuffix += "-${releaseChannel.suffix}"
 	
-//	if (isRelease) {
+	if (isRelease) {
 		patchAndSuffix += "."
 		
 		val maxBuild = patchHistory
@@ -87,7 +87,7 @@ if (releaseChannel.suffix != null) {
 		
 		val build = (maxBuild?.plus(1)) ?: 1
 		patchAndSuffix += build.toString()
-//	}
+	}
 }
 
 Zume.version = "${minorVersion}.${patchAndSuffix}"
