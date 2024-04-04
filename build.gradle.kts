@@ -50,8 +50,8 @@ enum class ReleaseChannel(
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
-grgit.fetch {
-	setTagMode(TagMode.ALL.name)
+project.exec {
+	commandLine("git", "fetch", "--all", "--tags")
 }
 
 val currentTagOutputStream = ByteArrayOutputStream()
