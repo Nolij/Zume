@@ -60,7 +60,10 @@ val releaseTagPrefix = "release/"
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
 
+val headDateTime = grgit.head().dateTime
+
 val patchHistory = grgit.tag.list()
+	.filter { tag -> tag.commit.dateTime <= headDateTime }
 	.map { tag -> tag.name }
 	.filter { name -> name.startsWith(minorTagPrefix) }
 	.map { name -> name.substring(minorTagPrefix.length) }
