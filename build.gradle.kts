@@ -13,6 +13,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
 import org.ajoberstar.grgit.operation.FetchOp.TagMode
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -52,6 +53,13 @@ val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) 
 grgit.fetch {
 	setTagMode(TagMode.ALL.name)
 }
+
+val currentTagOutputStream = ByteArrayOutputStream()
+project.exec {
+	commandLine("git", "describe", "--tags", "--abbrev=0")
+	standardOutput = currentTagOutputStream
+}
+val currentTag = currentTagOutputStream.toString(Charsets.UTF_8).trim()
 val branchName = grgit.branch.current().name!!
 val releaseTagPrefix = "release/"
 
@@ -589,11 +597,6 @@ afterEvaluate {
 			doLast {
 				val http = HttpUtils()
 				
-				val currentTag = grgit.describe {
-					tags = true
-					abbrev = 0
-				}!!
-
 				val commitList = grgit.log {
 					range(currentTag, "HEAD")
 				}.joinToString("\n") { commit ->
