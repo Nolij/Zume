@@ -593,23 +593,12 @@ afterEvaluate {
 		if (releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
-				
-				val tags = grgit.tag.list().sortedByDescending { it.commit.dateTime }.map { it.commit.id }
-				val prevTag: String = tags[1]
-
-				val commitList = grgit.log {
-					range(prevTag, "HEAD")
-				}.joinToString("\n") { commit ->
-					"${commit.abbreviatedId}: ${commit.shortMessage}"
-				}
-
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val changelog = getChangelog()
 				val file = getFileForPublish().asFile
 
 				val webhook = DiscordAPI.Webhook(
 					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
-						"Changes since last build: ```md\n${commitList}\n```\n" +
 						"Changes since last release: ```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
