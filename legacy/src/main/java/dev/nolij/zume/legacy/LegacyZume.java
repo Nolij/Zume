@@ -10,9 +10,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SmoothUtil;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-
 public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
