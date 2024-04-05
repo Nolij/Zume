@@ -1,9 +1,10 @@
 - added global config (stored in `.minecraft/global/zume.json5`) (overridden by old config file if present)
 - added config path override (use JVM argument `-Dzume.configPathOverride="path/to/zume.json5"`)
 - added `thirdPersonToggleMode` config option
+- easing now uses exponent instead of named methods
 - fixed bounce when deactivating third-person zoom
 - fixed Vintage implementation bug with some mixin loaders
 - fixed single-frame flicker when deactivating zoom
-- easing now uses exponent instead of named methods
+- fixed 14.4 and 15.2 compatibility
 - streamlined release process
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
