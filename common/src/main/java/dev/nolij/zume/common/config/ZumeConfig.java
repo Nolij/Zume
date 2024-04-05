@@ -62,13 +62,15 @@ public class ZumeConfig implements Cloneable {
 	public double defaultZoom = 0.5D;
 	
 	@Comment("""
-		\nIf `true`, the Zoom keybind will act as a toggle in first-person. If `false`, Zoom will only be active in first-person while the keybind is held.
+		\nIf `true`, the Zoom keybind will act as a toggle in first-person.
+		If `false`, Zoom will only be active in first-person while the keybind is held.
 		DEFAULT: `false`""")
 	public boolean toggleMode = false;
 	
 	@Comment("""
-		\nIf `true`, the Zoom keybind will act as a toggle in third-person. If `false`, Zoom will only be active in third-person while the keybind is held.
-		DEFAULT: `false`""")
+		\nIf `true`, the Zoom keybind will act as a toggle in third-person.
+		If `false`, Zoom will only be active in third-person while the keybind is held.
+		DEFAULT: `true`""")
 	public boolean thirdPersonToggleMode = true;
 	
 	@Comment("""
