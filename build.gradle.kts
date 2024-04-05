@@ -598,7 +598,7 @@ afterEvaluate {
 				val file = getFileForPublish().asFile
 
 				val webhook = DiscordAPI.Webhook(
-					"<@&1167481420583817286> <https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
+					"<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
 						"Changes since last release: ```md\n${changelog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
