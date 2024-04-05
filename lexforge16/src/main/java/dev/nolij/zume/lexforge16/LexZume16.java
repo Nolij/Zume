@@ -72,11 +72,6 @@ public class LexZume16 implements IZumeImplementation {
 		MethodHandle thirdPersonView = null;
 		
 		try {
-			Class.forName(
-				ObfuscationReflectionHelper.remapName(
-					INameMappingService.Domain.CLASS, "net/minecraft/client/CameraType")
-				.replace('/', '.'));
-			
 			final String getCameraTypeName = ObfuscationReflectionHelper.remapName(
 				INameMappingService.Domain.METHOD, "func_243230_g");
 			
@@ -85,14 +80,14 @@ public class LexZume16 implements IZumeImplementation {
 			
 			ordinal = lookup.unreflect(Enum.class.getMethod("ordinal"))
 				.asType(MethodType.methodType(int.class, Enum.class));
-		} catch (ClassNotFoundException ignored) {
+		} catch (NoSuchMethodException ignored) {
 			try {
 				//noinspection JavaLangInvokeHandleSignature
 				thirdPersonView = lookup.findGetter(Options.class, "field_74320_O", int.class);
 			} catch (NoSuchFieldException | IllegalAccessException e) {
 				throw new AssertionError(e);
 			}
-		} catch (IllegalAccessException | NoSuchMethodException e) {
+		} catch (IllegalAccessException e) {
 			throw new AssertionError(e);
 		}
 		

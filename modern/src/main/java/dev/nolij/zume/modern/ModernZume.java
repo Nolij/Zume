@@ -60,8 +60,6 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 		MethodHandle perspective = null;
 		
 		try {
-			Class.forName(mappingResolver.mapClassName("intermediary", "net.minecraft.class_5498"));
-			
 			final String getPerspectiveName = mappingResolver.mapMethodName("intermediary", 
 				"net.minecraft.class_315", "method_31044", "()Lnet/minecraft/class_5498;");
 			
@@ -70,14 +68,14 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 			
 			ordinal = lookup.unreflect(Enum.class.getMethod("ordinal"))
 				.asType(MethodType.methodType(int.class, Enum.class));
-		} catch (ClassNotFoundException ignored) {
+		} catch (NoSuchMethodException ignored) {
 			try {
 				//noinspection JavaLangInvokeHandleSignature
 				perspective = lookup.findGetter(GameOptions.class, "field_1850", int.class);
 			} catch (IllegalAccessException | NoSuchFieldException e) {
 				throw new AssertionError(e);
 			}
-		} catch (IllegalAccessException | NoSuchMethodException e) {
+		} catch (IllegalAccessException e) {
 			throw new AssertionError(e);
 		}
 		
