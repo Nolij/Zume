@@ -22,7 +22,7 @@ public class EntityRendererMixin {
 		return (float) Zume.transformMouseSensitivity(original);
 	}
 	
-	@ModifyVariable(method = "orientCamera", at = @At("STORE"), ordinal = 3)
+	@ModifyVariable(method = "orientCamera", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
 	public double zume$orientCamera$thirdPersonDistance(double original) {
         return Zume.transformThirdPersonDistance(original);
 	}

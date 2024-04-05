@@ -49,7 +49,7 @@ public class GameRendererMixin {
 		return (float) Zume.transformMouseSensitivity(original);
 	}
 	
-	@ModifyVariable(method = "transformCamera", at = @At("STORE"), ordinal = 3)
+	@ModifyVariable(method = "transformCamera", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
 	public double zume$transformCamera$thirdPersonDistance(double original) {
         return Zume.transformThirdPersonDistance(original);
 	}
