@@ -5,7 +5,6 @@ import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.InputEvent;
@@ -89,7 +88,7 @@ public class LexZume16 implements IZumeImplementation {
 		} catch (ClassNotFoundException ignored) {
 			try {
 				//noinspection JavaLangInvokeHandleSignature
-				thirdPersonView = lookup.findGetter(Option.class, "field_74320_O", int.class);
+				thirdPersonView = lookup.findGetter(Options.class, "field_74320_O", int.class);
 			} catch (NoSuchFieldException | IllegalAccessException e) {
 				throw new AssertionError(e);
 			}
