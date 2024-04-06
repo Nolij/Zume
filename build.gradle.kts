@@ -12,8 +12,6 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
-import org.ajoberstar.grgit.operation.FetchOp.TagMode
-import org.apache.commons.io.output.ByteArrayOutputStream
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -54,16 +52,22 @@ project.exec {
 	commandLine("git", "fetch", "--all", "--tags")
 }
 
+val headDateTime = grgit.head().dateTime
+
 val branchName = grgit.branch.current().name!!
 val releaseTagPrefix = "release/"
+
+val releaseTags = grgit.tag.list()
+	.filter { tag -> tag.name.startsWith(releaseTagPrefix) }
+	.sortedByDescending { tag -> tag.commit.dateTime }
+	.dropWhile { tag -> tag.commit.dateTime > headDateTime }
+
+val currentTag = releaseTags[0]
 
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
 
-val headDateTime = grgit.head().dateTime
-
-val patchHistory = grgit.tag.list()
-	.filter { tag -> tag.commit.dateTime <= headDateTime }
+val patchHistory = releaseTags
 	.map { tag -> tag.name }
 	.filter { name -> name.startsWith(minorTagPrefix) }
 	.map { name -> name.substring(minorTagPrefix.length) }
@@ -593,13 +597,22 @@ afterEvaluate {
 		if (releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
+				
+				val buildChangeLog =
+					grgit.log {
+						range(currentTag.commit.id, "HEAD")
+					}.joinToString("\n") { commit ->
+						"- [${commit.abbreviatedId}] ${commit.fullMessage.trim()} (${commit.author.name})"
+					}
+				
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
-				val changelog = getChangelog()
+				val releaseChangeLog = getChangelog()
 				val file = getFileForPublish().asFile
 
 				val webhook = DiscordAPI.Webhook(
-					"<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>\n" +
-						"Changes since last release: ```md\n${changelog}\n```",
+					"# [Zume Test Build ${Zume.version}](<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>) has been released!\n" +
+						"Changes since last build: ```md\n${buildChangeLog}\n```\n" +
+						"Changes since last release: ```md\n${releaseChangeLog}\n```",
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
 				)
