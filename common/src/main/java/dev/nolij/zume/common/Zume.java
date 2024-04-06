@@ -162,8 +162,17 @@ public class Zume {
 		
 		if (shouldUseFirstPersonZoom())
 			setZoom(1D, 1 - config.defaultZoom);
-		else
-			setZoom(getThirdPersonStartZoom(), implementation.getCameraPerspective() == CameraPerspective.THIRD_PERSON ? 1D : 0D);
+		else {
+			final double from = getThirdPersonStartZoom();
+			final double target;
+			
+			if (implementation.getCameraPerspective() == CameraPerspective.THIRD_PERSON)
+				target = EasingHelper.linear(1D, from, config.defaultZoom);
+			else
+				target = EasingHelper.linear(from, 0D, config.defaultZoom);
+			
+			setZoom(from, target);
+		}
 	}
 	
 	private static void onZoomDeactivate() {

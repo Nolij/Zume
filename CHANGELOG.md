@@ -1,6 +1,7 @@
 - added global config (stored in `.minecraft/global/zume.json5`) (overridden by old config file if present)
 - added config path override (use JVM argument `-Dzume.configPathOverride="path/to/zume.json5"`)
 - added `thirdPersonToggleMode` config option
+- third-person zoom now uses `defaultZoom` config value instead of activating at maximum value
 - easing now uses exponent instead of named methods
 - fixed bounce when deactivating third-person zoom
 - fixed single-frame flicker when deactivating zoom
