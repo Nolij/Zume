@@ -14,9 +14,9 @@ public class FabricZumePreLaunchEntrypoint implements PreLaunchEntrypoint {
 				var tab = tree.addTab("Error");
 				tab.node.addMessage("""
 				Failed to detect which variant of Zume to load! Ensure all dependencies are installed:
-				Fabric (14.4+): fabric-key-binding-api-v1
-				Legacy Fabric (7.10-12.2): legacy-fabric-keybinding-api-v1-common
-				Babric (b7.3): station-keybindings-v0""", FabricStatusTree.FabricTreeWarningLevel.ERROR);
+				Fabric (14.4+): Fabric API (fabric-key-binding-api-v1)
+				Legacy Fabric (7.10-12.2): Legacy Fabric API (legacy-fabric-keybinding-api-v1-common)
+				Babric (b7.3): Station API (station-keybindings-v0)""", FabricStatusTree.FabricTreeWarningLevel.ERROR);
 				tree.tabs.removeIf(x -> x != tab);
 			}, true);
 		}
