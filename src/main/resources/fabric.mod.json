@@ -19,6 +19,9 @@
 		"client": [
 			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
+		"preLaunch": [
+			"dev.nolij.zume.FabricZumePreLaunchEntrypoint"
+		],
 		"modmenu": [
 			"dev.nolij.zume.modern.integration.ZumeModMenuIntegration"
 		],

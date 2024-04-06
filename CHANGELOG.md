@@ -1,12 +1,2 @@
-- added global config (stored in `.minecraft/global/zume.json5`) (overridden by old config file if present)
-- added config path override (use JVM argument `-Dzume.configPathOverride="path/to/zume.json5"`)
-- added `thirdPersonToggleMode` config option
-- third-person zoom now uses `defaultZoom` config value instead of activating at maximum value
-- easing now uses exponent instead of named methods
-- fixed bounce when deactivating third-person zoom
-- fixed single-frame flicker when deactivating zoom
-- fixed Vintage Forge implementation bug with some mixin loaders
-- fixed bug with third-person zoom in Legacy Fabric & Vintage Forge implementations
-- fixed 14.4 and 15.2 compatibility
-- streamlined release process
+- made missing dependencies error on Fabric more user-friendly
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
