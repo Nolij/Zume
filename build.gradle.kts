@@ -608,11 +608,18 @@ afterEvaluate {
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val releaseChangeLog = getChangelog()
 				val file = getFileForPublish().asFile
+				
+				var content = "# [Zume Test Build ${Zume.version}](<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>) has been released!\n"
+				
+				content += 
+					if (buildChangeLog.trim().isEmpty())
+						"Changes since last build: None"
+					else
+						"Changes since last build: ```md\n${buildChangeLog}\n```\n"
+				content += "Changes since last release: ```md\n${releaseChangeLog}\n```"
 
 				val webhook = DiscordAPI.Webhook(
-					"# [Zume Test Build ${Zume.version}](<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>) has been released!\n" +
-						"Changes since last build: ```md\n${buildChangeLog}\n```\n" +
-						"Changes since last release: ```md\n${releaseChangeLog}\n```",
+					content,
 					"Zume Test Builds",
 					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
 				)
