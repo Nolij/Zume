@@ -58,7 +58,7 @@ val releaseTags = grgit.tag.list()
 	.sortedByDescending { tag -> tag.commit.dateTime }
 	.dropWhile { tag -> tag.commit.dateTime > headDateTime }
 
-val currentTag = releaseTags[0]
+val currentTag = releaseTags.getOrNull(0)
 
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
@@ -596,7 +596,7 @@ afterEvaluate {
 				
 				val buildChangeLog =
 					grgit.log {
-						range(currentTag.commit.id, "HEAD")
+						range(currentTag!!.commit.id, "HEAD")
 					}.joinToString("\n") { commit ->
 						"- [${commit.abbreviatedId}] ${commit.fullMessage.trim()} (${commit.author.name})"
 					}
