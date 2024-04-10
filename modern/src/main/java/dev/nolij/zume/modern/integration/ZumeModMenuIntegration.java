@@ -2,35 +2,22 @@ package dev.nolij.zume.modern.integration;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.common.util.MethodHandleHelper;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.*;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 public class ZumeModMenuIntegration implements ModMenuApi {
 	
-	private static final MethodHandle LITERALTEXT_INIT;
-	
-	static {
-		final MethodHandles.Lookup lookup = MethodHandles.lookup();
-		
-		MethodHandle methodHandle = null;
-		
-		try {
-			final Class<?> literalTextContent = Class.forName("net.minecraft.class_2585");
-			final Constructor<?> literalTextInit = literalTextContent.getConstructor(String.class);
-			methodHandle = lookup.unreflectConstructor(literalTextInit)
-				.asType(MethodType.methodType(Text.class, String.class));
-		} catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException ignored) {}
-		
-		LITERALTEXT_INIT = methodHandle;
-	}
+	private static final MethodHandle LITERALTEXT_INIT = MethodHandleHelper.getConstructorOrNull(
+		MethodHandleHelper.getClassOrNull("net.minecraft.class_2585"),
+		MethodType.methodType(Text.class, String.class),
+		String.class);
 	
 	private static final class ModernZumeConfigScreen extends Screen {
 		private final Screen parent;

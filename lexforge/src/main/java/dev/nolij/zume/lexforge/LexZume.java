@@ -3,6 +3,7 @@ package dev.nolij.zume.lexforge;
 import dev.nolij.zume.common.CameraPerspective;
 import dev.nolij.zume.common.IZumeImplementation;
 import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.common.util.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -14,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -78,32 +80,17 @@ public class LexZume implements IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle getScrollDelta;
-	
-	static {
-		final MethodHandles.Lookup lookup = MethodHandles.lookup();
-		Method method;
-        try {
-            method = InputEvent.MouseScrollingEvent.class.getMethod("getScrollDelta");
-        } catch (NoSuchMethodException ignored) {
-            try {
-	            //noinspection JavaReflectionMemberAccess
-	            method = InputEvent.MouseScrollingEvent.class.getMethod("getDeltaY");
-            } catch (NoSuchMethodException e) {
-                throw new AssertionError(e);
-            }
-        }
-        try {
-            getScrollDelta = lookup.unreflect(method);
-        } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
-        }
-    }
+	@SuppressWarnings("DataFlowIssue")
+	@NotNull
+	private static final MethodHandle GET_SCROLL_DELTA = MethodHandleHelper.firstNonNull(
+		MethodHandleHelper.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getScrollDelta"),
+		MethodHandleHelper.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getDeltaY")
+	);
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
         final int scrollAmount;
         try {
-            scrollAmount = (int) (double) getScrollDelta.invokeExact(event);
+	        scrollAmount = (int) (double) GET_SCROLL_DELTA.invokeExact(event);
         } catch (Throwable e) {
             throw new AssertionError(e);
         }
