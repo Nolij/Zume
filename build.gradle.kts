@@ -48,10 +48,6 @@ enum class ReleaseChannel(
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
-project.exec {
-	commandLine("git", "fetch", "--all", "--tags")
-}
-
 val headDateTime = grgit.head().dateTime
 
 val branchName = grgit.branch.current().name!!
