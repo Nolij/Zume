@@ -1,2 +1,4 @@
 - made missing dependencies error on Fabric more user-friendly
+- improved mod compatibility using events on LexForge on mc17-mc18.2
+- added explicit incompatibility with outdated versions of Embeddium++ which were causing obscure crashes
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
