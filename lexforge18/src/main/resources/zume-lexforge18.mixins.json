@@ -8,7 +8,6 @@
 	],
 	"client": [
 		"CameraMixin",
-		"GameRendererMixin",
 		"MouseHandlerMixin"
 	],
 	"injectors": {
