@@ -20,3 +20,10 @@ mandatory=true
 versionRange="${lexforge_minecraft_range}"
 ordering="NONE"
 side="CLIENT"
+
+[[dependencies.zume]]
+modId="embeddiumplus"
+mandatory=false
+versionRange="[1.2.6,)"
+ordering="BEFORE"
+side="CLIENT"

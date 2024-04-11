@@ -21,3 +21,11 @@ mandatory=true
 versionRange="${forge_version_range}"
 ordering="NONE"
 side="CLIENT"
+
+[[dependencies.zume]]
+modId="embeddiumplus"
+type="optional"
+mandatory=false
+versionRange="[1.2.6,)"
+ordering="BEFORE"
+side="CLIENT"
