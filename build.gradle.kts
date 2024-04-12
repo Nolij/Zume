@@ -48,10 +48,6 @@ enum class ReleaseChannel(
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
-//project.exec {
-//	commandLine("git", "fetch", "--all", "--tags")
-//}
-
 val headDateTime = grgit.head().dateTime
 
 val branchName = grgit.branch.current().name!!
@@ -63,15 +59,6 @@ val releaseTags = grgit.tag.list()
 	.dropWhile { tag -> tag.commit.dateTime > headDateTime }
 
 val currentTag = releaseTags.getOrNull(0)
-
-println("currentTag = ${currentTag?.name ?: "null"}")
-if (currentTag != null) {
-	grgit.log {
-		range(currentTag.name, "HEAD")
-	}.forEach { commit ->
-		println("${commit.abbreviatedId} ${commit.fullMessage}")
-	}
-}
 
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
@@ -609,7 +596,9 @@ afterEvaluate {
 				
 				val buildChangeLog =
 					grgit.log {
-						range(currentTag!!.commit.id, "HEAD")
+						if (currentTag != null)
+							excludes = listOf(currentTag.name)
+						includes = listOf("HEAD")
 					}.joinToString("\n") { commit ->
 						"- [${commit.abbreviatedId}] ${commit.fullMessage.trim()} (${commit.author.name})"
 					}
