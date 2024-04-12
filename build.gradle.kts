@@ -68,7 +68,8 @@ println("currentTag = ${currentTag?.name ?: "null"}")
 if (currentTag != null) {
 	println(currentTag.commit.id)
 	grgit.log {
-		range(currentTag.commit.id, "HEAD")
+		includes = listOf("HEAD")
+		excludes = listOf(currentTag.fullName)
 	}.forEach { commit ->
 		println(commit.id)
 	}
