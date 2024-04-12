@@ -48,9 +48,9 @@ enum class ReleaseChannel(
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
-project.exec {
-	commandLine("git", "fetch", "--all", "--tags")
-}
+//project.exec {
+//	commandLine("git", "fetch", "--all", "--tags")
+//}
 
 val headDateTime = grgit.head().dateTime
 
@@ -66,12 +66,10 @@ val currentTag = releaseTags.getOrNull(0)
 
 println("currentTag = ${currentTag?.name ?: "null"}")
 if (currentTag != null) {
-	println(currentTag.commit.id)
 	grgit.log {
-		includes = listOf(currentTag.fullName)
-		excludes = currentTag.commit.parentIds
+		range(currentTag.name, "HEAD")
 	}.forEach { commit ->
-		println(commit.id)
+		println("${commit.abbreviatedId} ${commit.fullMessage}")
 	}
 }
 
