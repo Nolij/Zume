@@ -64,6 +64,16 @@ val releaseTags = grgit.tag.list()
 
 val currentTag = releaseTags.getOrNull(0)
 
+println("currentTag = ${currentTag?.name ?: "null"}")
+if (currentTag != null) {
+	println(currentTag.commit.id)
+	grgit.log {
+		range(currentTag.commit.id, "HEAD")
+	}.forEach { commit ->
+		println(commit.id)
+	}
+}
+
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
 
