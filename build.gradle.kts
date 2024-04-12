@@ -69,6 +69,7 @@ if (currentTag != null) {
 	println(currentTag.commit.id)
 	grgit.log {
 		includes = listOf(currentTag.fullName)
+		excludes = currentTag.commit.parentIds
 	}.forEach { commit ->
 		println(commit.id)
 	}
