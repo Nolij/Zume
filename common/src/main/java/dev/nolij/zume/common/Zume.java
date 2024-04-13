@@ -21,7 +21,7 @@ public class Zume {
 	public static final String MOD_ID = "zume";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	public static final String CONFIG_FILE_NAME = MOD_ID + ".json5";
-	public static final ZumeVariant ZUME_VARIANT;
+	public static final String ZUME_VARIANT;
 	
 	//region Variant Detection
 	static {

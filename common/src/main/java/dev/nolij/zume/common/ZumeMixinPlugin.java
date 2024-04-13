@@ -15,7 +15,7 @@ public class ZumeMixinPlugin implements IMixinConfigPlugin {
 	public void onLoad(String mixinPackage) {
 		Zume.calculateZumeVariant();
         if (Zume.ZUME_VARIANT != null)
-            implementationMixinPackage = "dev.nolij.zume." + Zume.ZUME_VARIANT.name + ".mixin.";
+            implementationMixinPackage = "dev.nolij.zume." + Zume.ZUME_VARIANT + ".mixin.";
 	}
 	
 	@Override

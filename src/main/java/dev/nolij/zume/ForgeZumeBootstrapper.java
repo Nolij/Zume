@@ -2,6 +2,7 @@ package dev.nolij.zume;
 
 import dev.nolij.zume.common.Constants;
 import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.common.ZumeVariant;
 import dev.nolij.zume.lexforge.LexZume;
 import dev.nolij.zume.lexforge18.LexZume18;
 import dev.nolij.zume.lexforge16.LexZume16;
@@ -27,10 +28,10 @@ public class ForgeZumeBootstrapper {
 				7.10 - 12.2: UniMixins >= 0.1.15""");
 		
 		switch (Zume.ZUME_VARIANT) {
-			case LEXFORGE -> new LexZume();
-			case LEXFORGE18 -> new LexZume18();
-			case LEXFORGE16 -> new LexZume16();
-			case VINTAGE_FORGE -> new VintageZume();
+			case ZumeVariant.LEXFORGE -> new LexZume();
+			case ZumeVariant.LEXFORGE18 -> new LexZume18();
+			case ZumeVariant.LEXFORGE16 -> new LexZume16();
+			case ZumeVariant.VINTAGE_FORGE -> new VintageZume();
 		}
 	}
 	

@@ -1,23 +1,15 @@
 package dev.nolij.zume.common;
 
-public enum ZumeVariant {
+public final class ZumeVariant {
 	
-	MODERN("modern"),
-	PRIMITIVE("primitive"),
-	LEGACY("legacy"),
-	ARCHAIC_FORGE("archaic"),
-	VINTAGE_FORGE("vintage"),
-	NEOFORGE("neoforge"),
-	LEXFORGE("lexforge"),
-	LEXFORGE18("lexforge18"),
-	LEXFORGE16("lexforge16"),
-	
-	;
-	
-	public final String name;
-	
-	ZumeVariant(String name) {
-		this.name = name;
-	}
+	public static final String MODERN = "modern";
+	public static final String PRIMITIVE = "primitive";
+	public static final String LEGACY = "legacy";
+	public static final String ARCHAIC_FORGE = "archaic";
+	public static final String VINTAGE_FORGE = "vintage";
+	public static final String NEOFORGE = "neoforge";
+	public static final String LEXFORGE = "lexforge";
+	public static final String LEXFORGE18 = "lexforge18";
+	public static final String LEXFORGE16 = "lexforge16";
 	
 }
