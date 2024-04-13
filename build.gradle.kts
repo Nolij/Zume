@@ -606,6 +606,10 @@ afterEvaluate {
 						val author = commit.author.name
 						"- [${id}] $message (${author})"
 					}
+
+				val compareStart = releaseTags.getOrNull(1) ?: grgit.log().minBy { it.dateTime }.id
+				val compareEnd = currentTag?.name ?: "HEAD"
+				val compareLink = "https://github.com/Nolij/Zume/compare/release/${compareStart}...${compareEnd}"
 				
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val releaseChangeLog = getChangelog()
@@ -615,9 +619,9 @@ afterEvaluate {
 				
 				content += 
 					if (buildChangeLog.trim().isEmpty())
-						"Changes since last build: None"
+						"Changes since last build: <${compareLink}>"
 					else
-						"Changes since last build: ```md\n${buildChangeLog}\n```\n"
+						"Changes since last build: <${compareLink}> ```md\n${buildChangeLog}\n```\n"
 				content += "Changes since last release: ```md\n${releaseChangeLog}\n```"
 
 				val webhook = DiscordAPI.Webhook(
