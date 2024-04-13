@@ -601,7 +601,10 @@ afterEvaluate {
 							excludes = listOf(currentTag.name)
 						includes = listOf("HEAD")
 					}.joinToString("\n") { commit ->
-						"- [${commit.abbreviatedId}] ${commit.fullMessage.trim()} (${commit.author.name})"
+						val id = commit.abbreviatedId
+						val message = commit.fullMessage.substringBefore('\n').trim()
+						val author = commit.author.name
+						"- [${id}] $message (${author})"
 					}
 				
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
