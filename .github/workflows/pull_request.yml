@@ -2,23 +2,23 @@ name: pull_request
 on: [ pull_request ]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            -   uses: actions/checkout@v4
-            -   uses: actions/setup-java@v4
-                with:
-                    distribution: temurin
-                    java-version: 17
-            -   name: Setup Gradle
-                uses: gradle/actions/setup-gradle@v3
-                with:
-                    cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY_PR }}
-                    cache-read-only: true
-            -   name: :build
-                run: ./gradlew build
-            -   name: Upload artifacts
-                uses: actions/upload-artifact@v3
-                with:
-                    name: zume
-                    path: "**/zume-*.jar"
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY_PR }}
+          cache-read-only: true
+      - name: :build
+        run: ./gradlew build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: zume
+          path: "**/zume-*.jar"

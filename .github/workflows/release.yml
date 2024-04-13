@@ -2,26 +2,26 @@ name: release
 on: [ workflow_dispatch ]
 
 jobs:
-    publish:
-        runs-on: ubuntu-latest
-        steps:
-            -   uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
-                    fetch-tags: true
-            -   uses: actions/setup-java@v4
-                with:
-                    distribution: temurin
-                    java-version: 17
-            -   name: Setup Gradle
-                uses: gradle/actions/setup-gradle@v3
-                with:
-                    cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-                    cache-read-only: true
-            -   name: :publishMods
-                run: ./gradlew publishMods -Prelease_channel=RELEASE
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                    MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-                    CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-                    DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-read-only: true
+      - name: :publishMods
+        run: ./gradlew publishMods -Prelease_channel=RELEASE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
