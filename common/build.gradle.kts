@@ -29,3 +29,16 @@ dependencies {
 	compileOnly("org.ow2.asm:asm-tree:${"asm_version"()}")
 	compileOnly("org.spongepowered:mixin:${"mixin_version"()}")
 }
+
+tasks.processResources {
+	from("src/main/resources/assets/zume/lang/") {
+		include("*.lang")
+		rename { name -> name.lowercase() }
+		into("assets/zume/lang/")
+	}
+
+	from("src/main/resources/assets/zume/lang/") {
+		include("*.lang")
+		into("assets/zume/stationapi/lang/")
+	}
+}
