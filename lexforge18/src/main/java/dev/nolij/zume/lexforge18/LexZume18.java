@@ -21,9 +21,9 @@ import java.lang.invoke.MethodType;
 @Mod(Zume.MOD_ID)
 public class LexZume18 implements IZumeImplementation {
 	
-	private static final Class<?> FOV_EVENT_CLASS = MethodHandleHelper.firstNonNull(
-		MethodHandleHelper.getClassOrNull("net.minecraftforge.client.event.EntityViewRenderEvent$FieldOfView"),
-		MethodHandleHelper.getClassOrNull("net.minecraftforge.client.event.EntityViewRenderEvent$FOVModifier")
+	private static final Class<?> FOV_EVENT_CLASS = MethodHandleHelper.getClassOrNull(
+		"net.minecraftforge.client.event.EntityViewRenderEvent$FieldOfView",
+		"net.minecraftforge.client.event.EntityViewRenderEvent$FOVModifier"
 	);
 	private static final MethodHandle GET_FOV = MethodHandleHelper.getMethodOrNull(
 		FOV_EVENT_CLASS,
