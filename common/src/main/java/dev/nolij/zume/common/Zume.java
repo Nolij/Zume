@@ -34,7 +34,9 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.LEGACY;
 		else if (CLASS_LOADER.getResource("net/modificationstation/stationapi/api/client/event/option/KeyBindingRegisterEvent.class") != null)
 			ZUME_VARIANT = ZumeVariant.PRIMITIVE;
-		else if (CLASS_LOADER.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
+		else if (
+			CLASS_LOADER.getResource("cpw/mods/fml/client/registry/KeyBindingRegistry.class") == null &&
+			CLASS_LOADER.getResource("cpw/mods/fml/client/registry/ClientRegistry.class") != null)
 			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
 		else if (CLASS_LOADER.getResource("net/minecraftforge/oredict/OreDictionary.class") != null)
 			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
@@ -58,8 +60,10 @@ public class Zume {
 					ZUME_VARIANT = ZumeVariant.LEXFORGE;
 				else if (major > 36)
 					ZUME_VARIANT = ZumeVariant.LEXFORGE18;
-				else
+				else if (major > 25)
 					ZUME_VARIANT = ZumeVariant.LEXFORGE16;
+				else 
+					ZUME_VARIANT = null;
 			} else {
 				ZUME_VARIANT = null;
 			}
