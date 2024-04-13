@@ -3,14 +3,14 @@ package dev.nolij.zume.common;
 import dev.nolij.zume.common.config.ZumeConfig;
 import dev.nolij.zume.common.easing.EasedDouble;
 import dev.nolij.zume.common.easing.EasingHelper;
+import dev.nolij.zume.common.util.MethodHandleHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodType;
 import java.nio.file.Path;
 
 public class Zume {
@@ -21,17 +21,13 @@ public class Zume {
 	public static final String MOD_ID = "zume";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	public static final String CONFIG_FILE_NAME = MOD_ID + ".json5";
-	public static final String ZUME_VARIANT;
+	//endregion
 	
 	//region Variant Detection
+	public static final String ZUME_VARIANT;
+	
 	static {
-		var connectorPresent = false;
-		try {
-			Class.forName("dev.su5ed.sinytra.connector.service.ConnectorLoaderService");
-			connectorPresent = true;
-		} catch (ClassNotFoundException ignored) {}
-		
-		if (!connectorPresent &&
+		if (MethodHandleHelper.getClassOrNull("dev.su5ed.sinytra.connector.service.ConnectorLoaderService") == null &&
 			CLASS_LOADER.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.MODERN;
 		else if (CLASS_LOADER.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
@@ -48,11 +44,14 @@ public class Zume {
 			String forgeVersion = null;
 			
 			try {
-				final Class<?> forgeVersionClass = Class.forName("net.minecraftforge.versions.forge.ForgeVersion");
-				final Method getVersionMethod = forgeVersionClass.getMethod("getVersion");
-				forgeVersion = (String) getVersionMethod.invoke(null);
-			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
-			
+				//noinspection DataFlowIssue
+				forgeVersion = (String) MethodHandleHelper.getMethodOrNull(
+					MethodHandleHelper.getClassOrNull("net.minecraftforge.versions.forge.ForgeVersion"),
+					"getVersion",
+					MethodType.methodType(String.class)
+				).invokeExact();
+			} catch (Throwable ignored) { }
+				
 			if (forgeVersion != null) {
 				final int major = Integer.parseInt(forgeVersion.substring(0, forgeVersion.indexOf('.')));
 				if (major > 40)
@@ -68,9 +67,9 @@ public class Zume {
 	}
 	//endregion
 	
+	//region Platform Detection
 	public static final HostPlatform HOST_PLATFORM;
 	
-	//region Platform Detection
 	static {
 		final String OS_NAME = System.getProperty("os.name").toLowerCase();
 		
@@ -83,7 +82,6 @@ public class Zume {
 		else
 			HOST_PLATFORM = HostPlatform.UNKNOWN;
 	}
-	//endregion
 	//endregion
 	
 	//region Helper Methods
