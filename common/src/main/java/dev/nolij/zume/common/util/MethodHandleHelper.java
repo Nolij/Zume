@@ -25,6 +25,16 @@ public final class MethodHandleHelper {
 		}
 	}
 	
+	public static Class<?> getClassOrNull(String... classNames) {
+		for (final String className : classNames) {
+			try {
+				return Class.forName(className);
+			} catch (ClassNotFoundException ignored) { }
+		}
+		
+		return null;
+	}
+	
 	public static MethodHandle getMethodOrNull(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
 		if (clazz == null)
 			return null;
