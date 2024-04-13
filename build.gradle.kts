@@ -227,7 +227,7 @@ subprojects {
 					rename { "${it}_${"archives_base_name"()}" }
 				}
 
-				val remapJar = tasks.withType<RemapJarTask>()["remapJar"]
+				val remapJar = tasks.withType<RemapJarTask>()
 				dependsOn(remapJar)
 				from(remapJar)
 
@@ -334,10 +334,12 @@ tasks.shadowJar {
 	isReproducibleFileOrder = true
 	
 	uniminedImpls.forEach { impl ->
-		val remapJar = project(":${impl}").tasks.withType<RemapJarTask>()["remapJar"]
-		shadowJar.dependsOn(remapJar)
-		from(zipTree(remapJar.archiveFile.get())) {
-			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+		val remapJars = project(":${impl}").tasks.withType<RemapJarTask>()
+		shadowJar.dependsOn(remapJars)
+		remapJars.forEach { remapJar ->
+			from(zipTree(remapJar.archiveFile.get())) {
+				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+			}
 		}
 	}
 	
