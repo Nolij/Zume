@@ -607,9 +607,9 @@ afterEvaluate {
 						"- [${id}] $message (${author})"
 					}
 
-				val compareStart = releaseTags.getOrNull(1) ?: grgit.log().minBy { it.dateTime }.id
-				val compareEnd = currentTag?.name ?: "HEAD"
-				val compareLink = "https://github.com/Nolij/Zume/compare/release/${compareStart}...${compareEnd}"
+				val compareStart = currentTag?.name ?: grgit.log().minBy { it.dateTime }.id
+				val compareEnd = releaseTagPrefix + Zume.version
+				val compareLink = "https://github.com/Nolij/Zume/compare/${compareStart}...${compareEnd}"
 				
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val releaseChangeLog = getChangelog()
