@@ -40,8 +40,6 @@ public class Zume {
 			ZUME_VARIANT = ZumeVariant.ARCHAIC_FORGE;
 		else if (CLASS_LOADER.getResource("net/minecraftforge/oredict/OreDictionary.class") != null)
 			ZUME_VARIANT = ZumeVariant.VINTAGE_FORGE;
-		else if (CLASS_LOADER.getResource("net/neoforged/neoforge/common/NeoForge.class") != null)
-			ZUME_VARIANT = ZumeVariant.NEOFORGE;
 		else {
 			String forgeVersion = null;
 			
