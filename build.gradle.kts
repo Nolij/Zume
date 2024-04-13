@@ -177,7 +177,7 @@ allprojects {
 			.mapValues { entry -> entry.value as String })
 		props["mod_version"] = Zume.version
 
-		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml")) {
+		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
 			expand(props)
 		}
 	}

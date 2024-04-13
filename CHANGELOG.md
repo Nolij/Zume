@@ -1,3 +1,4 @@
+- added support for NeoForge 20.5+
 - made missing dependencies error on Fabric more user-friendly
 - improved mod compatibility using events on LexForge for mc17-mc18.2
 - added explicit incompatibility with outdated versions of Embeddium++ which were causing obscure crashes
