@@ -58,8 +58,6 @@ val releaseTags = grgit.tag.list()
 	.sortedByDescending { tag -> tag.commit.dateTime }
 	.dropWhile { tag -> tag.commit.dateTime > headDateTime }
 
-val currentTag = releaseTags.getOrNull(0)
-
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
 
@@ -593,7 +591,8 @@ afterEvaluate {
 		if (releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
-				
+
+				val currentTag = releaseTags.getOrNull(0)
 				val buildChangeLog =
 					grgit.log {
 						if (currentTag != null)
