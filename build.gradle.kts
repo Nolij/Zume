@@ -1,6 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PublishModTask
@@ -16,10 +14,6 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
-import java.util.jar.JarEntry
-import java.util.jar.JarFile
-import java.util.jar.JarOutputStream
-import java.util.zip.Deflater
 
 plugins {
     id("java")
@@ -30,23 +24,23 @@ plugins {
 	id("org.ajoberstar.grgit")
 }
 
-operator fun String.invoke(): String {
-	return (rootProject.properties[this] as String?)!!
-}
+operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 enum class ReleaseChannel(
 	val suffix: String? = null,
 	val releaseType: ReleaseType? = null,
-	val compress: Boolean,
+	val compress: CompressionType
 	) {
-	DEV_BUILD(suffix = "dev", compress = false),
-	PRE_RELEASE(suffix = "pre", compress = false),
-	RELEASE_CANDIDATE(suffix = "rc", compress = true),
-	RELEASE(releaseType = ReleaseType.STABLE, compress = true),
+	DEV_BUILD(suffix = "dev", compress = CompressionType.NONE),
+	PRE_RELEASE(suffix = "pre", compress = CompressionType.NONE),
+	RELEASE_CANDIDATE(suffix = "rc", compress = CompressionType.LIBDEFLATE),
+	RELEASE(releaseType = ReleaseType.STABLE, compress = CompressionType.SEVENZIP),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
 val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
+
+println("Release Channel: $releaseChannel")
 
 val headDateTime = grgit.head().dateTime
 
@@ -160,9 +154,10 @@ allprojects {
 	}
 	
 	dependencies {
-		val jabelDependency = "com.github.bsideup.jabel:jabel-javac-plugin:${"jabel_version"()}"
-		annotationProcessor(jabelDependency)
-		compileOnly(jabelDependency)
+		"com.github.bsideup.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
+			annotationProcessor(it)
+			compileOnly(it)
+		}
 	}
 
 	tasks.processResources {
@@ -395,58 +390,13 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 	inputs.property("strip_lvts", stripLVTs)
 	inputs.property("strip_source_files", stripSourceFiles)
 	
-	val processClassFiles = stripLVTs || stripSourceFiles
-	
 	val shadowJar = tasks.shadowJar.get()
 	inputJar.set(shadowJar.archiveFile)
 	
 	doLast {
 		val jar = inputJar.get().asFile
-		val contents = linkedMapOf<String, ByteArray>()
-		JarFile(jar).use {
-			it.entries().asIterator().forEach { entry ->
-				if (!entry.isDirectory) {
-					contents[entry.name] = it.getInputStream(entry).readAllBytes()
-				}
-			}
-		}
-
-		jar.delete()
-
-		JarOutputStream(jar.outputStream()).use { out ->
-			out.setLevel(Deflater.BEST_COMPRESSION)
-			contents.forEach { var (name, bytes) = it
-				if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
-					bytes = JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
-				}
-
-				if (processClassFiles && name.endsWith(".class")) {
-					val reader = ClassReader(bytes)
-					val classNode = ClassNode()
-					reader.accept(classNode, 0)
-
-					if (stripLVTs) {
-						classNode.methods.forEach { methodNode ->
-							methodNode.localVariables?.clear()
-							methodNode.parameters?.clear()
-						}
-					}
-					if (stripSourceFiles) {
-						classNode.sourceFile = null
-					}
-
-					val writer = ClassWriter(0)
-					classNode.accept(writer)
-					bytes = writer.toByteArray()
-				}
-
-				out.putNextEntry(JarEntry(name))
-				out.write(bytes)
-				out.closeEntry()
-			}
-			out.finish()
-			out.close()
-		}
+		squishJar(jar, stripLVTs, stripSourceFiles)
+		deflate(jar, releaseChannel.compress)
 	}
 }
 
@@ -474,14 +424,14 @@ afterEvaluate {
 	}
 
 	fun getTaskForPublish(): TaskProvider<out DefaultTask> {
-		return if (releaseChannel.compress)
+		return if (releaseChannel.compress != CompressionType.NONE)
 			compressJar
 		else
 			tasks.shadowJar
 	}
 	
 	fun getFileForPublish(): RegularFile {
-		return if (releaseChannel.compress)
+		return if (releaseChannel.compress != CompressionType.NONE)
 			compressJar.get().getOutputJar()
 		else
 			tasks.shadowJar.get().archiveFile.get()
