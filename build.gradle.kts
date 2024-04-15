@@ -615,14 +615,13 @@ afterEvaluate {
 				val releaseChangeLog = getChangelog()
 				val file = getFileForPublish().asFile
 				
-				var content = "# [Zume Test Build ${Zume.version}](<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>) has been released!\n"
+				var content = "# [Zume Test Build ${Zume.version}]" +
+					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
+					"Changes since last build: <${compareLink}>"
 				
-				content += 
-					if (buildChangeLog.trim().isEmpty())
-						"Changes since last build: <${compareLink}>"
-					else
-						"Changes since last build: <${compareLink}> ```md\n${buildChangeLog}\n```\n"
-				content += "Changes since last release: ```md\n${releaseChangeLog}\n```"
+				if (buildChangeLog.trim().isEmpty())
+					content += " ```md\n${buildChangeLog}\n```"
+				content += "\nChanges since last release: ```md\n${releaseChangeLog}\n```"
 
 				val webhook = DiscordAPI.Webhook(
 					content,
