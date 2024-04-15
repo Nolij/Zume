@@ -18,7 +18,7 @@ ${mod_description}
 modId="minecraft"
 type="required"
 mandatory=true
-versionRange="${forge_version_range}"
+versionRange="${forge_minecraft_range}"
 ordering="NONE"
 side="CLIENT"
 
