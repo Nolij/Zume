@@ -619,7 +619,7 @@ afterEvaluate {
 					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
 					"Changes since last build: <${compareLink}>"
 				
-				if (buildChangeLog.trim().isEmpty())
+				if (buildChangeLog.isNotBlank())
 					content += " ```md\n${buildChangeLog}\n```"
 				content += "\nChanges since last release: ```md\n${releaseChangeLog}\n```"
 
