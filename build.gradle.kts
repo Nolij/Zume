@@ -98,7 +98,7 @@ rootProject.group = "maven_group"()
 rootProject.version = Zume.version
 
 base {
-	archivesName = "archives_base_name"()
+	archivesName = "mod_id"()
 }
 
 val fabricImpls = arrayOf(
@@ -191,7 +191,7 @@ subprojects {
 	version = Zume.version
 	
 	base {
-		archivesName = "${"archives_base_name"()}-${subProject.name}"
+		archivesName = "${"mod_id"()}-${subProject.name}"
 	}
 	
 	tasks.withType<GenerateModuleMetadata> {
@@ -212,11 +212,7 @@ subprojects {
 		dependencies {
 			"shade"("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
 
-			"shade"(project(":common")) { isTransitive = false }
-		}
-		
-		tasks.processResources {
-			from("common/src/main/resources")
+			"shade"(project(":api")) { isTransitive = false }
 		}
 		
 		afterEvaluate {
@@ -224,7 +220,7 @@ subprojects {
 				group = "build"
 				
 				from("../LICENSE") {
-					rename { "${it}_${"archives_base_name"()}" }
+					rename { "${it}_${"mod_id"()}" }
 				}
 
 				val remapJar = tasks.withType<RemapJarTask>()
@@ -305,15 +301,12 @@ dependencies {
 	
 	compileOnly(project(":stubs"))
 	
-	"shade"(project(":common")) { isTransitive = false }
+	implementation(project(":api"))
+	"shade"(project(":api")) { isTransitive = false }
 	
 	uniminedImpls.forEach { 
 		implementation(project(":${it}")) { isTransitive = false }
 	}
-}
-
-tasks.processResources {
-	from("common/src/main/resources")
 }
 
 tasks.jar {
@@ -323,7 +316,7 @@ tasks.jar {
 tasks.shadowJar {
 	val shadowJar = this
 	from("LICENSE") {
-		rename { "${it}_${"archives_base_name"()}" }
+		rename { "${it}_${"mod_id"()}" }
 	}
 	
 	exclude("*.xcf")
@@ -453,7 +446,7 @@ val compressJar = tasks.register<ProcessJarTask>("compressJar") {
 afterEvaluate {
 	publishing {
 		publications {
-			create<MavenPublication>("archives_base_name"()) {
+			create<MavenPublication>("mod_id"()) {
 				artifact(tasks.shadowJar)
 				uniminedImpls.forEach { implName ->
 					artifact(project(":${implName}").tasks.named("platformJar"))

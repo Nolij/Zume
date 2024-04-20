@@ -1,6 +1,6 @@
 package dev.nolij.zume.neoforge;
 
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -15,7 +15,7 @@ final class NeoZumeConfigScreen {
 			() -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new Screen(Component.empty()) {
 				@Override
 				public void init() {
-					Zume.openConfigFile();
+					ZumeAPI.openConfigFile();
 					Minecraft.getInstance().setScreen(parent);
 				}
 			}));

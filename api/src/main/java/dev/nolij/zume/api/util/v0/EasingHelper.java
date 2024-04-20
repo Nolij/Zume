@@ -1,4 +1,4 @@
-package dev.nolij.zume.common.easing;
+package dev.nolij.zume.api.util.v0;
 
 public final class EasingHelper {
 	

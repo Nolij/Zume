@@ -1,6 +1,6 @@
 package dev.nolij.zume.legacy.mixin;
 
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
 import net.minecraft.client.option.KeyBinding;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +22,7 @@ public class KeyBindingMixin {
 	
 	@Inject(method = "<clinit>", at = @At("TAIL"))
 	private static void static$TAIL(CallbackInfo ci) {
-		if (Zume.disabled) return;
+		if (ZumeConfigAPI.isDisabled()) return;
 		
 		categories.add("category.zume");
 		if (field_15867 != null)

@@ -1,4 +1,4 @@
-package dev.nolij.zume.common;
+package dev.nolij.zume.impl;
 
 public enum HostPlatform {
 	

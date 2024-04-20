@@ -1,4 +1,4 @@
-package dev.nolij.zume.common.util;
+package dev.nolij.zume.impl.config;
 
 public interface IFileWatcher {
 	

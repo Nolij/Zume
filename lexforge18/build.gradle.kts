@@ -3,7 +3,7 @@ operator fun String.invoke(): String {
 }
 
 unimined.minecraft {
-	combineWith(project(":common").sourceSets.main.get())
+	combineWith(project(":api").sourceSets.main.get())
 
 	version("lexforge18_minecraft_version"())
 

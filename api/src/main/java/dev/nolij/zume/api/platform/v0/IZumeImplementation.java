@@ -1,4 +1,4 @@
-package dev.nolij.zume.common;
+package dev.nolij.zume.api.platform.v0;
 
 public interface IZumeImplementation {
 	

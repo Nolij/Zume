@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge16.mixin;
 
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Options;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,12 +12,12 @@ public class MouseHandlerMixin {
 	
 	@Redirect(method = "turnPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;smoothCamera:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(Options instance) {
-		return Zume.transformCinematicCamera(instance.smoothCamera);
+		return ZumeAPI.cinematicCameraEnabledHook(instance.smoothCamera);
 	}
 	
 	@Redirect(method = "turnPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;sensitivity:D", ordinal = 0))
 	public double zume$updateMouse$getMouseSensitivity$getValue(Options instance) {
-		return Zume.transformMouseSensitivity(instance.sensitivity);
+		return ZumeAPI.mouseSensitivityHook(instance.sensitivity);
 	}
 	
 }

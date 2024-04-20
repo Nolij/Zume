@@ -1,10 +1,11 @@
 package dev.nolij.zume.lexforge16;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import dev.nolij.zume.common.CameraPerspective;
-import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.common.util.MethodHandleHelper;
+import dev.nolij.zume.api.platform.v0.CameraPerspective;
+import dev.nolij.zume.api.platform.v0.IZumeImplementation;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -21,19 +22,21 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
-@Mod(Zume.MOD_ID)
+import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
+
+@Mod(MOD_ID)
 public class LexZume16 implements IZumeImplementation {
 	
 	public LexZume16() {
 		if (!FMLEnvironment.dist.isClient())
 			return;
 		
-		Zume.LOGGER.info("Loading LexZume16...");
+		ZumeAPI.getLogger().info("Loading LexZume16...");
 		
 		LexZume16ConfigScreen.register();
 		
-		Zume.init(this, FMLPaths.CONFIGDIR.get());
-		if (Zume.disabled)
+		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
+		if (ZumeConfigAPI.isDisabled())
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -85,19 +88,19 @@ public class LexZume16 implements IZumeImplementation {
 	
 	private void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			Zume.render();
+			ZumeAPI.renderHook();
 		}
 	}
 	
 	private void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (Zume.shouldHookFOV()) {
-			event.setFOV(Zume.transformFOV(event.getFOV()));
+		if (ZumeAPI.isFOVHookActive()) {
+			event.setFOV(ZumeAPI.fovHook(event.getFOV()));
 		}
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
-		if (Zume.interceptScroll(scrollAmount)) {
+		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

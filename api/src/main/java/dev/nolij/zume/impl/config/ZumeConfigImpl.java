@@ -1,19 +1,17 @@
-package dev.nolij.zume.common.config;
+package dev.nolij.zume.impl.config;
 
 import blue.endless.jankson.Comment;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonGrammar;
 import blue.endless.jankson.api.SyntaxError;
-import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.common.util.FileWatcher;
-import dev.nolij.zume.common.util.IFileWatcher;
+import dev.nolij.zume.impl.Zume;
 
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ZumeConfig implements Cloneable {
+public class ZumeConfigImpl {
 	
 	@Comment("""
 		\nEnable Cinematic Camera while zooming.
@@ -103,7 +101,7 @@ public class ZumeConfig implements Cloneable {
 	
 	@FunctionalInterface
 	public interface ConfigConsumer {
-		void invoke(ZumeConfig config);
+		void invoke(ZumeConfigImpl config);
 	}
 	
 	private static final int MAX_RETRIES = 5;
@@ -112,14 +110,14 @@ public class ZumeConfig implements Cloneable {
 		.allowBareRootObject()
 		.build();
 	
-	private static ZumeConfig readFromFile(final File configFile) {
+	private static ZumeConfigImpl readFromFile(final File configFile) {
 		if (configFile == null || !configFile.exists())
 			return null;
 		
 		int i = 0;
 		while (true) {
 			try {
-				return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfig.class);
+				return JANKSON.fromJson(JANKSON.load(configFile), ZumeConfigImpl.class);
             } catch (SyntaxError e) {
 				if (++i < MAX_RETRIES) {
                     try {
@@ -130,7 +128,7 @@ public class ZumeConfig implements Cloneable {
                         return null;
                     }
                 }
-				Zume.LOGGER.error("Error parsing config after " + i + " retries: ", e);
+				Zume.LOGGER.error("Error parsing config after {} retries: ", i, e);
 				return null;
 			} catch (IOException e) {
 				Zume.LOGGER.error("Error reading config: ", e);
@@ -139,11 +137,11 @@ public class ZumeConfig implements Cloneable {
         }
 	}
 	
-	private static ZumeConfig readConfigFile() {
-		ZumeConfig result = readFromFile(getConfigFile());
+	private static ZumeConfigImpl readConfigFile() {
+		ZumeConfigImpl result = readFromFile(getConfigFile());
 		
 		if (result == null)
-			result = new ZumeConfig();
+			result = new ZumeConfigImpl();
 		
 		return result;
 	}
@@ -164,16 +162,7 @@ public class ZumeConfig implements Cloneable {
 	private static File instanceFile = null;
 	private static File globalFile = null;
 	
-	@Override
-	public ZumeConfig clone() {
-		try {
-			return (ZumeConfig) super.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new AssertionError(e);
-		}
-	}
-	
-	public static void replace(final ZumeConfig newConfig) throws InterruptedException {
+	public static void replace(final ZumeConfigImpl newConfig) throws InterruptedException {
 		try {
 			instanceWatcher.lock();
 			try {
@@ -188,12 +177,6 @@ public class ZumeConfig implements Cloneable {
 			instanceWatcher.unlock();
 		}
 	}
-	
-	public void modify(ConfigConsumer modifier) throws InterruptedException {
-		final ZumeConfig newConfig = this.clone();
-		modifier.invoke(newConfig);
-		replace(newConfig);
-    }
 	
 	
 	private static final String CONFIG_PATH_OVERRIDE = System.getProperty("zume.configPathOverride");
@@ -231,7 +214,7 @@ public class ZumeConfig implements Cloneable {
 	public static void reloadConfig() {
 		Zume.LOGGER.info("Reloading config...");
 		
-		final ZumeConfig newConfig = readConfigFile();
+		final ZumeConfigImpl newConfig = readConfigFile();
 		
 		consumer.invoke(newConfig);
 	}
@@ -246,7 +229,7 @@ public class ZumeConfig implements Cloneable {
 			globalFile = GLOBAL_CONFIG_PATH.resolve(fileName).toFile();
 		}
 		
-		ZumeConfig config = readConfigFile();
+		ZumeConfigImpl config = readConfigFile();
 		
 		// write new options and comment updates to disk
 		config.writeToFile(getConfigFile());
@@ -271,11 +254,11 @@ public class ZumeConfig implements Cloneable {
 				instanceWatcher = nullWatcher;
 				globalWatcher = nullWatcher;
 			} else if (CONFIG_PATH_OVERRIDE == null) {
-				instanceWatcher = FileWatcher.onFileChange(instanceFile.toPath(), ZumeConfig::reloadConfig);
-				globalWatcher = FileWatcher.onFileChange(globalFile.toPath(), ZumeConfig::reloadConfig);
+				instanceWatcher = FileWatcher.onFileChange(instanceFile.toPath(), ZumeConfigImpl::reloadConfig);
+				globalWatcher = FileWatcher.onFileChange(globalFile.toPath(), ZumeConfigImpl::reloadConfig);
 			} else {
 				instanceWatcher = nullWatcher;
-				globalWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfig::reloadConfig);
+				globalWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfigImpl::reloadConfig);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

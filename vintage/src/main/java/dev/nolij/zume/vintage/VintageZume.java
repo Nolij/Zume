@@ -1,9 +1,9 @@
 package dev.nolij.zume.vintage;
 
-import dev.nolij.zume.common.CameraPerspective;
-import dev.nolij.zume.common.Constants;
-import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.CameraPerspective;
+import dev.nolij.zume.api.platform.v0.IZumeImplementation;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -18,11 +18,13 @@ import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 
 import java.io.File;
 
+import static dev.nolij.zume.impl.ZumeConstants.*;
+
 @Mod(
-	modid = Zume.MOD_ID,
-	name = Constants.MOD_NAME,
-	version = Constants.MOD_VERSION, 
-	acceptedMinecraftVersions = Constants.VINTAGE_VERSION_RANGE,
+	modid = MOD_ID,
+	name = MOD_NAME,
+	version = MOD_VERSION, 
+	acceptedMinecraftVersions = VINTAGE_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeImplementation {
 	
@@ -30,10 +32,10 @@ public class VintageZume implements IZumeImplementation {
 		if (!FMLLaunchHandler.side().isClient())
 			return;
 		
-		Zume.LOGGER.info("Loading Vintage Zume...");
+		ZumeAPI.getLogger().info("Loading Vintage Zume...");
 		
-		Zume.init(this, new File(Launch.minecraftHome, "config").toPath());
-		if (Zume.disabled)
+		ZumeAPI.registerImplementation(this, new File(Launch.minecraftHome, "config").toPath());
+		if (ZumeConfigAPI.isDisabled())
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -66,21 +68,21 @@ public class VintageZume implements IZumeImplementation {
 	@SubscribeEvent
 	public void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			Zume.render();
+			ZumeAPI.renderHook();
 		}
 	}
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (Zume.shouldHookFOV()) {
-			event.setFOV((float) Zume.transformFOV(event.getFOV()));
+		if (ZumeAPI.isFOVHookActive()) {
+			event.setFOV((float) ZumeAPI.fovHook(event.getFOV()));
 		}
 	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) {
 		final int scrollAmount = mouseEvent.getDwheel();
-		if (Zume.interceptScroll(scrollAmount)) {
+		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
 			mouseEvent.setCanceled(true);
 		}
 	}

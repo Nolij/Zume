@@ -20,7 +20,7 @@
 			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
 		"preLaunch": [
-			"dev.nolij.zume.FabricZumePreLaunchEntrypoint"
+			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
 		"modmenu": [
 			"dev.nolij.zume.modern.integration.ZumeModMenuIntegration"

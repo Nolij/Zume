@@ -1,8 +1,9 @@
 package dev.nolij.zume.neoforge;
 
-import dev.nolij.zume.common.CameraPerspective;
-import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.CameraPerspective;
+import dev.nolij.zume.api.platform.v0.IZumeImplementation;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -13,19 +14,21 @@ import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 
-@Mod(Zume.MOD_ID)
+import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
+
+@Mod(MOD_ID)
 public class NeoZume implements IZumeImplementation {
 	
 	public NeoZume(IEventBus modEventBus) {
 		if (!FMLEnvironment.dist.isClient())
 			return;
 		
-		Zume.LOGGER.info("Loading NeoZume...");
+		ZumeAPI.getLogger().info("Loading NeoZume...");
 		
 		NeoZumeConfigScreen.register();
 		
-		Zume.init(this, FMLPaths.CONFIGDIR.get());
-		if (Zume.disabled)
+		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
+		if (ZumeConfigAPI.isDisabled())
 			return;
 		
 		modEventBus.addListener(this::registerKeyBindings);
@@ -64,30 +67,30 @@ public class NeoZume implements IZumeImplementation {
 	
 	private void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			Zume.render();
+			ZumeAPI.renderHook();
 		}
 	}
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
-		if (Zume.shouldHookFOV()) {
-			event.setFOV(Zume.transformFOV(event.getFOV()));
+		if (ZumeAPI.isFOVHookActive()) {
+			event.setFOV(ZumeAPI.fovHook(event.getFOV()));
 		}
 	}
 	
 	private void calculateTurnPlayerValues(CalculatePlayerTurnEvent event) {
-		event.setMouseSensitivity(Zume.transformMouseSensitivity(event.getMouseSensitivity()));
-		event.setCinematicCameraEnabled(Zume.transformCinematicCamera(event.getCinematicCameraEnabled()));
+		event.setMouseSensitivity(ZumeAPI.mouseSensitivityHook(event.getMouseSensitivity()));
+		event.setCinematicCameraEnabled(ZumeAPI.cinematicCameraEnabledHook(event.getCinematicCameraEnabled()));
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
 		final int scrollAmount = (int) event.getScrollDeltaY();
-		if (Zume.interceptScroll(scrollAmount)) {
+		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-        event.setDistance(Zume.transformThirdPersonDistance(event.getDistance()));
+        event.setDistance(ZumeAPI.thirdPersonCameraHook(event.getDistance()));
 	}
 	
 }

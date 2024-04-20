@@ -28,5 +28,5 @@ dependencies {
 	
 	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
 	
-	"minecraftLibraries"(project(":common"))
+	"minecraftLibraries"(project(":api"))
 }

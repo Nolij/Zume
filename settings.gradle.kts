@@ -32,7 +32,7 @@ plugins {
 rootProject.name = "zume"
 
 include("stubs")
-include("common")
+include("api")
 include("modern")
 include("legacy")
 include("primitive")

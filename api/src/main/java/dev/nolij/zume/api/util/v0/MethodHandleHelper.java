@@ -1,4 +1,4 @@
-package dev.nolij.zume.common.util;
+package dev.nolij.zume.api.util.v0;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

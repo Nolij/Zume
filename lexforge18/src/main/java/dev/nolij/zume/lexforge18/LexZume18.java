@@ -1,9 +1,10 @@
 package dev.nolij.zume.lexforge18;
 
-import dev.nolij.zume.common.CameraPerspective;
-import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.common.util.MethodHandleHelper;
+import dev.nolij.zume.api.platform.v0.CameraPerspective;
+import dev.nolij.zume.api.platform.v0.IZumeImplementation;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -18,7 +19,9 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
-@Mod(Zume.MOD_ID)
+import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
+
+@Mod(MOD_ID)
 public class LexZume18 implements IZumeImplementation {
 	
 	private static final Class<?> FOV_EVENT_CLASS = MethodHandleHelper.getClassOrNull(
@@ -41,12 +44,12 @@ public class LexZume18 implements IZumeImplementation {
 		if (!FMLEnvironment.dist.isClient())
 			return;
 		
-		Zume.LOGGER.info("Loading LexZume18...");
+		ZumeAPI.getLogger().info("Loading LexZume18...");
 		
 		LexZume18ConfigScreen.register();
 		
-		Zume.init(this, FMLPaths.CONFIGDIR.get());
-		if (Zume.disabled)
+		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
+		if (ZumeConfigAPI.isDisabled())
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -80,14 +83,14 @@ public class LexZume18 implements IZumeImplementation {
 	
 	private void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			Zume.render();
+			ZumeAPI.renderHook();
 		}
 	}
 	
 	private void calculateFOV(EntityViewRenderEvent event) {
-		if (event.getClass() == FOV_EVENT_CLASS && Zume.shouldHookFOV()) {
+		if (event.getClass() == FOV_EVENT_CLASS && ZumeAPI.isFOVHookActive()) {
 			try {
-				SET_FOV.invokeExact(event, Zume.transformFOV((double) GET_FOV.invokeExact(event)));
+				SET_FOV.invokeExact(event, ZumeAPI.fovHook((double) GET_FOV.invokeExact(event)));
 			} catch (Throwable e) {
 				throw new AssertionError(e);
 			}
@@ -96,7 +99,7 @@ public class LexZume18 implements IZumeImplementation {
 	
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
-		if (Zume.interceptScroll(scrollAmount)) {
+		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

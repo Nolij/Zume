@@ -1,9 +1,9 @@
 // Based off of https://gist.githubusercontent.com/danielflower/f54c2fe42d32356301c68860a4ab21ed/raw/d09c312b4e40b17cdce310992da89dc06aabb98a/FileWatcher.java
 // Original License (all modifications are still distributed under this project's license): https://gist.github.com/danielflower/f54c2fe42d32356301c68860a4ab21ed?permalink_comment_id=2352260#gistcomment-2352260
 
-package dev.nolij.zume.common.util;
+package dev.nolij.zume.impl.config;
 
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.impl.Zume;
 
 import java.io.IOException;
 import java.nio.file.*;
