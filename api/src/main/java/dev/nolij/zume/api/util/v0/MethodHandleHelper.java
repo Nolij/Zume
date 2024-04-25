@@ -25,10 +25,28 @@ public final class MethodHandleHelper {
 		}
 	}
 	
+	public static Class<?> getClassOrNull(ClassLoader classLoader, String className) {
+		try {
+			return Class.forName(className, true, classLoader);
+		} catch (ClassNotFoundException ignored) {
+			return null;
+		}
+	}
+	
 	public static Class<?> getClassOrNull(String... classNames) {
 		for (final String className : classNames) {
 			try {
 				return Class.forName(className);
+			} catch (ClassNotFoundException ignored) { }
+		}
+		
+		return null;
+	}
+	
+	public static Class<?> getClassOrNull(ClassLoader classLoader, String... classNames) {
+		for (final String className : classNames) {
+			try {
+				return Class.forName(className, true, classLoader);
 			} catch (ClassNotFoundException ignored) { }
 		}
 		
