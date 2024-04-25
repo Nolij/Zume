@@ -15,9 +15,13 @@ unimined.minecraft {
 		loader("neoforge_version"())
 	}
 
+	source {
+		sourceGenerator.jvmArgs = listOf("-Xmx4G")
+	}
+
 	mappings {
 		mojmap()
-		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
+//		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
 	}
 
 	defaultRemapJar = true
