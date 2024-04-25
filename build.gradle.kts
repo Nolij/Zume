@@ -151,16 +151,16 @@ allprojects {
 	tasks.withType<JavaCompile> {
 		if (name !in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) {
 			options.encoding = "UTF-8"
-			sourceCompatibility = "17"
+			sourceCompatibility = "21"
 			options.release = 8
 			javaCompiler = javaToolchains.compilerFor {
-				languageVersion = JavaLanguageVersion.of(17)
+				languageVersion = JavaLanguageVersion.of(21)
 			}
 		}
 	}
 	
 	dependencies {
-		val jabelDependency = "com.github.bsideup.jabel:jabel-javac-plugin:${"jabel_version"()}"
+		val jabelDependency = "com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}"
 		annotationProcessor(jabelDependency)
 		compileOnly(jabelDependency)
 	}
