@@ -557,8 +557,6 @@ afterEvaluate {
 					snapshots = HashSet()
 				}
 				
-				snapshots.add("1.20.5-Snapshot")
-				
 				minecraftVersions.addAll(snapshots)
 			}
 
