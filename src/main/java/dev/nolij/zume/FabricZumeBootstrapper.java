@@ -36,7 +36,7 @@ public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEn
 	public void onInitializeClient() {
 		if (ZumeMixinPlugin.ZUME_VARIANT == null)
 			return;
-			
+		
 		switch (ZumeMixinPlugin.ZUME_VARIANT) {
 			case ZumeVariant.MODERN -> new ModernZume().onInitializeClient();
 			case ZumeVariant.LEGACY -> new LegacyZume().onInitializeClient();

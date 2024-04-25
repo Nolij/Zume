@@ -25,6 +25,7 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	
 	@Override
 	public boolean isZoomPressed() {
+		//noinspection UnreachableCode
 		return MinecraftAccessor.getInstance().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
