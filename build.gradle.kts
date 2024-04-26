@@ -36,30 +36,30 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
 	val suffix: String? = null,
 	val releaseType: ReleaseType? = null,
-	val deflation: CompressionType,
-	val classes: ClassFileProcessing,
-	val json: JsonProcessing,
+	val deflation: JarShrinkingType,
+	val classes: ClassShrinkingType,
+	val json: JsonShrinkingType,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		deflation = CompressionType.LIBDEFLATE,
-		classes = ClassFileProcessing.STRIP_NONE,
-		json = JsonProcessing.PRETTY_PRINT),
+		deflation = JarShrinkingType.LIBDEFLATE,
+		classes = ClassShrinkingType.STRIP_NONE,
+		json = JsonShrinkingType.PRETTY_PRINT),
 	PRE_RELEASE(
 		suffix = "pre", 
-		deflation = CompressionType.LIBDEFLATE, 
-		classes = ClassFileProcessing.STRIP_NONE, 
-		json = JsonProcessing.PRETTY_PRINT),
+		deflation = JarShrinkingType.LIBDEFLATE, 
+		classes = ClassShrinkingType.STRIP_NONE, 
+		json = JsonShrinkingType.PRETTY_PRINT),
 	RELEASE_CANDIDATE(
 		suffix = "rc", 
-		deflation = CompressionType.SEVENZIP, 
-		classes = ClassFileProcessing.STRIP_ALL, 
-		json = JsonProcessing.MINIFY),
+		deflation = JarShrinkingType.SEVENZIP, 
+		classes = ClassShrinkingType.STRIP_ALL, 
+		json = JsonShrinkingType.MINIFY),
 	RELEASE(
 		releaseType = ReleaseType.STABLE, 
-		deflation = CompressionType.SEVENZIP, 
-		classes = ClassFileProcessing.STRIP_ALL, 
-		json = JsonProcessing.MINIFY),
+		deflation = JarShrinkingType.SEVENZIP, 
+		classes = ClassShrinkingType.STRIP_ALL, 
+		json = JsonShrinkingType.MINIFY),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
@@ -470,9 +470,9 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	val shadowJar = tasks.shadowJar.get()
 	inputJar = shadowJar.archiveFile.get().asFile
 	
-	compressionType = releaseChannel.deflation
-	classFileSettings = releaseChannel.classes
-	jsonProcessing = releaseChannel.json
+	jarShrinkingType = releaseChannel.deflation
+	classShrinkingType = releaseChannel.classes
+	jsonShrinkingType = releaseChannel.json
 }
 
 afterEvaluate {
@@ -499,7 +499,7 @@ afterEvaluate {
 	}
 	
 	fun getFileForPublish(): RegularFile {
-		return if (releaseChannel.deflation != CompressionType.NONE)
+		return if (releaseChannel.deflation != JarShrinkingType.NONE)
 			RegularFile { compressJar.get().outputJar }
 		else
 			tasks.shadowJar.get().archiveFile.get()

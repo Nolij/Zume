@@ -15,7 +15,7 @@ import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.Deflater
 
-enum class CompressionType(val id: Int?) {
+enum class JarShrinkingType(val id: Int?) {
 	NONE(null),
 	LIBDEFLATE(2),
 	SEVENZIP(3),
@@ -25,7 +25,7 @@ enum class CompressionType(val id: Int?) {
 	override fun toString() = name.lowercase().uppercaseFirstChar()
 }
 
-enum class ClassFileProcessing {
+enum class ClassShrinkingType {
 	STRIP_NONE,
 	STRIP_LVTS,
 	STRIP_SOURCE_FILES,
@@ -37,11 +37,11 @@ enum class ClassFileProcessing {
 	fun shouldRun() = this != STRIP_NONE
 }
 
-enum class JsonProcessing {
+enum class JsonShrinkingType {
 	NONE, MINIFY, PRETTY_PRINT
 }
 
-fun squishJar(jar: File, classFileSettings: ClassFileProcessing, jsonProcessing: JsonProcessing) {
+fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -54,19 +54,19 @@ fun squishJar(jar: File, classFileSettings: ClassFileProcessing, jsonProcessing:
 	jar.delete()
 	
 	val gson = GsonBuilder().apply {
-		if(jsonProcessing == JsonProcessing.PRETTY_PRINT) setPrettyPrinting()
+		if(jsonProcessing == JsonShrinkingType.PRETTY_PRINT) setPrettyPrinting()
 	}.create()
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
-			if (jsonProcessing != JsonProcessing.NONE && 
+			if (jsonProcessing != JsonShrinkingType.NONE && 
 				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
 				bytes = gson.fromJson(String(bytes), Any::class.java).toString().toByteArray()
 			}
 
 			if (name.endsWith(".class")) {
-				bytes = processClassFile(bytes, classFileSettings)
+				bytes = processClassFile(bytes, classProcessing)
 			}
 
 			out.putNextEntry(JarEntry(name))
@@ -78,7 +78,7 @@ fun squishJar(jar: File, classFileSettings: ClassFileProcessing, jsonProcessing:
 	}
 }
 
-private fun processClassFile(bytes: ByteArray, classFileSettings: ClassFileProcessing): ByteArray {
+private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType): ByteArray {
 	if(!classFileSettings.shouldRun()) return bytes
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
@@ -108,10 +108,11 @@ private fun isAdvzipInstalled(): Boolean {
 	}
 }
 
-fun deflate(zip: File, type: CompressionType) {
-	if(type == CompressionType.NONE) return
+fun deflate(zip: File, type: JarShrinkingType) {
+	if(type == JarShrinkingType.NONE) return
 	if(!advzipInstalled) {
 		println("advzip is not installed, skipping re-deflation of $zip")
+		return
 	}
 	
 	try {
@@ -130,39 +131,39 @@ open class CompressJarTask : DefaultTask() {
 	lateinit var inputJar: File
 
 	@Input
-	var classFileSettings = ClassFileProcessing.STRIP_ALL
+	var classShrinkingType = ClassShrinkingType.STRIP_ALL
 
 	@Input
-	var compressionType = CompressionType.LIBDEFLATE
+	var jarShrinkingType = JarShrinkingType.LIBDEFLATE
 	
 	@Input
-	var jsonProcessing = JsonProcessing.NONE
+	var jsonShrinkingType = JsonShrinkingType.NONE
 
 	@get:OutputFile
 	val outputJar: File
 		get() = inputJar // compressed jar will replace the input jar
 	
 	@Option(option = "class-file-compression", description = "How to process class files")
-	fun setClassFileSettings(value: String) {
-		classFileSettings = ClassFileProcessing.valueOf(value.uppercase())
+	fun setClassShrinkingType(value: String) {
+		classShrinkingType = ClassShrinkingType.valueOf(value.uppercase())
 	}
 	
 	@Option(option = "compression-type", description = "How to compress the jar")
-	fun setCompressionType(value: String) {
-		compressionType = value.uppercase().let {
-			if(it.matches(Regex("7Z(?:IP)?"))) CompressionType.SEVENZIP
-			else CompressionType.valueOf(it.uppercase())
+	fun setJarShrinkingType(value: String) {
+		jarShrinkingType = value.uppercase().let {
+			if(it.matches(Regex("7Z(?:IP)?"))) JarShrinkingType.SEVENZIP
+			else JarShrinkingType.valueOf(it.uppercase())
 		}
 	}
 	
 	@Option(option = "json-processing", description = "How to process json files")
-	fun setJsonProcessing(value: String) {
-		jsonProcessing = JsonProcessing.valueOf(value.uppercase())
+	fun setJsonShrinkingType(value: String) {
+		jsonShrinkingType = JsonShrinkingType.valueOf(value.uppercase())
 	}
 
 	@TaskAction
 	fun compressJar() {
-		squishJar(inputJar, classFileSettings, jsonProcessing)
-		deflate(outputJar, compressionType)
+		squishJar(inputJar, classShrinkingType, jsonShrinkingType)
+		deflate(outputJar, jarShrinkingType)
 	}
 }
