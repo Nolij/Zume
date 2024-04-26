@@ -29,11 +29,7 @@
 			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
 		]
 	},
-	"mixins": [
-		"zume-modern.mixins.json",
-		"zume-legacy.mixins.json",
-		"zume-primitive.mixins.json"
-	],
+	"mixins": ["zume.mixins.json"],
 	"depends": {
 		"fabricloader": [">=${fabric_version}", "${babric_version}"]
 	}
