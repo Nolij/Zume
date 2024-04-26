@@ -1,4 +1,4 @@
-package dev.nolij.zume.impl;
+package dev.nolij.zume;
 
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import org.objectweb.asm.tree.ClassNode;
@@ -9,11 +9,11 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Set;
 
-public class ZumeMixinPlugin implements IMixinConfigPlugin {
+public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 	
 	private static final ClassLoader CLASS_LOADER = ZumeMixinPlugin.class.getClassLoader();
 	
-	public static final String ZUME_VARIANT;
+	static final String ZUME_VARIANT;
 	private static final String implementationMixinPackage;
 	
 	static {

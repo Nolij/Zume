@@ -391,7 +391,7 @@ tasks.shadowJar {
 	transform(MixinConfigMergingTransformer::class.java) {
 		modId = "mod_id"()
 		packageName = "dev.nolij.zume.mixin"
-		mixinPlugin = "dev.nolij.zume.impl.ZumeMixinPlugin"
+		mixinPlugin = "dev.nolij.zume.ZumeMixinPlugin"
 	}
 	
 	val shadowJar = this

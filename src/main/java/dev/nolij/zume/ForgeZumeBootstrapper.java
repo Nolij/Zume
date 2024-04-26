@@ -1,7 +1,5 @@
 package dev.nolij.zume;
 
-import dev.nolij.zume.impl.ZumeMixinPlugin;
-import dev.nolij.zume.impl.ZumeVariant;
 import dev.nolij.zume.lexforge.LexZume;
 import dev.nolij.zume.lexforge18.LexZume18;
 import dev.nolij.zume.lexforge16.LexZume16;
