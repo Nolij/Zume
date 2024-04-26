@@ -1,5 +1,4 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import com.google.gson.GsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -38,7 +37,11 @@ enum class ClassFileProcessing {
 	fun shouldRun() = this != STRIP_NONE
 }
 
-fun squishJar(jar: File, classFileSettings: ClassFileProcessing) {
+enum class JsonProcessing {
+	NONE, MINIFY, PRETTY_PRINT
+}
+
+fun squishJar(jar: File, classFileSettings: ClassFileProcessing, jsonProcessing: JsonProcessing) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -50,13 +53,16 @@ fun squishJar(jar: File, classFileSettings: ClassFileProcessing) {
 
 	jar.delete()
 	
-	val slurper = JsonSlurper()
+	val gson = GsonBuilder().apply {
+		if(jsonProcessing == JsonProcessing.PRETTY_PRINT) setPrettyPrinting()
+	}.create()
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
-			if (name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
-				bytes = JsonOutput.toJson(slurper.parse(bytes)).toByteArray()
+			if (jsonProcessing != JsonProcessing.NONE && 
+				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
+				bytes = gson.fromJson(String(bytes), Any::class.java).toString().toByteArray()
 			}
 
 			if (name.endsWith(".class")) {
@@ -128,6 +134,9 @@ open class CompressJarTask : DefaultTask() {
 
 	@Input
 	var compressionType = CompressionType.LIBDEFLATE
+	
+	@Input
+	var jsonProcessing = JsonProcessing.NONE
 
 	@get:OutputFile
 	val outputJar: File
@@ -145,10 +154,15 @@ open class CompressJarTask : DefaultTask() {
 			else CompressionType.valueOf(it.uppercase())
 		}
 	}
+	
+	@Option(option = "json-processing", description = "How to process json files")
+	fun setJsonProcessing(value: String) {
+		jsonProcessing = JsonProcessing.valueOf(value.uppercase())
+	}
 
 	@TaskAction
 	fun compressJar() {
-		squishJar(inputJar, classFileSettings)
+		squishJar(inputJar, classFileSettings, jsonProcessing)
 		deflate(outputJar, compressionType)
 	}
 }

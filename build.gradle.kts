@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
@@ -35,13 +36,30 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
 	val suffix: String? = null,
 	val releaseType: ReleaseType? = null,
-	val compress: CompressionType,
-	val classFileSettings: ClassFileProcessing,
+	val deflation: CompressionType,
+	val classes: ClassFileProcessing,
+	val json: JsonProcessing,
 	) {
-	DEV_BUILD(suffix = "dev", compress = CompressionType.LIBDEFLATE, classFileSettings = ClassFileProcessing.STRIP_NONE),
-	PRE_RELEASE(suffix = "pre", compress = CompressionType.LIBDEFLATE, classFileSettings = ClassFileProcessing.STRIP_NONE),
-	RELEASE_CANDIDATE(suffix = "rc", compress = CompressionType.SEVENZIP, classFileSettings = ClassFileProcessing.STRIP_ALL),
-	RELEASE(releaseType = ReleaseType.STABLE, compress = CompressionType.SEVENZIP, classFileSettings = ClassFileProcessing.STRIP_ALL),
+	DEV_BUILD(
+		suffix = "dev",
+		deflation = CompressionType.LIBDEFLATE,
+		classes = ClassFileProcessing.STRIP_NONE,
+		json = JsonProcessing.PRETTY_PRINT),
+	PRE_RELEASE(
+		suffix = "pre", 
+		deflation = CompressionType.LIBDEFLATE, 
+		classes = ClassFileProcessing.STRIP_NONE, 
+		json = JsonProcessing.PRETTY_PRINT),
+	RELEASE_CANDIDATE(
+		suffix = "rc", 
+		deflation = CompressionType.SEVENZIP, 
+		classes = ClassFileProcessing.STRIP_ALL, 
+		json = JsonProcessing.MINIFY),
+	RELEASE(
+		releaseType = ReleaseType.STABLE, 
+		deflation = CompressionType.SEVENZIP, 
+		classes = ClassFileProcessing.STRIP_ALL, 
+		json = JsonProcessing.MINIFY),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
@@ -452,8 +470,9 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	val shadowJar = tasks.shadowJar.get()
 	inputJar = shadowJar.archiveFile.get().asFile
 	
-	compressionType = releaseChannel.compress
-	classFileSettings = releaseChannel.classFileSettings
+	compressionType = releaseChannel.deflation
+	classFileSettings = releaseChannel.classes
+	jsonProcessing = releaseChannel.json
 }
 
 afterEvaluate {
@@ -478,16 +497,9 @@ afterEvaluate {
 	fun getChangelog(): String {
 		return file("CHANGELOG.md").readText()
 	}
-
-	fun getTaskForPublish(): TaskProvider<out DefaultTask> {
-		return if (releaseChannel.compress != CompressionType.NONE)
-			compressJar
-		else
-			tasks.shadowJar
-	}
 	
 	fun getFileForPublish(): RegularFile {
-		return if (releaseChannel.compress != CompressionType.NONE)
+		return if (releaseChannel.deflation != CompressionType.NONE)
 			RegularFile { compressJar.get().outputJar }
 		else
 			tasks.shadowJar.get().archiveFile.get()
@@ -590,7 +602,7 @@ afterEvaluate {
 	}
 	
 	tasks.withType<PublishModTask> {
-		dependsOn(getTaskForPublish())
+		dependsOn(compressJar)
 	}
 
 	tasks.publishMods {
