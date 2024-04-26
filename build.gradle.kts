@@ -29,12 +29,13 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
 	val suffix: String? = null,
 	val releaseType: ReleaseType? = null,
-	val compress: CompressionType
+	val compress: CompressionType,
+	val classFileSettings: ClassFileProcessing,
 	) {
-	DEV_BUILD(suffix = "dev", compress = CompressionType.NONE),
-	PRE_RELEASE(suffix = "pre", compress = CompressionType.NONE),
-	RELEASE_CANDIDATE(suffix = "rc", compress = CompressionType.LIBDEFLATE),
-	RELEASE(releaseType = ReleaseType.STABLE, compress = CompressionType.SEVENZIP),
+	DEV_BUILD(suffix = "dev", compress = CompressionType.LIBDEFLATE, classFileSettings = ClassFileProcessing.STRIP_NONE),
+	PRE_RELEASE(suffix = "pre", compress = CompressionType.LIBDEFLATE, classFileSettings = ClassFileProcessing.STRIP_NONE),
+	RELEASE_CANDIDATE(suffix = "rc", compress = CompressionType.SEVENZIP, classFileSettings = ClassFileProcessing.STRIP_ALL),
+	RELEASE(releaseType = ReleaseType.STABLE, compress = CompressionType.SEVENZIP, classFileSettings = ClassFileProcessing.STRIP_ALL),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
@@ -370,34 +371,15 @@ tasks.assemble {
 	dependsOn(tasks.shadowJar)
 }
 
-abstract class ProcessJarTask : DefaultTask() {
-	@get:InputFile
-	abstract val inputJar: RegularFileProperty
-	
-	@OutputFile
-	fun getOutputJar(): RegularFile {
-		return inputJar.get()
-	}
-}
-
-val compressJar = tasks.register<ProcessJarTask>("compressJar") {
+val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
 	
-	val stripLVTs = "strip_lvts"().toBoolean()
-	val stripSourceFiles = "strip_source_files"().toBoolean()
-	
-	inputs.property("strip_lvts", stripLVTs)
-	inputs.property("strip_source_files", stripSourceFiles)
-	
 	val shadowJar = tasks.shadowJar.get()
-	inputJar.set(shadowJar.archiveFile)
+	inputJar = shadowJar.archiveFile.get().asFile
 	
-	doLast {
-		val jar = inputJar.get().asFile
-		squishJar(jar, stripLVTs, stripSourceFiles)
-		deflate(jar, releaseChannel.compress)
-	}
+	compressionType = releaseChannel.compress
+	classFileSettings = releaseChannel.classFileSettings
 }
 
 afterEvaluate {
@@ -432,7 +414,7 @@ afterEvaluate {
 	
 	fun getFileForPublish(): RegularFile {
 		return if (releaseChannel.compress != CompressionType.NONE)
-			compressJar.get().getOutputJar()
+			RegularFile { compressJar.get().outputJar }
 		else
 			tasks.shadowJar.get().archiveFile.get()
 	}
