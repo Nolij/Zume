@@ -140,7 +140,9 @@ open class CompressJarTask : DefaultTask() {
 	
 	@Option(option = "compression-type", description = "How to compress the jar")
 	fun setCompressionType(value: String) {
-		compressionType = CompressionType.valueOf(value.uppercase())
+		compressionType =
+			if(value.uppercase().matches(Regex("7Z(IP)?"))) CompressionType.SEVENZIP
+			else CompressionType.valueOf(value.uppercase())
 	}
 
 	@TaskAction
