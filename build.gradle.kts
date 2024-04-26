@@ -21,6 +21,7 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import java.time.ZonedDateTime
 
 plugins {
     id("java")
@@ -42,12 +43,12 @@ enum class ReleaseChannel(
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		deflation = JarShrinkingType.LIBDEFLATE,
+		deflation = JarShrinkingType.SEVENZIP,
 		classes = ClassShrinkingType.STRIP_NONE,
 		json = JsonShrinkingType.PRETTY_PRINT),
 	PRE_RELEASE(
 		suffix = "pre", 
-		deflation = JarShrinkingType.LIBDEFLATE, 
+		deflation = JarShrinkingType.SEVENZIP, 
 		classes = ClassShrinkingType.STRIP_NONE, 
 		json = JsonShrinkingType.PRETTY_PRINT),
 	RELEASE_CANDIDATE(
@@ -67,7 +68,7 @@ val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) 
 
 println("Release Channel: $releaseChannel")
 
-val headDateTime = grgit.head().dateTime
+val headDateTime: ZonedDateTime = grgit.head().dateTime
 
 val branchName = grgit.branch.current().name!!
 val releaseTagPrefix = "release/"
@@ -498,15 +499,8 @@ afterEvaluate {
 		return file("CHANGELOG.md").readText()
 	}
 	
-	fun getFileForPublish(): RegularFile {
-		return if (releaseChannel.deflation != JarShrinkingType.NONE)
-			RegularFile { compressJar.get().outputJar }
-		else
-			tasks.shadowJar.get().archiveFile.get()
-	}
-	
 	publishMods {
-		file = getFileForPublish()
+		file = compressJar.get().outputJar
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version
@@ -629,7 +623,7 @@ afterEvaluate {
 				
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val releaseChangeLog = getChangelog()
-				val file = getFileForPublish().asFile
+				val file = compressJar.get().outputJar
 				
 				var content = "# [Zume Test Build ${Zume.version}]" +
 					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
