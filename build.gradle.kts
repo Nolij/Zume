@@ -366,7 +366,6 @@ class MixinConfigMergingTransformer : Transformer {
 			"package" to packageName,
 			"plugin" to mixinPlugin,
 			"compatibilityLevel" to "JAVA_8",
-			"mixins" to emptyList<String>(),
 			"client" to mixins,
 			"injectors" to mapOf(
 				"defaultRequire" to 1,

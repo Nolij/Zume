@@ -3,8 +3,6 @@
 	"minVersion": "0.8",
 	"package": "dev.nolij.zume.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"mixins": [
-	],
 	"client": [
 		"lexforge16.CameraMixin",
 		"lexforge16.MouseHandlerMixin"
