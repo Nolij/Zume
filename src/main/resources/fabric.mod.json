@@ -20,7 +20,7 @@
 			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
 		"preLaunch": [
-			"dev.nolij.zume.FabricZumePreLaunchEntrypoint"
+			"dev.nolij.zume.FabricZumeBootstrapper"
 		],
 		"modmenu": [
 			"dev.nolij.zume.modern.integration.ZumeModMenuIntegration"
@@ -29,11 +29,7 @@
 			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
 		]
 	},
-	"mixins": [
-		"zume-modern.mixins.json",
-		"zume-legacy.mixins.json",
-		"zume-primitive.mixins.json"
-	],
+	"mixins": ["zume.mixins.json"],
 	"depends": {
 		"fabricloader": [">=${fabric_version}", "${babric_version}"]
 	}

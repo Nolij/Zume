@@ -1,14 +1,11 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "dev.nolij.zume.lexforge18.mixin",
-	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
+	"package": "dev.nolij.zume.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"mixins": [
-	],
 	"client": [
-		"CameraMixin",
-		"MouseHandlerMixin"
+		"lexforge18.CameraMixin",
+		"lexforge18.MouseHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

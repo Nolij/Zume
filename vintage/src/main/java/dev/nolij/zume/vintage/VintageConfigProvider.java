@@ -1,6 +1,6 @@
 package dev.nolij.zume.vintage;
 
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
@@ -9,14 +9,17 @@ import net.minecraftforge.fml.client.config.GuiConfig;
 import java.util.Collections;
 import java.util.Set;
 
+import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
+
+@SuppressWarnings("unused")
 public class VintageConfigProvider implements IModGuiFactory {
 	
 	public static class VintageZumeConfigGUI extends GuiConfig {
 		
 		public VintageZumeConfigGUI(GuiScreen parentScreen) {
-			super(parentScreen, Collections.emptyList(), Zume.MOD_ID, false, false, "config");
+			super(parentScreen, Collections.emptyList(), MOD_ID, false, false, "config");
 			
-			Zume.openConfigFile();
+			ZumeAPI.openConfigFile();
 		}
 		
 		@Override

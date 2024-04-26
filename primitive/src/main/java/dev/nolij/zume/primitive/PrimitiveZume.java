@@ -1,10 +1,11 @@
 package dev.nolij.zume.primitive;
 
-import dev.nolij.zume.common.CameraPerspective;
-import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.primitive.mixin.GameRendererAccessor;
-import dev.nolij.zume.primitive.mixin.MinecraftAccessor;
+import dev.nolij.zume.api.platform.v0.CameraPerspective;
+import dev.nolij.zume.api.platform.v0.IZumeImplementation;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.mixin.primitive.GameRendererAccessor;
+import dev.nolij.zume.mixin.primitive.MinecraftAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -17,13 +18,14 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
 			return;
 		
-		Zume.LOGGER.info("Loading Primitive Zume...");
+		ZumeAPI.getLogger().info("Loading Primitive Zume...");
 		
-		Zume.init(this, FabricLoader.getInstance().getConfigDir());
+		ZumeAPI.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
 	}
 	
 	@Override
 	public boolean isZoomPressed() {
+		//noinspection UnreachableCode
 		return MinecraftAccessor.getInstance().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
@@ -39,13 +41,14 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
+		//noinspection UnreachableCode
 		return MinecraftAccessor.getInstance().options.thirdPerson ? CameraPerspective.THIRD_PERSON : CameraPerspective.FIRST_PERSON;
 	}
 	
 	@Override
 	public void onZoomActivate() {
 		//noinspection ConstantValue
-		if (Zume.config.enableCinematicZoom && !MinecraftAccessor.getInstance().options.cinematicMode) {
+		if (ZumeConfigAPI.isCinematicZoomEnabled() && !MinecraftAccessor.getInstance().options.cinematicMode) {
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().field_2818;
 			gameRenderer.setCinematicYawSmoother(new SmoothUtil());
 			gameRenderer.setCinematicPitchSmoother(new SmoothUtil());

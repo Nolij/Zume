@@ -2,21 +2,24 @@ package dev.nolij.zume.archaic;
 
 import cpw.mods.fml.client.IModGuiFactory;
 import cpw.mods.fml.client.config.GuiConfig;
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
 import java.util.Collections;
 import java.util.Set;
 
+import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
+
+@SuppressWarnings("unused")
 public class ArchaicConfigProvider implements IModGuiFactory {
 	
 	public static class ArchaicZumeConfigGUI extends GuiConfig {
 		
 		public ArchaicZumeConfigGUI(GuiScreen parentScreen) {
-			super(parentScreen, Collections.emptyList(), Zume.MOD_ID, false, false, "config");
+			super(parentScreen, Collections.emptyList(), MOD_ID, false, false, "config");
 			
-			Zume.openConfigFile();
+			ZumeAPI.openConfigFile();
 		}
 		
 		@Override

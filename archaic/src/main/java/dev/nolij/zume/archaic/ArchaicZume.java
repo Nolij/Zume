@@ -3,11 +3,11 @@ package dev.nolij.zume.archaic;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import dev.nolij.zume.archaic.mixin.EntityRendererAccessor;
-import dev.nolij.zume.common.CameraPerspective;
-import dev.nolij.zume.common.Constants;
-import dev.nolij.zume.common.IZumeImplementation;
-import dev.nolij.zume.common.Zume;
+import dev.nolij.zume.api.platform.v0.CameraPerspective;
+import dev.nolij.zume.api.platform.v0.IZumeImplementation;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.mixin.archaic.EntityRendererAccessor;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -17,11 +17,13 @@ import net.minecraft.util.MouseFilter;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 
+import static dev.nolij.zume.impl.ZumeConstants.*;
+
 @Mod(
-	modid = Zume.MOD_ID,
-	name = Constants.MOD_NAME,
-	version = Constants.MOD_VERSION, 
-	acceptedMinecraftVersions = Constants.ARCHAIC_VERSION_RANGE,
+	modid = MOD_ID,
+	name = MOD_NAME,
+	version = MOD_VERSION,
+	acceptedMinecraftVersions = ARCHAIC_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.archaic.ArchaicConfigProvider",
 	dependencies = "required-after:unimixins@[0.1.15,)")
 public class ArchaicZume implements IZumeImplementation {
@@ -31,10 +33,10 @@ public class ArchaicZume implements IZumeImplementation {
 		if (!FMLLaunchHandler.side().isClient())
 			return;
 		
-		Zume.LOGGER.info("Loading Archaic Zume...");
+		ZumeAPI.getLogger().info("Loading Archaic Zume...");
 		
-		Zume.init(this, Launch.minecraftHome.toPath().resolve("config"));
-		if (Zume.disabled)
+		ZumeAPI.registerImplementation(this, Launch.minecraftHome.toPath().resolve("config"));
+		if (ZumeConfigAPI.isDisabled())
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -66,7 +68,7 @@ public class ArchaicZume implements IZumeImplementation {
 	
 	@Override
 	public void onZoomActivate() {
-		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
+		if (ZumeConfigAPI.isCinematicZoomEnabled() && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
 			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
 			entityRenderer.setMouseFilterXAxis(new MouseFilter());
 			entityRenderer.setMouseFilterYAxis(new MouseFilter());
@@ -81,7 +83,7 @@ public class ArchaicZume implements IZumeImplementation {
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) {
 		final int scrollAmount = mouseEvent.dwheel;
-		if (Zume.interceptScroll(scrollAmount)) {
+		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
 			mouseEvent.setCanceled(true);
 		}
 	}

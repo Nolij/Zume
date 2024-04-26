@@ -1,4 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PublishModTask
@@ -10,6 +14,8 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
+import org.apache.tools.zip.ZipEntry
+import org.apache.tools.zip.ZipOutputStream
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -93,7 +99,7 @@ rootProject.group = "maven_group"()
 rootProject.version = Zume.version
 
 base {
-	archivesName = "archives_base_name"()
+	archivesName = "mod_id"()
 }
 
 val fabricImpls = arrayOf(
@@ -146,16 +152,16 @@ allprojects {
 	tasks.withType<JavaCompile> {
 		if (name !in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) {
 			options.encoding = "UTF-8"
-			sourceCompatibility = "17"
+			sourceCompatibility = "21"
 			options.release = 8
 			javaCompiler = javaToolchains.compilerFor {
-				languageVersion = JavaLanguageVersion.of(17)
+				languageVersion = JavaLanguageVersion.of(21)
 			}
 		}
 	}
 	
 	dependencies {
-		"com.github.bsideup.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
+		"com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
 			annotationProcessor(it)
 			compileOnly(it)
 		}
@@ -187,7 +193,7 @@ subprojects {
 	version = Zume.version
 	
 	base {
-		archivesName = "${"archives_base_name"()}-${subProject.name}"
+		archivesName = "${"mod_id"()}-${subProject.name}"
 	}
 	
 	tasks.withType<GenerateModuleMetadata> {
@@ -208,11 +214,7 @@ subprojects {
 		dependencies {
 			"shade"("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
 
-			"shade"(project(":common")) { isTransitive = false }
-		}
-		
-		tasks.processResources {
-			from("common/src/main/resources")
+			"shade"(project(":api")) { isTransitive = false }
 		}
 		
 		afterEvaluate {
@@ -220,7 +222,7 @@ subprojects {
 				group = "build"
 				
 				from("../LICENSE") {
-					rename { "${it}_${"archives_base_name"()}" }
+					rename { "${it}_${"mod_id"()}" }
 				}
 
 				val remapJar = tasks.withType<RemapJarTask>()
@@ -301,25 +303,97 @@ dependencies {
 	
 	compileOnly(project(":stubs"))
 	
-	"shade"(project(":common")) { isTransitive = false }
+	implementation(project(":api"))
+	"shade"(project(":api")) { isTransitive = false }
 	
 	uniminedImpls.forEach { 
 		implementation(project(":${it}")) { isTransitive = false }
 	}
 }
 
-tasks.processResources {
-	from("common/src/main/resources")
-}
-
 tasks.jar {
 	enabled = false
 }
 
+class MixinConfigMergingTransformer : Transformer {
+	private val JSON = JsonSlurper()
+
+	@Input lateinit var modId: String
+	@Input lateinit var packageName: String
+	@Input lateinit var mixinPlugin: String
+
+	override fun getName(): String {
+		return "MixinConfigMergingTransformer"
+	}
+
+	override fun canTransformResource(element: FileTreeElement?): Boolean {
+		return element != null && (element.name.endsWith(".mixins.json") || element.name.endsWith("-refmap.json"))
+	}
+
+	private var transformed = false
+	
+	private var mixins = ArrayList<String>()
+	private var refMaps = HashMap<String, Map<String, String>>()
+
+	override fun transform(context: TransformerContext?) {
+		if (context == null)
+			return
+
+		this.transformed = true
+
+		val parsed = JSON.parse(context.`is`) as Map<*, *>
+		if (parsed.contains("client")) {
+			@Suppress("UNCHECKED_CAST")
+			mixins.addAll(parsed["client"] as List<String>)
+		} else {
+			@Suppress("UNCHECKED_CAST")
+			refMaps.putAll(parsed["mappings"] as Map<String, Map<String, String>>)
+		}
+	}
+
+	override fun hasTransformedResource(): Boolean {
+		return transformed
+	}
+
+	override fun modifyOutputStream(os: ZipOutputStream?, preserveFileTimestamps: Boolean) {
+		val mixinConfigEntry = ZipEntry("${modId}.mixins.json")
+		os!!.putNextEntry(mixinConfigEntry)
+		os.write(JsonOutput.prettyPrint(JsonOutput.toJson(mapOf(
+			"required" to true,
+			"minVersion" to "0.8",
+			"package" to packageName,
+			"plugin" to mixinPlugin,
+			"compatibilityLevel" to "JAVA_8",
+			"client" to mixins,
+			"injectors" to mapOf(
+				"defaultRequire" to 1,
+			),
+			"refmap" to "${modId}-refmap.json",
+		))).toByteArray())
+		
+		val refMapEntry = ZipEntry("${modId}-refmap.json")
+		os.putNextEntry(refMapEntry)
+		os.write(JsonOutput.prettyPrint(JsonOutput.toJson(mapOf(
+			"mappings" to refMaps,
+		))).toByteArray())
+
+		transformed = false
+		mixins.clear()
+		refMaps.clear()
+	}
+
+}
+
 tasks.shadowJar {
+	transform(MixinConfigMergingTransformer::class.java) {
+		modId = "mod_id"()
+		packageName = "dev.nolij.zume.mixin"
+		mixinPlugin = "dev.nolij.zume.ZumeMixinPlugin"
+	}
+	
 	val shadowJar = this
 	from("LICENSE") {
-		rename { "${it}_${"archives_base_name"()}" }
+		rename { "${it}_${"mod_id"()}" }
 	}
 	
 	exclude("*.xcf")
@@ -361,7 +435,7 @@ tasks.shadowJar {
 		attributes(
 			"FMLCorePluginContainsFMLMod" to true,
 			"ForceLoadAsMod" to true,
-			"MixinConfigs" to lexForgeImpls.joinToString(",") { "zume-${it}.mixins.json" },
+			"MixinConfigs" to "zume.mixins.json",
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
 		)
 	}
@@ -385,7 +459,7 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 afterEvaluate {
 	publishing {
 		publications {
-			create<MavenPublication>("archives_base_name"()) {
+			create<MavenPublication>("mod_id"()) {
 				artifact(tasks.shadowJar)
 				uniminedImpls.forEach { implName ->
 					artifact(project(":${implName}").tasks.named("platformJar"))
@@ -496,8 +570,6 @@ afterEvaluate {
 					snapshots = HashSet()
 				}
 				
-				snapshots.add("1.20.5-Snapshot")
-				
 				minecraftVersions.addAll(snapshots)
 			}
 
@@ -547,14 +619,13 @@ afterEvaluate {
 				val releaseChangeLog = getChangelog()
 				val file = getFileForPublish().asFile
 				
-				var content = "# [Zume Test Build ${Zume.version}](<https://github.com/Nolij/Zume/releases/tag/release/${Zume.version}>) has been released!\n"
+				var content = "# [Zume Test Build ${Zume.version}]" +
+					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
+					"Changes since last build: <${compareLink}>"
 				
-				content += 
-					if (buildChangeLog.trim().isEmpty())
-						"Changes since last build: <${compareLink}>"
-					else
-						"Changes since last build: <${compareLink}> ```md\n${buildChangeLog}\n```\n"
-				content += "Changes since last release: ```md\n${releaseChangeLog}\n```"
+				if (buildChangeLog.isNotBlank())
+					content += " ```md\n${buildChangeLog}\n```"
+				content += "\nChanges since last release: ```md\n${releaseChangeLog}\n```"
 
 				val webhook = DiscordAPI.Webhook(
 					content,

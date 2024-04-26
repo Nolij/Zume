@@ -1,16 +1,13 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "dev.nolij.zume.primitive.mixin",
-	"plugin": "dev.nolij.zume.common.ZumeMixinPlugin",
+	"package": "dev.nolij.zume.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"mixins": [
-	],
 	"client": [
-		"GameRendererAccessor",
-		"GameRendererMixin",
-		"MinecraftAccessor",
-		"MinecraftMixin"
+		"primitive.GameRendererAccessor",
+		"primitive.GameRendererMixin",
+		"primitive.MinecraftAccessor",
+		"primitive.MinecraftMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

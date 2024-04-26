@@ -1,8 +1,8 @@
 package dev.nolij.zume.modern.integration;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import dev.nolij.zume.common.Zume;
-import dev.nolij.zume.common.util.MethodHandleHelper;
+import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -11,6 +11,8 @@ import net.minecraft.text.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.function.Function;
+
+import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 
 public class ZumeModMenuIntegration implements ModMenuApi {
 	
@@ -29,7 +31,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 		
 		@Override
 		public void init() {
-			Zume.openConfigFile();
+			ZumeAPI.openConfigFile();
 			
 			MinecraftClient.getInstance().setScreen(parent);
 		}
@@ -41,7 +43,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	
 	@Override
 	public String getModId() {
-		return Zume.MOD_ID;
+		return MOD_ID;
 	}
 	
 	@Override
@@ -50,7 +52,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
             try {
                 return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invokeExact(""), parent);
             } catch (Throwable e) {
-				Zume.LOGGER.error("Error opening config screen: ", e);
+				ZumeAPI.getLogger().error("Error opening config screen: ", e);
 				return null;
             }
         };
