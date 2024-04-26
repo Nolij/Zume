@@ -1,15 +1,15 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "dev.nolij.zume.modern.mixin",
+	"package": "dev.nolij.zume.mixin",
 	"plugin": "dev.nolij.zume.impl.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 	],
 	"client": [
-		"CameraMixin",
-		"GameRendererMixin",
-		"MouseMixin"
+		"modern.CameraMixin",
+		"modern.GameRendererMixin",
+		"modern.MouseMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -1,13 +1,13 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "dev.nolij.zume.vintage.mixin",
+	"package": "dev.nolij.zume.mixin",
 	"plugin": "dev.nolij.zume.impl.ZumeMixinPlugin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
 	],
 	"client": [
-		"EntityRendererMixin"
+		"vintage.EntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

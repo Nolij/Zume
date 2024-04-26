@@ -58,7 +58,7 @@ public class ZumeMixinPlugin implements IMixinConfigPlugin {
 		}
 		
 		if (ZUME_VARIANT != null)
-			implementationMixinPackage = "dev.nolij.zume." + ZUME_VARIANT + ".mixin.";
+			implementationMixinPackage = "dev.nolij.zume.mixin." + ZUME_VARIANT + ".";
 		else
 			implementationMixinPackage = null;
 	}
