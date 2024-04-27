@@ -29,7 +29,7 @@ plugins {
 	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
 	id("org.ajoberstar.grgit")
-//	id("dev.nolij.zume-proguard")
+	id("dev.nolij.zume-proguard")
 }
 
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
@@ -223,17 +223,18 @@ subprojects {
 		apply(plugin = "xyz.wagyourtail.unimined")
 		apply(plugin = "com.github.johnrengelman.shadow")
 
-		configurations {
-			val shade = create("shade")
-
-			compileClasspath.get().extendsFrom(shade)
-			runtimeClasspath.get().extendsFrom(shade)
+		val shade: Configuration by configurations.creating {
+			configurations.compileClasspath.get().extendsFrom(this)
+			configurations.runtimeClasspath.get().extendsFrom(this)
+		}
+		
+		tasks.jar {
+			destinationDirectory = subProject.layout.buildDirectory.dir("devlibs")
 		}
 
 		dependencies {
-			"shade"("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
-
-			"shade"(project(":api")) { isTransitive = false }
+			shade("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
+			shade(project(":api")) { isTransitive = false }
 		}
 		
 		afterEvaluate {
@@ -244,11 +245,11 @@ subprojects {
 					rename { "${it}_${"mod_id"()}" }
 				}
 
-				val remapJar = tasks.withType<RemapJarTask>()
+				val remapJar = tasks.withType<RemapJarTask>()["remapJar"]
 				dependsOn(remapJar)
 				from(remapJar)
 
-				configurations = immutableListOf(project.configurations["shade"])
+				configurations = immutableListOf(shade)
 				archiveBaseName = rootProject.name
 				archiveClassifier = implName
 				isPreserveFileTimestamps = false
@@ -308,22 +309,20 @@ unimined.minecraft {
 	defaultRemapJar = false
 }
 
-configurations {
-	val shade = create("shade")
-	
-	compileClasspath.get().extendsFrom(shade)
-	runtimeClasspath.get().extendsFrom(shade)
+val shade: Configuration by configurations.creating {
+	configurations.compileClasspath.get().extendsFrom(this)
+	configurations.runtimeClasspath.get().extendsFrom(this)
 }
 
 dependencies {
-	"shade"("blue.endless:jankson:${"jankson_version"()}")
+	shade("blue.endless:jankson:${"jankson_version"()}")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
 	compileOnly(project(":stubs"))
 	
 	implementation(project(":api"))
-	"shade"(project(":api")) { isTransitive = false }
+	shade(project(":api")) { isTransitive = false }
 	
 	uniminedImpls.forEach { 
 		implementation(project(":${it}")) { isTransitive = false }
@@ -348,7 +347,7 @@ tasks.shadowJar {
 	
 	exclude("*.xcf")
 	
-	configurations = immutableListOf(project.configurations["shade"])
+	configurations = immutableListOf(shade)
 	archiveClassifier = null
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
