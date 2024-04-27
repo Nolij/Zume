@@ -19,6 +19,7 @@ import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
+import proguard.gradle.ProGuardTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import java.time.ZonedDateTime
 
@@ -29,7 +30,6 @@ plugins {
 	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
 	id("org.ajoberstar.grgit")
-	id("dev.nolij.zume-proguard")
 }
 
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
@@ -40,6 +40,7 @@ enum class ReleaseChannel(
 	val deflation: JarShrinkingType,
 	val classes: ClassShrinkingType,
 	val json: JsonShrinkingType,
+	val proguard: Boolean = false
 	) {
 	DEV_BUILD(
 		suffix = "dev",
@@ -55,16 +56,18 @@ enum class ReleaseChannel(
 		suffix = "rc", 
 		deflation = JarShrinkingType.SEVENZIP, 
 		classes = ClassShrinkingType.STRIP_ALL, 
-		json = JsonShrinkingType.MINIFY),
+		json = JsonShrinkingType.MINIFY,
+		proguard = true),
 	RELEASE(
 		releaseType = ReleaseType.STABLE, 
 		deflation = JarShrinkingType.SEVENZIP, 
 		classes = ClassShrinkingType.STRIP_ALL, 
-		json = JsonShrinkingType.MINIFY),
+		json = JsonShrinkingType.MINIFY,
+		proguard = true),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
-val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
+val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"().uppercase()) else ReleaseChannel.DEV_BUILD
 
 println("Release Channel: $releaseChannel")
 
@@ -222,6 +225,7 @@ subprojects {
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
 		apply(plugin = "com.github.johnrengelman.shadow")
+		apply(plugin = "dev.nolij.zume-proguard")
 
 		val shade: Configuration by configurations.creating {
 			configurations.compileClasspath.get().extendsFrom(this)
@@ -340,7 +344,6 @@ tasks.shadowJar {
 		mixinPlugin = "dev.nolij.zume.ZumeMixinPlugin"
 	}
 	
-	val shadowJar = this
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
 	}
@@ -353,10 +356,16 @@ tasks.shadowJar {
 	isReproducibleFileOrder = true
 	
 	uniminedImpls.forEach { impl ->
-		val remapJars = project(":${impl}").tasks.withType<RemapJarTask>()
-		shadowJar.dependsOn(remapJars)
-		remapJars.forEach { remapJar ->
-			from(zipTree(remapJar.archiveFile.get())) {
+		if(releaseChannel.proguard) {
+			val task = project(":${impl}").tasks.withType<ProGuardTask>()["proguard"]
+			this.dependsOn(task)
+			from(zipTree(task.outJarFiles.single() as File)) {
+				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+			}
+		} else {
+			val task = project(":${impl}").tasks.withType<RemapJarTask>()["remapJar"]
+			this.dependsOn(task)
+			from(zipTree(task.archiveFile.get())) {
 				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 			}
 		}
