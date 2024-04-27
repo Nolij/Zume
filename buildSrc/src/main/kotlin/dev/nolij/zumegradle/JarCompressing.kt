@@ -1,3 +1,5 @@
+package dev.nolij.zumegradle
+
 import com.google.gson.GsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input

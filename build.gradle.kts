@@ -1,5 +1,10 @@
 @file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import dev.nolij.zumegradle.ClassShrinkingType
+import dev.nolij.zumegradle.JarShrinkingType
+import dev.nolij.zumegradle.JsonShrinkingType
+import dev.nolij.zumegradle.MixinConfigMergingTransformer
+import dev.nolij.zumegradle.CompressJarTask
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PublishModTask

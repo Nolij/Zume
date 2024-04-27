@@ -1,3 +1,5 @@
+package dev.nolij.zumegradle
+
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 import groovy.json.JsonOutput
@@ -8,6 +10,7 @@ import org.apache.tools.zip.ZipOutputStream
 import org.apache.tools.zip.ZipEntry
 
 class MixinConfigMergingTransformer : Transformer {
+	
 	private val JSON = JsonSlurper()
 
 	@Input
@@ -80,5 +83,5 @@ class MixinConfigMergingTransformer : Transformer {
 		mixins.clear()
 		refMaps.clear()
 	}
-
+	
 }
