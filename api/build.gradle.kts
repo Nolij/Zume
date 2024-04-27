@@ -2,9 +2,7 @@ plugins {
 	id("com.github.gmazzo.buildconfig")
 }
 
-operator fun String.invoke(): String {
-	return (rootProject.properties[this] as String?)!!
-}
+operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 buildConfig {
 	className("ZumeConstants")
