@@ -29,6 +29,7 @@ plugins {
 	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
 	id("org.ajoberstar.grgit")
+//	id("dev.nolij.zume-proguard")
 }
 
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
