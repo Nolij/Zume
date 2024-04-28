@@ -214,67 +214,16 @@ subprojects {
 	tasks.withType<GenerateModuleMetadata> {
 		enabled = false
 	}
+	
+	dependencies {
+		implementation("blue.endless:jankson:${"jankson_version"()}")
+	}
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
-		apply(plugin = "com.github.johnrengelman.shadow")
-
-		configurations {
-			val shade = create("shade")
-
-			compileClasspath.get().extendsFrom(shade)
-			runtimeClasspath.get().extendsFrom(shade)
-		}
 
 		dependencies {
-			"shade"("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
-
-			"shade"(project(":api")) { isTransitive = false }
-		}
-		
-		afterEvaluate {
-			val platformJar = tasks.create<ShadowJar>("platformJar") {
-				group = "build"
-				
-				from("../LICENSE") {
-					rename { "${it}_${"mod_id"()}" }
-				}
-
-				val remapJar = tasks.withType<RemapJarTask>()
-				dependsOn(remapJar)
-				from(remapJar)
-
-				configurations = immutableListOf(project.configurations["shade"])
-				archiveBaseName = rootProject.name
-				archiveClassifier = implName
-				isPreserveFileTimestamps = false
-
-				relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
-
-				if (implName in lexForgeImpls) {
-					manifest {
-						attributes(
-							"MixinConfigs" to "zume-${implName}.mixins.json",
-						)
-					
-						if (implName in legacyForgeImpls) {
-							attributes(
-								"ForceLoadAsMod" to true,
-								"FMLCorePluginContainsFMLMod" to true,
-								"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
-							)
-						}
-					}
-				}
-			}
-
-			tasks.build {
-				dependsOn(platformJar)
-			}
-		}
-	} else {
-		dependencies {
-			implementation("blue.endless:jankson:${"jankson_version"()}")
+			implementation(project(":api"))
 		}
 	}
 }
@@ -304,22 +253,19 @@ unimined.minecraft {
 	defaultRemapJar = false
 }
 
-configurations {
-	val shade = create("shade")
-	
-	compileClasspath.get().extendsFrom(shade)
-	runtimeClasspath.get().extendsFrom(shade)
+val shade: Configuration by configurations.creating {
+	configurations.compileClasspath.get().extendsFrom(this)
+	configurations.runtimeClasspath.get().extendsFrom(this)
 }
 
 dependencies {
-	"shade"("blue.endless:jankson:${"jankson_version"()}")
+	shade("blue.endless:jankson:${"jankson_version"()}")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
 	compileOnly(project(":stubs"))
 	
 	implementation(project(":api"))
-	"shade"(project(":api")) { isTransitive = false }
 	
 	uniminedImpls.forEach { 
 		implementation(project(":${it}")) { isTransitive = false }
@@ -337,21 +283,24 @@ tasks.shadowJar {
 		mixinPlugin = "dev.nolij.zume.ZumeMixinPlugin"
 	}
 	
-	val shadowJar = this
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
 	}
 	
 	exclude("*.xcf")
 	
-	configurations = immutableListOf(project.configurations["shade"])
+	configurations = immutableListOf(shade)
 	archiveClassifier = null
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
 	
+	val apiJar = project(":api").tasks.jar
+	dependsOn(apiJar)
+	from(zipTree(apiJar.get().archiveFile.get()))
+	
 	uniminedImpls.forEach { impl ->
 		val remapJars = project(":${impl}").tasks.withType<RemapJarTask>()
-		shadowJar.dependsOn(remapJars)
+		dependsOn(remapJars)
 		remapJars.forEach { remapJar ->
 			from(zipTree(remapJar.archiveFile.get())) {
 				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
@@ -408,18 +357,12 @@ afterEvaluate {
 		publications {
 			create<MavenPublication>("mod_id"()) {
 				artifact(tasks.shadowJar)
-				uniminedImpls.forEach { implName ->
-					artifact(project(":${implName}").tasks.named("platformJar"))
-				}
 			}
 		}
 	}
 
 	tasks.withType<AbstractPublishToMaven> {
 		dependsOn(tasks.shadowJar)
-		uniminedImpls.forEach { implName ->
-			dependsOn(project(":${implName}").tasks.named("platformJar"))
-		}
 	}
 	
 	fun getChangelog(): String {
