@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.GameOptions;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -47,16 +48,16 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
 	}
 	
-	private static final MethodHandle GET_PERSPECTIVE = MethodHandleHelper.getMethodOrNull(
+	private static final MethodHandle GET_PERSPECTIVE = MethodHandleHelper.PUBLIC.getMethodOrNull(
 		GameOptions.class,
 		FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary",
 			"net.minecraft.class_315", "method_31044", "()Lnet/minecraft/class_5498;"),
 		MethodType.methodType(Enum.class, GameOptions.class));
 	private static final MethodHandle PERSPECTIVE =
-		MethodHandleHelper.getGetterOrNull(GameOptions.class, "field_1850", int.class);
+		MethodHandleHelper.PUBLIC.getGetterOrNull(GameOptions.class, "field_1850", int.class);
 	
 	@Override
-	public CameraPerspective getCameraPerspective() {
+	public @NotNull CameraPerspective getCameraPerspective() {
 		int ordinal;
 		try {
 			if (GET_PERSPECTIVE != null)

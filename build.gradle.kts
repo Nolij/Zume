@@ -147,10 +147,6 @@ val uniminedImpls = arrayOf(
 	*lexForgeImpls,
 	*neoForgeImpls,
 )
-val impls = arrayOf(
-	"api",
-	*uniminedImpls,
-)
 
 allprojects {	
 	apply(plugin = "java")
@@ -181,6 +177,7 @@ allprojects {
 	}
 
 	dependencies {
+		compileOnly("org.jetbrains:annotations:${"jetbrains_annotations_version"()}")
 		"com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
 			annotationProcessor(it)
 			compileOnly(it)

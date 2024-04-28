@@ -1,6 +1,9 @@
 package dev.nolij.zume.api.config.v0;
 
-public class ZumeConfig {
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.NonExtendable
+public final class ZumeConfig {
 	
 	public boolean isCinematicZoomEnabled;
 	public double mouseSensitivityFloor;
