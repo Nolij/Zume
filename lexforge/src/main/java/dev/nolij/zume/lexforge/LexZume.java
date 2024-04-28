@@ -84,8 +84,8 @@ public class LexZume implements IZumeImplementation {
 	@SuppressWarnings("DataFlowIssue")
 	@NotNull
 	private static final MethodHandle GET_SCROLL_DELTA = MethodHandleHelper.firstNonNull(
-		MethodHandleHelper.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getScrollDelta"),
-		MethodHandleHelper.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getDeltaY")
+		MethodHandleHelper.PUBLIC.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getScrollDelta"),
+		MethodHandleHelper.PUBLIC.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getDeltaY")
 	);
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {

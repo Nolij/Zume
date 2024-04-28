@@ -63,13 +63,13 @@ public class LexZume16 implements IZumeImplementation {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
 	}
 	
-	private static final MethodHandle GET_CAMERA_TYPE = MethodHandleHelper.getMethodOrNull(
+	private static final MethodHandle GET_CAMERA_TYPE = MethodHandleHelper.PUBLIC.getMethodOrNull(
 		Options.class,
 		ObfuscationReflectionHelper.remapName(
 			INameMappingService.Domain.METHOD, "func_243230_g"),
 		MethodType.methodType(Enum.class, Options.class));
 	private static final MethodHandle THIRD_PERSON_VIEW =
-		MethodHandleHelper.getGetterOrNull(Options.class, "field_74320_O", int.class);
+		MethodHandleHelper.PUBLIC.getGetterOrNull(Options.class, "field_74320_O", int.class);
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {

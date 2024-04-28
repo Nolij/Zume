@@ -16,8 +16,8 @@ import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 
 public class ZumeModMenuIntegration implements ModMenuApi {
 	
-	private static final MethodHandle LITERALTEXT_INIT = MethodHandleHelper.getConstructorOrNull(
-		MethodHandleHelper.getClassOrNull("net.minecraft.class_2585"),
+	private static final MethodHandle LITERALTEXT_INIT = MethodHandleHelper.PUBLIC.getConstructorOrNull(
+		MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraft.class_2585"),
 		MethodType.methodType(Text.class, String.class),
 		String.class);
 	

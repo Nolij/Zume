@@ -22,6 +22,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.TickEvent;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -31,15 +33,18 @@ import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 @Mod(MOD_ID)
 public class NeoZume implements IZumeImplementation {
 	
-	private static final Class<?> CONFIG_SCREEN_EXT_INTERFACE = MethodHandleHelper.getClassOrNull(
-		NeoZume.class.getClassLoader(), "net.neoforged.neoforge.client.gui.IConfigScreenFactory");
-	private static final Class<?> CONFIG_SCREEN_EXT_RECORD = MethodHandleHelper.getClassOrNull(
-		NeoZume.class.getClassLoader(), "net.neoforged.neoforge.client.ConfigScreenHandler$ConfigScreenFactory");
+	private static final MethodHandleHelper METHOD_HANDLE_HELPER =
+		new MethodHandleHelper(NeoZume.class.getClassLoader(), MethodHandles.lookup());
+	
+	private static final Class<?> CONFIG_SCREEN_EXT_INTERFACE = METHOD_HANDLE_HELPER.getClassOrNull(
+		"net.neoforged.neoforge.client.gui.IConfigScreenFactory");
+	private static final Class<?> CONFIG_SCREEN_EXT_RECORD = METHOD_HANDLE_HELPER.getClassOrNull(
+		"net.neoforged.neoforge.client.ConfigScreenHandler$ConfigScreenFactory");
 	private static final Class<?> CONFIG_SCREEN_EXT = MethodHandleHelper.firstNonNull(
 		CONFIG_SCREEN_EXT_INTERFACE,
 		CONFIG_SCREEN_EXT_RECORD
 	);
-	private static final MethodHandle REGISTER_EXT_POINT = MethodHandleHelper.getMethodOrNull(
+	private static final MethodHandle REGISTER_EXT_POINT = METHOD_HANDLE_HELPER.getMethodOrNull(
 		ModContainer.class,
 		"registerExtensionPoint",
 		Class.class, Supplier.class

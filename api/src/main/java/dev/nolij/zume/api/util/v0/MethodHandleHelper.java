@@ -4,7 +4,18 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-public final class MethodHandleHelper {
+public class MethodHandleHelper {
+	
+	public static final MethodHandleHelper PUBLIC =
+		new MethodHandleHelper(MethodHandleHelper.class.getClassLoader(), MethodHandles.lookup());
+	
+	private final ClassLoader classLoader;
+	private final MethodHandles.Lookup lookup;
+	
+	public MethodHandleHelper(ClassLoader classLoader, MethodHandles.Lookup lookup) {
+		this.classLoader = classLoader;
+		this.lookup = lookup;
+	}
 	
 	@SafeVarargs
 	public static <T> T firstNonNull(T... options) {
@@ -15,17 +26,7 @@ public final class MethodHandleHelper {
 		return null;
 	}
 	
-	private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-	
-	public static Class<?> getClassOrNull(String className) {
-		try {
-			return Class.forName(className);
-		} catch (ClassNotFoundException ignored) {
-			return null;
-		}
-	}
-	
-	public static Class<?> getClassOrNull(ClassLoader classLoader, String className) {
+	public Class<?> getClassOrNull(String className) {
 		try {
 			return Class.forName(className, true, classLoader);
 		} catch (ClassNotFoundException ignored) {
@@ -33,17 +34,7 @@ public final class MethodHandleHelper {
 		}
 	}
 	
-	public static Class<?> getClassOrNull(String... classNames) {
-		for (final String className : classNames) {
-			try {
-				return Class.forName(className);
-			} catch (ClassNotFoundException ignored) { }
-		}
-		
-		return null;
-	}
-	
-	public static Class<?> getClassOrNull(ClassLoader classLoader, String... classNames) {
+	public Class<?> getClassOrNull(String... classNames) {
 		for (final String className : classNames) {
 			try {
 				return Class.forName(className, true, classLoader);
@@ -53,7 +44,7 @@ public final class MethodHandleHelper {
 		return null;
 	}
 	
-	public static MethodHandle getMethodOrNull(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+	public MethodHandle getMethodOrNull(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
 		if (clazz == null)
 			return null;
 		
@@ -64,8 +55,8 @@ public final class MethodHandleHelper {
 		}
 	}
 	
-	public static MethodHandle getMethodOrNull(Class<?> clazz, String methodName, 
-	                                           MethodType methodType, Class<?>... parameterTypes) {
+	public MethodHandle getMethodOrNull(Class<?> clazz, String methodName, 
+	                                    MethodType methodType, Class<?>... parameterTypes) {
 		if (clazz == null)
 			return null;
 		
@@ -77,7 +68,7 @@ public final class MethodHandleHelper {
 		}
 	}
 	
-	public static MethodHandle getConstructorOrNull(Class<?> clazz, MethodType methodType, Class<?>... parameterTypes) {
+	public MethodHandle getConstructorOrNull(Class<?> clazz, MethodType methodType, Class<?>... parameterTypes) {
 		if (clazz == null)
 			return null;
 		
@@ -89,8 +80,7 @@ public final class MethodHandleHelper {
 		}
 	}
 	
-	public static MethodHandle getGetterOrNull(final Class<?> clazz,
-	                                           final String fieldName, final Class<?> fieldType) {
+	public MethodHandle getGetterOrNull(final Class<?> clazz, final String fieldName, final Class<?> fieldType) {
 		if (clazz == null || fieldType == null)
 			return null;
 		
@@ -101,13 +91,38 @@ public final class MethodHandleHelper {
 		}
 	}
 	
-	public static MethodHandle getSetterOrNull(final Class<?> clazz,
-	                                           final String fieldName, final Class<?> fieldType) {
+	public MethodHandle getGetterOrNull(final Class<?> clazz, final String fieldName, 
+	                                    final Class<?> fieldType, final MethodType methodType) {
+		if (clazz == null || fieldType == null)
+			return null;
+		
+		try {
+			return lookup.findGetter(clazz, fieldName, fieldType)
+				.asType(methodType);
+		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+			return null;
+		}
+	}
+	
+	public MethodHandle getSetterOrNull(final Class<?> clazz, final String fieldName, final Class<?> fieldType) {
 		if (clazz == null || fieldType == null)
 			return null;
 		
 		try {
 			return lookup.findSetter(clazz, fieldName, fieldType);
+		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+			return null;
+		}
+	}
+	
+	public MethodHandle getSetterOrNull(final Class<?> clazz, final String fieldName, 
+	                                    final Class<?> fieldType, final MethodType methodType) {
+		if (clazz == null || fieldType == null)
+			return null;
+		
+		try {
+			return lookup.findSetter(clazz, fieldName, fieldType)
+				.asType(methodType);
 		} catch (NoSuchFieldException | IllegalAccessException ignored) {
 			return null;
 		}

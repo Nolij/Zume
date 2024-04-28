@@ -17,7 +17,7 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 	private static final String implementationMixinPackage;
 	
 	static {
-		if (MethodHandleHelper.getClassOrNull("dev.su5ed.sinytra.connector.service.ConnectorLoaderService") == null &&
+		if (MethodHandleHelper.PUBLIC.getClassOrNull("dev.su5ed.sinytra.connector.service.ConnectorLoaderService") == null &&
 			CLASS_LOADER.getResource("net/fabricmc/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
 			ZUME_VARIANT = ZumeVariant.MODERN;
 		else if (CLASS_LOADER.getResource("net/legacyfabric/fabric/api/client/keybinding/v1/KeyBindingHelper.class") != null)
@@ -34,9 +34,8 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 			String forgeVersion = null;
 			
 			try {
-				//noinspection DataFlowIssue
-				forgeVersion = (String) MethodHandleHelper.getMethodOrNull(
-					MethodHandleHelper.getClassOrNull("net.minecraftforge.versions.forge.ForgeVersion"),
+				forgeVersion = (String) MethodHandleHelper.PUBLIC.getMethodOrNull(
+					MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraftforge.versions.forge.ForgeVersion"),
 					"getVersion",
 					MethodType.methodType(String.class)
 				).invokeExact();
