@@ -63,7 +63,7 @@ enum class ReleaseChannel(
 		deflation = JarShrinkingType.SEVENZIP, 
 		classes = ClassShrinkingType.STRIP_ALL, 
 		json = JsonShrinkingType.MINIFY,
-		proguard = true),
+		proguard = false),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
@@ -148,7 +148,7 @@ val uniminedImpls = arrayOf(
 	*neoForgeImpls,
 )
 val impls = arrayOf(
-	"common",
+	"api",
 	*uniminedImpls,
 )
 
@@ -164,24 +164,22 @@ allprojects {
 		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
-		maven("https://api.modrinth.com/maven") {
-			content {
-				includeGroup("maven.modrinth")
-			}
+		exclusiveContent { 
+			forRepository { maven("https://api.modrinth.com/maven") }
+			filter { includeGroup("maven.modrinth") }
 		}
 	}
 	
 	tasks.withType<JavaCompile> {
-		if (name !in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) {
-			options.encoding = "UTF-8"
-			sourceCompatibility = "21"
-			options.release = 8
-			javaCompiler = javaToolchains.compilerFor {
-				languageVersion = JavaLanguageVersion.of(21)
-			}
+		if (name in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) return@withType
+		options.encoding = "UTF-8"
+		sourceCompatibility = "21"
+		options.release = 8
+		javaCompiler = javaToolchains.compilerFor {
+			languageVersion = JavaLanguageVersion.of(21)
 		}
 	}
-	
+
 	dependencies {
 		"com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
 			annotationProcessor(it)
@@ -237,8 +235,7 @@ subprojects {
 		}
 
 		dependencies {
-			shade("blue.endless:jankson:${"jankson_version"()}") { isTransitive = false }
-			shade(project(":api")) { isTransitive = false }
+			shade(project(path = ":api", configuration = "proguard")) { isTransitive = false }
 		}
 		
 		afterEvaluate {
@@ -263,7 +260,7 @@ subprojects {
 				if (implName in lexForgeImpls) {
 					manifest {
 						attributes(
-							"MixinConfigs" to "zume-${implName}.mixins.json",
+							"MixinConfigs" to "zume.mixins.json",
 						)
 					
 						if (implName in legacyForgeImpls) {
@@ -319,8 +316,6 @@ val shade: Configuration by configurations.creating {
 }
 
 dependencies {
-	shade("blue.endless:jankson:${"jankson_version"()}")
-
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
 	compileOnly(project(":stubs"))
@@ -357,16 +352,20 @@ tasks.shadowJar {
 	
 	uniminedImpls.forEach { impl ->
 		if(releaseChannel.proguard) {
-			val task = project(":${impl}").tasks.withType<ProGuardTask>()["proguard"]
-			this.dependsOn(task)
-			from(zipTree(task.outJarFiles.single() as File)) {
-				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+			val tasks = project(":${impl}").tasks.withType<ProGuardTask>()
+			tasks.forEach { task ->
+				this.dependsOn(task)
+				from(zipTree(task.outJarFiles.single() as File)) {
+					exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+				}
 			}
 		} else {
-			val task = project(":${impl}").tasks.withType<RemapJarTask>()["remapJar"]
-			this.dependsOn(task)
-			from(zipTree(task.archiveFile.get())) {
-				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+			val tasks = project(":${impl}").tasks.withType<RemapJarTask>()
+			tasks.forEach { task ->
+				this.dependsOn(task)
+				from(task.archiveFile.get().asFile) {
+					exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+				}
 			}
 		}
 	}
