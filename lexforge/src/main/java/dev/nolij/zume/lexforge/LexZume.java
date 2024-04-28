@@ -59,7 +59,7 @@ public class LexZume implements IZumeImplementation {
 	}
 	
 	@Override
-	public CameraPerspective getCameraPerspective() {
+	public @NotNull CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[Minecraft.getInstance().options.getCameraType().ordinal()];
 	}
 	

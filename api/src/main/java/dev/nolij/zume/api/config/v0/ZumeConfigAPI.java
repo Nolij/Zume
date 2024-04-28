@@ -2,66 +2,84 @@ package dev.nolij.zume.api.config.v0;
 
 import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
+@ApiStatus.NonExtendable
 public final class ZumeConfigAPI {
 	
+	@Contract(pure = true)
 	public static boolean isCinematicZoomEnabled() {
 		return Zume.config.enableCinematicZoom;
 	}
 	
+	@Contract(pure = true)
 	public static double getMouseSensitivityFloor() {
 		return Zume.config.mouseSensitivityFloor;
 	}
 	
+	@Contract(pure = true)
 	public static short getZoomSpeed() {
 		return Zume.config.zoomSpeed;
 	}
 	
+	@Contract(pure = true)
 	public static boolean isZoomScrollingEnabled() {
 		return Zume.config.enableZoomScrolling;
 	}
 	
+	@Contract(pure = true)
 	public static short getZoomSmoothnessMilliseconds() {
 		return Zume.config.zoomSmoothnessMs;
 	}
 	
+	@Contract(pure = true)
 	public static double getAnimationEasingExponent() {
 		return Zume.config.animationEasingExponent;
 	}
 	
+	@Contract(pure = true)
 	public static double getZoomEasingExponent() {
 		return Zume.config.zoomEasingExponent;
 	}
 	
+	@Contract(pure = true)
 	public static double getDefaultZoom() {
 		return Zume.config.defaultZoom;
 	}
 	
+	@Contract(pure = true)
 	public static boolean isFirstPersonToggleModeEnabled() {
 		return Zume.config.toggleMode;
 	}
 	
+	@Contract(pure = true)
 	public static boolean isThirdPersonToggleModeEnabled() {
 		return Zume.config.thirdPersonToggleMode;
 	}
 	
+	@Contract(pure = true)
 	public static double getMinimumFOV() {
 		return Zume.config.minFOV;
 	}
 	
+	@Contract(pure = true)
 	public static double getMaximumThirdPersonZoomBlocks() {
 		return Zume.config.maxThirdPersonZoomDistance;
 	}
 	
+	@Contract(pure = true)
 	public static double getMinimumThirdPersonZoomBlocks() {
 		return Zume.config.minThirdPersonZoomDistance;
 	}
 	
+	@Contract(pure = true)
 	public static boolean isDisabled() {
 		return Zume.config.disable;
 	}
 	
-	public static ZumeConfig getSnapshot() {
+	public static @NotNull ZumeConfig getSnapshot() {
 		final ZumeConfig snapshot = new ZumeConfig();
 		
 		snapshot.isCinematicZoomEnabled = isCinematicZoomEnabled();
@@ -82,7 +100,7 @@ public final class ZumeConfigAPI {
 		return snapshot;
 	}
 	
-	public static void replaceConfig(ZumeConfig replacement) throws InterruptedException {
+	public static void replaceConfig(@NotNull ZumeConfig replacement) throws InterruptedException {
 		final ZumeConfigImpl config = new ZumeConfigImpl();
 		
 		config.enableCinematicZoom = replacement.isCinematicZoomEnabled;

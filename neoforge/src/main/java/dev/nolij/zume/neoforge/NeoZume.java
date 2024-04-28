@@ -20,6 +20,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -127,7 +128,7 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	@Override
-	public CameraPerspective getCameraPerspective() {
+	public @NotNull CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[Minecraft.getInstance().options.getCameraType().ordinal()];
 	}
 	

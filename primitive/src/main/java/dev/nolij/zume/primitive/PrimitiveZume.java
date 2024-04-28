@@ -10,6 +10,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.util.SmoothUtil;
+import org.jetbrains.annotations.NotNull;
 
 public class PrimitiveZume implements ClientModInitializer, IZumeImplementation {
 	
@@ -40,7 +41,7 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	}
 	
 	@Override
-	public CameraPerspective getCameraPerspective() {
+	public @NotNull CameraPerspective getCameraPerspective() {
 		//noinspection UnreachableCode
 		return MinecraftAccessor.getInstance().options.thirdPerson ? CameraPerspective.THIRD_PERSON : CameraPerspective.FIRST_PERSON;
 	}

@@ -1,13 +1,19 @@
 package dev.nolij.zume.api.platform.v0;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NonBlocking;
+import org.jetbrains.annotations.NotNull;
+
+@ApiStatus.OverrideOnly
 public interface IZumeImplementation {
 	
-	boolean isZoomPressed();
-	boolean isZoomInPressed();
-	boolean isZoomOutPressed();
+	@Contract(pure = true) boolean isZoomPressed();
+	@Contract(pure = true) boolean isZoomInPressed();
+	@Contract(pure = true) boolean isZoomOutPressed();
 	
-	CameraPerspective getCameraPerspective();
+	@Contract(pure = true) @NotNull CameraPerspective getCameraPerspective();
 	
-	default void onZoomActivate() {}
+	@NonBlocking default void onZoomActivate() {}
 	
 }

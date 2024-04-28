@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
@@ -61,7 +62,7 @@ public class VintageZume implements IZumeImplementation {
 	}
 	
 	@Override
-	public CameraPerspective getCameraPerspective() {
+	public @NotNull CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[Minecraft.getMinecraft().gameSettings.thirdPersonView];
 	}
 	

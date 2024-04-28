@@ -3,11 +3,16 @@ package dev.nolij.zume.api.platform.v0;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.Zume;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
+@ApiStatus.NonExtendable
 public final class ZumeAPI {
 	
+	@Contract(pure = true)
 	public static Logger getLogger() {
 		return Zume.LOGGER;
 	}
@@ -25,7 +30,8 @@ public final class ZumeAPI {
 	 * @param implementation The {@linkplain IZumeImplementation} Zume should use. 
 	 * @param instanceConfigPath The {@linkplain Path} Zume should use for storing the instance-specific config.
 	 */
-	public static void registerImplementation(IZumeImplementation implementation, Path instanceConfigPath) {
+	public static void registerImplementation(@NotNull final IZumeImplementation implementation,
+	                                          @NotNull final Path instanceConfigPath) {
 		Zume.init(new dev.nolij.zume.impl.IZumeImplementation() {
 			@Override
 			public boolean isZoomPressed() {
@@ -58,6 +64,7 @@ public final class ZumeAPI {
 	/**
 	 * Returns `true` if Zoom is activated.
 	 */
+	@Contract(pure = true)
 	public static boolean isActive() {
 		return Zume.isEnabled();
 	}
@@ -65,6 +72,7 @@ public final class ZumeAPI {
 	/**
 	 * Returns `true` if FOV should be hooked.
 	 */
+	@Contract(pure = true)
 	public static boolean isFOVHookActive() {
 		return Zume.shouldHookFOV();
 	}
@@ -72,6 +80,7 @@ public final class ZumeAPI {
 	/**
 	 * Returns `true` if mouse scrolling should be hooked.
 	 */
+	@Contract(pure = true)
 	public static boolean isMouseScrollHookActive() {
 		return Zume.shouldCancelScroll();
 	}

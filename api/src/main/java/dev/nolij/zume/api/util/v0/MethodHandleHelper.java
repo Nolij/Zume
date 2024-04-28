@@ -1,24 +1,29 @@
 package dev.nolij.zume.api.util.v0;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class MethodHandleHelper {
 	
 	public static final MethodHandleHelper PUBLIC =
 		new MethodHandleHelper(MethodHandleHelper.class.getClassLoader(), MethodHandles.lookup());
 	
-	private final ClassLoader classLoader;
-	private final MethodHandles.Lookup lookup;
+	private final @NotNull ClassLoader classLoader;
+	private final @NotNull MethodHandles.Lookup lookup;
 	
-	public MethodHandleHelper(ClassLoader classLoader, MethodHandles.Lookup lookup) {
+	public MethodHandleHelper(@NotNull final ClassLoader classLoader, @NotNull final MethodHandles.Lookup lookup) {
 		this.classLoader = classLoader;
 		this.lookup = lookup;
 	}
 	
 	@SafeVarargs
-	public static <T> T firstNonNull(T... options) {
+	public static <T> @Nullable T firstNonNull(@Nullable T... options) {
 		for (final T option : options)
 			if (option != null)
 				return option;
@@ -26,7 +31,7 @@ public class MethodHandleHelper {
 		return null;
 	}
 	
-	public Class<?> getClassOrNull(String className) {
+	public @Nullable Class<?> getClassOrNull(@NotNull final String className) {
 		try {
 			return Class.forName(className, true, classLoader);
 		} catch (ClassNotFoundException ignored) {
@@ -34,7 +39,7 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public Class<?> getClassOrNull(String... classNames) {
+	public @Nullable Class<?> getClassOrNull(@NotNull String... classNames) {
 		for (final String className : classNames) {
 			try {
 				return Class.forName(className, true, classLoader);
@@ -44,8 +49,10 @@ public class MethodHandleHelper {
 		return null;
 	}
 	
-	public MethodHandle getMethodOrNull(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
-		if (clazz == null)
+	public @Nullable MethodHandle getMethodOrNull(@Nullable final Class<?> clazz, 
+	                                              @NotNull final String methodName,
+	                                              @Nullable Class<?>... parameterTypes) {
+		if (clazz == null || Arrays.stream(parameterTypes).anyMatch(Objects::isNull))
 			return null;
 		
 		try {
@@ -55,9 +62,11 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public MethodHandle getMethodOrNull(Class<?> clazz, String methodName, 
-	                                    MethodType methodType, Class<?>... parameterTypes) {
-		if (clazz == null)
+	public @Nullable MethodHandle getMethodOrNull(@Nullable final Class<?> clazz, 
+	                                              @NotNull final String methodName,
+	                                              @Nullable final MethodType methodType,
+	                                              @Nullable Class<?>... parameterTypes) {
+		if (clazz == null || Arrays.stream(parameterTypes).anyMatch(Objects::isNull))
 			return null;
 		
 		try {
@@ -68,8 +77,10 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public MethodHandle getConstructorOrNull(Class<?> clazz, MethodType methodType, Class<?>... parameterTypes) {
-		if (clazz == null)
+	public @Nullable MethodHandle getConstructorOrNull(@Nullable final Class<?> clazz,
+	                                                   @NotNull final MethodType methodType,
+	                                                   @Nullable Class<?>... parameterTypes) {
+		if (clazz == null || Arrays.stream(parameterTypes).anyMatch(Objects::isNull))
 			return null;
 		
 		try {
@@ -80,7 +91,8 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public MethodHandle getGetterOrNull(final Class<?> clazz, final String fieldName, final Class<?> fieldType) {
+	public @Nullable MethodHandle getGetterOrNull(@Nullable final Class<?> clazz, @NotNull final String fieldName,
+	                                              @Nullable final Class<?> fieldType) {
 		if (clazz == null || fieldType == null)
 			return null;
 		
@@ -91,8 +103,8 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public MethodHandle getGetterOrNull(final Class<?> clazz, final String fieldName, 
-	                                    final Class<?> fieldType, final MethodType methodType) {
+	public @Nullable MethodHandle getGetterOrNull(@Nullable final Class<?> clazz, @NotNull final String fieldName,
+	                                              @Nullable final Class<?> fieldType, @NotNull final MethodType methodType) {
 		if (clazz == null || fieldType == null)
 			return null;
 		
@@ -104,7 +116,8 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public MethodHandle getSetterOrNull(final Class<?> clazz, final String fieldName, final Class<?> fieldType) {
+	public @Nullable MethodHandle getSetterOrNull(@Nullable final Class<?> clazz, @NotNull final String fieldName,
+	                                              @Nullable final Class<?> fieldType) {
 		if (clazz == null || fieldType == null)
 			return null;
 		
@@ -115,8 +128,8 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public MethodHandle getSetterOrNull(final Class<?> clazz, final String fieldName, 
-	                                    final Class<?> fieldType, final MethodType methodType) {
+	public @Nullable MethodHandle getSetterOrNull(@Nullable final Class<?> clazz, @NotNull final String fieldName,
+	                                              @Nullable final Class<?> fieldType, @NotNull final MethodType methodType) {
 		if (clazz == null || fieldType == null)
 			return null;
 		
