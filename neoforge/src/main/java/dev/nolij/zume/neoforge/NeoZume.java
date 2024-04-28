@@ -41,13 +41,9 @@ public class NeoZume implements IZumeImplementation {
 	private static final Class<?> CONFIG_SCREEN_EXT_RECORD = METHOD_HANDLE_HELPER.getClassOrNull(
 		"net.neoforged.neoforge.client.ConfigScreenHandler$ConfigScreenFactory");
 	private static final Class<?> CONFIG_SCREEN_EXT = MethodHandleHelper.firstNonNull(
-		CONFIG_SCREEN_EXT_INTERFACE,
-		CONFIG_SCREEN_EXT_RECORD
-	);
+		CONFIG_SCREEN_EXT_INTERFACE, CONFIG_SCREEN_EXT_RECORD);
 	private static final MethodHandle REGISTER_EXT_POINT = METHOD_HANDLE_HELPER.getMethodOrNull(
-		ModContainer.class,
-		"registerExtensionPoint",
-		Class.class, Supplier.class
+		ModContainer.class, "registerExtensionPoint", Class.class, Supplier.class
 	);
 	
 	private static final Class<?> RENDER_TICK_EVENT = METHOD_HANDLE_HELPER.getClassOrNull(
