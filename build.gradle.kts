@@ -143,10 +143,6 @@ val uniminedImpls = arrayOf(
 	*lexForgeImpls,
 	*neoForgeImpls,
 )
-val impls = arrayOf(
-	"common",
-	*uniminedImpls,
-)
 
 allprojects {	
 	apply(plugin = "java")
