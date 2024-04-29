@@ -115,9 +115,9 @@ private fun isAdvzipInstalled(): Boolean {
 }
 
 fun deflate(zip: File, type: JarShrinkingType) {
-	if(type == JarShrinkingType.NONE) return
-	if(!advzipInstalled) {
-		println("advzip is not installed, skipping re-deflation of $zip")
+	if (type == JarShrinkingType.NONE) return
+	if (!advzipInstalled) {
+		println("advzip is not installed; skipping re-deflation of $zip")
 		return
 	}
 	
