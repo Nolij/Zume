@@ -1,5 +1,4 @@
 @file:Suppress("UnstableApiUsage")
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.nolij.zumegradle.ClassShrinkingType
 import dev.nolij.zumegradle.JarShrinkingType
 import dev.nolij.zumegradle.JsonShrinkingType

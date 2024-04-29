@@ -75,6 +75,7 @@ public class NeoZume implements IZumeImplementation {
 		ZumeAPI.getLogger().info("Loading NeoZume...");
 		
 		try {
+			//noinspection DataFlowIssue
 			REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
 				try {
 					if (CONFIG_SCREEN_EXT_RECORD == null) {
@@ -144,6 +145,7 @@ public class NeoZume implements IZumeImplementation {
 	
 	private void renderLegacy(Object event) {
 		try {
+			//noinspection DataFlowIssue
 			if ((Enum<?>) RENDER_TICK_EVENT_PHASE_GETTER.invokeExact(event) == TICK_EVENT_PHASE_START) {
 				ZumeAPI.renderHook();
 			}
