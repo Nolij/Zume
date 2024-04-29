@@ -114,6 +114,16 @@ private fun isAdvzipInstalled(): Boolean {
 	}
 }
 
+val proGuardInstalled = isProGuardInstalled()
+
+private fun isProGuardInstalled(): Boolean {
+	return try {
+		ProcessBuilder("proguard").start().waitFor() == 1
+	} catch (e: Exception) {
+		false
+	}
+}
+
 fun deflate(zip: File, type: JarShrinkingType) {
 	if (type == JarShrinkingType.NONE) return
 	if (!advzipInstalled) {
@@ -136,6 +146,11 @@ val JAVA_HOME = System.getProperty("java.home")
 
 @Suppress("UnstableApiUsage")
 fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
+	if (!proGuardInstalled) {
+		println("proguard is not installed; skipping obfuscation of $outputJar")
+		return
+	}
+	
 	val inputJar = outputJar.copyTo(
 		outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}_.jar"), true)
 	inputJar.deleteOnExit()
