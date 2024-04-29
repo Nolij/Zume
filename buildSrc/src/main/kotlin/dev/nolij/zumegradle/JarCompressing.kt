@@ -1,6 +1,7 @@
 package dev.nolij.zumegradle
 
-import com.google.gson.GsonBuilder
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -55,16 +56,18 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 
 	jar.delete()
 	
-	val gson = GsonBuilder().apply {
-		if(jsonProcessing == JsonShrinkingType.PRETTY_PRINT) setPrettyPrinting()
-	}.create()
+	val json = JsonSlurper()
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
 			if (jsonProcessing != JsonShrinkingType.NONE && 
 				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
-				bytes = gson.fromJson(String(bytes), Any::class.java).toString().toByteArray()
+				bytes = when (jsonProcessing) {
+					JsonShrinkingType.MINIFY -> JsonOutput.toJson(json.parse(bytes)).toByteArray()
+					JsonShrinkingType.PRETTY_PRINT -> JsonOutput.prettyPrint(JsonOutput.toJson(json.parse(bytes))).toByteArray()
+					else -> bytes
+				}
 			}
 
 			if (name.endsWith(".class")) {
