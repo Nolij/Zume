@@ -12,6 +12,7 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
+import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import java.io.File
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -131,6 +132,78 @@ fun deflate(zip: File, type: JarShrinkingType) {
 	}
 }
 
+val JAVA_HOME = System.getProperty("java.home")
+
+@Suppress("UnstableApiUsage")
+fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
+	val inputJar = outputJar.copyTo(
+		outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}_.jar"), true)
+	inputJar.deleteOnExit()
+	
+	val proguardCommand = ArrayList<String>()
+	proguardCommand.addAll(arrayOf(
+		"proguard",
+		"-ignorewarnings",
+		"-optimizationpasses", "10",
+		"-optimizations", "!class/merging/*,!method/marking/private",
+		"-allowaccessmodification",
+		"-optimizeaggressively",
+		"-overloadaggressively",
+		"-repackageclasses", "dev.nolij.zume",
+		"-printmapping", outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}-mappings.txt").absolutePath,
+		"-injars", inputJar.absolutePath,
+		"-outjars", outputJar.absolutePath,
+		"-keepattributes", "Runtime*Annotations", // keep annotations
+		"-keep,allowoptimization", "public class dev.nolij.zume.api.** { public *; }", // public APIs
+		"-keepclassmembers", "class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; }", // dont rename config fields
+		"-keep,allowoptimization", "class dev.nolij.zume.ZumeMixinPlugin", // dont rename mixin plugin
+		"-keep", "class dev.nolij.zume.mixin.** { *; }", // dont touch mixins
+		"-keep,allowobfuscation,allowoptimization", "@*.*.fml.common.Mod class dev.nolij.zume.** { " + // Forge entrypoints
+			"public <init>(...); " +
+			"@*.*.fml.common.Mod\$EventHandler <methods>; " +
+			"@*.*.fml.common.eventhandler.SubscribeEvent <methods>; }",
+		"-keepclassmembers,allowoptimization", "class dev.nolij.zume.** { " + // screens
+			"public void render(int,int,float); " +
+			"public void tick(); " +
+			"public void init(); }",
+		"-keep,allowoptimization", "class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory", // Legacy Forge config providers
+		"-keep,allowoptimization", "class dev.nolij.zume.FabricZumeBootstrapper", // referenced in FMJ
+		"-keep,allowoptimization", "class dev.nolij.zume.modern.integration.ZumeModMenuIntegration", // referenced in FMJ
+		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar", // referenced in FMJ
+		"-keep,allowoptimization", "class io.github.prospector.modmenu.** { *; }", // ugly classloader hack
+	))
+	
+	val libraries = HashSet<String>()
+	libraries.add("${JAVA_HOME}/jmods/java.base.jmod")
+	libraries.add("${JAVA_HOME}/jmods/java.desktop.jmod")
+
+	for (minecraftConfig in minecraftConfigs) {
+		val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
+		
+		libraries.add(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile().absolutePath)
+		
+		libraries.addAll(minecraftConfig.mods.getClasspathAs(prodNamespace, prodNamespace,
+				minecraftConfig.sourceSet.compileClasspath.files
+					.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
+					.toSet())
+			.filter { it.extension == "jar" }
+			.filter { !it.name.startsWith("zume") }
+			.map { it.absolutePath })
+	}
+	
+	proguardCommand.add("-libraryjars")
+	proguardCommand.add(libraries.joinToString(":") { "\"$it\"" })
+	
+	val process = ProcessBuilder(proguardCommand)
+		.inheritIO()
+		.start()
+	val exitCode = process.waitFor()
+	inputJar.delete()
+	if (exitCode != 0) {
+		error("ProGuard failed for $outputJar")
+	}
+}
+
 open class CompressJarTask : DefaultTask() {
 	@InputFile
 	lateinit var inputJar: File
@@ -143,6 +216,11 @@ open class CompressJarTask : DefaultTask() {
 	
 	@Input
 	var jsonShrinkingType = JsonShrinkingType.NONE
+	
+	@get:Input
+	val useProguard get() = this.minecraftConfigs != null
+	
+	private var minecraftConfigs: List<MinecraftConfig>? = null
 
 	@get:OutputFile
 	val outputJar: File
@@ -165,10 +243,16 @@ open class CompressJarTask : DefaultTask() {
 	fun setJsonShrinkingType(value: String) {
 		jsonShrinkingType = JsonShrinkingType.valueOf(value.uppercase())
 	}
+	
+	fun useProguard(minecraftConfigs: List<MinecraftConfig>?) {
+		this.minecraftConfigs = minecraftConfigs
+	}
 
 	@TaskAction
 	fun compressJar() {
 		squishJar(inputJar, classShrinkingType, jsonShrinkingType)
 		deflate(outputJar, jarShrinkingType)
+		if (useProguard)
+			applyProguard(outputJar, minecraftConfigs!!)
 	}
 }

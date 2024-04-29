@@ -35,30 +35,35 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
 	val suffix: String? = null,
 	val releaseType: ReleaseType? = null,
-	val deflation: JarShrinkingType,
-	val classes: ClassShrinkingType,
-	val json: JsonShrinkingType,
+	val deflation: JarShrinkingType = JarShrinkingType.SEVENZIP,
+	val classes: ClassShrinkingType = ClassShrinkingType.STRIP_NONE,
+	val json: JsonShrinkingType = JsonShrinkingType.PRETTY_PRINT,
+	val proguard: Boolean = false,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
 		deflation = JarShrinkingType.SEVENZIP,
-		classes = ClassShrinkingType.STRIP_NONE,
-		json = JsonShrinkingType.PRETTY_PRINT),
+		classes = ClassShrinkingType.STRIP_ALL,
+		json = JsonShrinkingType.MINIFY,
+		proguard = true),
 	PRE_RELEASE(
-		suffix = "pre", 
-		deflation = JarShrinkingType.SEVENZIP, 
-		classes = ClassShrinkingType.STRIP_NONE, 
-		json = JsonShrinkingType.PRETTY_PRINT),
+		suffix = "pre",
+		deflation = JarShrinkingType.SEVENZIP,
+		classes = ClassShrinkingType.STRIP_ALL,
+		json = JsonShrinkingType.MINIFY,
+		proguard = true),
 	RELEASE_CANDIDATE(
-		suffix = "rc", 
-		deflation = JarShrinkingType.SEVENZIP, 
-		classes = ClassShrinkingType.STRIP_ALL, 
-		json = JsonShrinkingType.MINIFY),
+		suffix = "rc",
+		deflation = JarShrinkingType.SEVENZIP,
+		classes = ClassShrinkingType.STRIP_ALL,
+		json = JsonShrinkingType.MINIFY,
+		proguard = true),
 	RELEASE(
-		releaseType = ReleaseType.STABLE, 
-		deflation = JarShrinkingType.SEVENZIP, 
-		classes = ClassShrinkingType.STRIP_ALL, 
-		json = JsonShrinkingType.MINIFY),
+		releaseType = ReleaseType.STABLE,
+		deflation = JarShrinkingType.SEVENZIP,
+		classes = ClassShrinkingType.STRIP_ALL,
+		json = JsonShrinkingType.MINIFY,
+		proguard = true),
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
@@ -349,6 +354,7 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	jarShrinkingType = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
+	useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
 }
 
 afterEvaluate {
