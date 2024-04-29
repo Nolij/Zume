@@ -184,7 +184,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 		"-keep,allowoptimization", "class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory", // Legacy Forge config providers
 		"-keep,allowoptimization", "class dev.nolij.zume.FabricZumeBootstrapper", // referenced in FMJ
 		"-keep,allowoptimization", "class dev.nolij.zume.modern.integration.ZumeModMenuIntegration", // referenced in FMJ
-		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar", // referenced in FMJ
+		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar { *; }", // referenced in FMJ
 		"-keep,allowoptimization", "class io.github.prospector.modmenu.** { *; }", // ugly classloader hack
 	))
 	
