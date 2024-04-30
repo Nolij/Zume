@@ -141,7 +141,7 @@ val JAVA_HOME = System.getProperty("java.home")
 fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	val inputJar = outputJar.copyTo(
 		outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}_.jar"), true)
-//	inputJar.deleteOnExit()
+	inputJar.deleteOnExit()
 	
 	val proguardCommand = ArrayList<String>()
 	proguardCommand.addAll(arrayOf(
@@ -207,7 +207,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	} catch(ex: Exception) {
 		throw IllegalStateException("ProGuard failed for $outputJar", ex)
 	} finally {
-		//inputJar.delete()
+		inputJar.delete()
 	}
 }
 
