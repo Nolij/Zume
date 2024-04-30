@@ -1,6 +1,6 @@
 - fixed crash on NeoForge 20.5+
-- compressed JAR even more (@rhysdh540 is a mad man)
 - created APIs for 3rd-party integrations with Zume (other mods that integrate with Zume should only use these API classes from now on)
-- added ProGuard optimization & obfuscation to further reduce JAR size (once again with great help from @rhysdh540)
+- compressed JAR even more (@rhysdh540 is a mad man)
+- added ProGuard optimization & obfuscation to further reduce JAR size (with much help from @rhysdh540 and @embeddedt)
 - many internal refactors
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
