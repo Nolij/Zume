@@ -160,16 +160,18 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 		"-keepclassmembers", "class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; }", // dont rename config fields
 		"-keep,allowoptimization", "class dev.nolij.zume.ZumeMixinPlugin", // dont rename mixin plugin
 		"-keep", "class dev.nolij.zume.mixin.** { *; }", // dont touch mixins
-		"-keep,allowobfuscation,allowoptimization", "@*.*.fml.common.Mod class dev.nolij.zume.** { " + // Forge entrypoints
-			"public <init>(...); " +
+		"-keep,allowobfuscation", "@*.*.fml.common.Mod class dev.nolij.zume.** { " +
+			"public <init>(...); }",
+		"-keep,allowobfuscation", "class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v0.IZumeImplementation { " + // entrypoints
 			"@*.*.fml.common.Mod\$EventHandler <methods>; " +
 			"@*.*.fml.common.eventhandler.SubscribeEvent <methods>; }",
-		"-keepclassmembers,allowoptimization", "class dev.nolij.zume.** { " + // screens
-			"public void render(int,int,float); " +
-			"public void tick(); " +
-			"public void init(); }",
+		"-keepclassmembers", "class dev.nolij.zume.** extends net.minecraft.** { " + // screens
+			"void render(int,int,float); " +
+			"void tick(); " +
+			"void init(); }",
 		"-keepclassmembers,allowoptimization", "class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen { public *; }",
 		"-keep,allowoptimization", "class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory", // Legacy Forge config providers
+		"-keep,allowoptimization", "class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig { *; }", // Legacy Forge config providers
 		"-keep,allowoptimization", "class dev.nolij.zume.FabricZumeBootstrapper", // referenced in FMJ
 		"-keep,allowoptimization", "class dev.nolij.zume.modern.integration.ZumeModMenuIntegration", // referenced in FMJ
 		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }", // referenced in FMJ
