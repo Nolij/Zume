@@ -39,8 +39,8 @@ enum class ClassShrinkingType {
 	STRIP_ALL,
 	;
 	
-	fun shouldStripLVTs() = this == STRIP_LVTS || this == STRIP_ALL
-	fun shouldStripSourceFiles() = this == STRIP_SOURCE_FILES || this == STRIP_ALL
+	fun shouldStripLVTs() = this.ordinal % 2 == 1
+	fun shouldStripSourceFiles() = this.ordinal >= 2
 	fun shouldRun() = this != STRIP_NONE
 }
 
@@ -70,7 +70,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 				bytes = when (jsonProcessing) {
 					JsonShrinkingType.MINIFY -> JsonOutput.toJson(json.parse(bytes)).toByteArray()
 					JsonShrinkingType.PRETTY_PRINT -> JsonOutput.prettyPrint(JsonOutput.toJson(json.parse(bytes))).toByteArray()
-					else -> bytes
+					else -> throw AssertionError()
 				}
 			}
 
@@ -83,7 +83,6 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 			out.closeEntry()
 		}
 		out.finish()
-		out.close()
 	}
 }
 
@@ -138,43 +137,22 @@ fun deflate(zip: File, type: JarShrinkingType) {
 val JAVA_HOME = System.getProperty("java.home")
 
 @Suppress("UnstableApiUsage")
-fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
-	val inputJar = outputJar.copyTo(
-		outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}_.jar"), true)
-	inputJar.deleteOnExit()
+fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir: File) {
+	val inputJar = jar.copyTo(
+		jar.parentFile.resolve("${jar.nameWithoutExtension}_.jar"), true).also { 
+			it.deleteOnExit()
+	}
 	
-	val proguardCommand = ArrayList<String>()
-	proguardCommand.addAll(arrayOf(
-		"-ignorewarnings", "-dontnote",
-		"-optimizationpasses", "10",
-		"-optimizations", "!class/merging/*,!method/marking/private",
-		"-allowaccessmodification",
-		"-optimizeaggressively",
-		"-overloadaggressively",
-		"-repackageclasses", "dev.nolij.zume",
-		"-printmapping", outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}-mappings.txt").absolutePath,
+	val config = configDir.resolve("proguard.pro")
+	if (!config.exists()) {
+		error("proguard.pro not found")
+	}
+	val proguardCommand = mutableListOf(
+		"@${config.absolutePath}",
+		"-printmapping", jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt").absolutePath,
 		"-injars", inputJar.absolutePath,
-		"-outjars", outputJar.absolutePath,
-		"-keepattributes", "Runtime*Annotations", // keep annotations
-		"-keep,allowoptimization", "public class dev.nolij.zume.api.** { public *; }", // public APIs
-		"-keepclassmembers", "class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; }", // dont rename config fields
-		"-keep,allowoptimization", "class dev.nolij.zume.ZumeMixinPlugin", // dont rename mixin plugin
-		"-keep", "class dev.nolij.zume.mixin.** { *; }", // dont touch mixins
-		"-keep,allowobfuscation,allowoptimization", "@*.*.fml.common.Mod class dev.nolij.zume.** { " + // Forge entrypoints
-			"public <init>(...); " +
-			"@*.*.fml.common.Mod\$EventHandler <methods>; " +
-			"@*.*.fml.common.eventhandler.SubscribeEvent <methods>; }",
-		"-keepclassmembers,allowoptimization", "class dev.nolij.zume.** { " + // screens
-			"public void render(int,int,float); " +
-			"public void tick(); " +
-			"public void init(); }",
-		"-keepclassmembers,allowoptimization", "class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen { public *; }",
-		"-keep,allowoptimization", "class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory", // Legacy Forge config providers
-		"-keep,allowoptimization", "class dev.nolij.zume.FabricZumeBootstrapper", // referenced in FMJ
-		"-keep,allowoptimization", "class dev.nolij.zume.modern.integration.ZumeModMenuIntegration", // referenced in FMJ
-		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }", // referenced in FMJ
-		"-keep,allowoptimization", "class io.github.prospector.modmenu.** { *; }", // ugly classloader hack
-	))
+		"-outjars", jar.absolutePath,
+	)
 	
 	val libraries = HashSet<String>()
 	libraries.add("${JAVA_HOME}/jmods/java.base.jmod")
@@ -205,7 +183,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	try {
 		ProGuard(configuration).execute()
 	} catch(ex: Exception) {
-		throw IllegalStateException("ProGuard failed for $outputJar", ex)
+		throw IllegalStateException("ProGuard failed for $jar", ex)
 	} finally {
 		inputJar.delete()
 	}
@@ -217,6 +195,7 @@ open class CompressJarTask : DefaultTask() {
 
 	@Input
 	var classShrinkingType = ClassShrinkingType.STRIP_ALL
+		get() = if (useProguard) ClassShrinkingType.STRIP_NONE else field
 
 	@Input
 	var jarShrinkingType = JarShrinkingType.LIBDEFLATE
@@ -225,13 +204,12 @@ open class CompressJarTask : DefaultTask() {
 	var jsonShrinkingType = JsonShrinkingType.NONE
 	
 	@get:Input
-	val useProguard get() = this.minecraftConfigs != null
+	val useProguard get() = !this.minecraftConfigs.isEmpty()
 	
-	private var minecraftConfigs: List<MinecraftConfig>? = null
+	private var minecraftConfigs: List<MinecraftConfig> = emptyList()
 
 	@get:OutputFile
-	val outputJar: File
-		get() = inputJar // compressed jar will replace the input jar
+	val outputJar get() = inputJar // compressed jar will replace the input jar
 	
 	@Option(option = "class-file-compression", description = "How to process class files")
 	fun setClassShrinkingType(value: String) {
@@ -242,7 +220,7 @@ open class CompressJarTask : DefaultTask() {
 	fun setJarShrinkingType(value: String) {
 		jarShrinkingType = value.uppercase().let {
 			if(it.matches(Regex("7Z(?:IP)?"))) JarShrinkingType.SEVENZIP
-			else JarShrinkingType.valueOf(it.uppercase())
+			else JarShrinkingType.valueOf(it)
 		}
 	}
 	
@@ -251,15 +229,15 @@ open class CompressJarTask : DefaultTask() {
 		jsonShrinkingType = JsonShrinkingType.valueOf(value.uppercase())
 	}
 	
-	fun useProguard(minecraftConfigs: List<MinecraftConfig>?) {
+	fun useProguard(minecraftConfigs: List<MinecraftConfig>) {
 		this.minecraftConfigs = minecraftConfigs
 	}
 
 	@TaskAction
 	fun compressJar() {
+		if (useProguard)
+			applyProguard(inputJar, minecraftConfigs, project.rootDir)
 		squishJar(inputJar, classShrinkingType, jsonShrinkingType)
 		deflate(outputJar, jarShrinkingType)
-		if (useProguard)
-			applyProguard(outputJar, minecraftConfigs!!)
 	}
 }

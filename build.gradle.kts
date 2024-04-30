@@ -20,6 +20,9 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import java.time.ZonedDateTime
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 plugins {
     id("java")
@@ -67,7 +70,7 @@ enum class ReleaseChannel(
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
-val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
+val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"().uppercase()) else ReleaseChannel.DEV_BUILD
 
 println("Release Channel: $releaseChannel")
 
@@ -338,6 +341,10 @@ tasks.shadowJar {
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
 		)
 	}
+	
+	doLast {
+		removeDuplicateEntries(archiveFile.get().asFile)
+	}
 }
 
 tasks.assemble {
@@ -354,7 +361,9 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	jarShrinkingType = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
-	useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
+	if(releaseChannel.proguard) {
+		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
+	}
 }
 
 afterEvaluate {
@@ -527,5 +536,24 @@ afterEvaluate {
 				http.httpClient.newCall(requestBuilder.build()).execute().close()
 			}
 		}
+	}
+}
+
+fun removeDuplicateEntries(zip: File) {
+	val contents = linkedMapOf<String, ByteArray>()
+	ZipFile(zip).use {
+		it.entries().asIterator().forEach { entry ->
+			if(!entry.isDirectory)
+				contents[entry.name] = it.getInputStream(entry).readAllBytes()
+		}
+	}
+	zip.delete()
+	ZipOutputStream(zip.outputStream()).use { out ->
+		contents.forEach { (name, bytes) ->
+			out.putNextEntry(ZipEntry(name))
+			out.write(bytes)
+			out.closeEntry()
+		}
+		out.finish()
 	}
 }
