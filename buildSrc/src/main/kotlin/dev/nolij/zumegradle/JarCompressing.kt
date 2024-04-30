@@ -39,8 +39,8 @@ enum class ClassShrinkingType {
 	STRIP_ALL,
 	;
 	
-	fun shouldStripLVTs() = this.ordinal % 2 == 1
-	fun shouldStripSourceFiles() = this.ordinal >= 2
+	fun shouldStripLVTs() = this == STRIP_LVTS || this == STRIP_ALL
+	fun shouldStripSourceFiles() = this == STRIP_SOURCE_FILES || this == STRIP_ALL
 	fun shouldRun() = this != STRIP_NONE
 }
 
