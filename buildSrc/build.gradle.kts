@@ -24,6 +24,7 @@ dependencies {
 	implementation("org.ow2.asm:asm-tree:9.7")
 
 	implementation("org.apache.ant:ant:1.10.13")
+	implementation("com.guardsquare:proguard-base:7.4.2")
 	plugin(id = "com.github.johnrengelman.shadow", version = "8.1.1")
 	plugin(id = "xyz.wagyourtail.unimined", version = "1.2.3")
 	plugin(id = "com.github.gmazzo.buildconfig", version = "5.2.0")

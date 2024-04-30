@@ -12,6 +12,9 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
+import proguard.Configuration
+import proguard.ConfigurationParser
+import proguard.ProGuard
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import java.io.File
 import java.util.jar.JarEntry
@@ -114,16 +117,6 @@ private fun isAdvzipInstalled(): Boolean {
 	}
 }
 
-val proGuardInstalled = isProGuardInstalled()
-
-private fun isProGuardInstalled(): Boolean {
-	return try {
-		ProcessBuilder("proguard").start().waitFor() == 1
-	} catch (e: Exception) {
-		false
-	}
-}
-
 fun deflate(zip: File, type: JarShrinkingType) {
 	if (type == JarShrinkingType.NONE) return
 	if (!advzipInstalled) {
@@ -146,18 +139,12 @@ val JAVA_HOME = System.getProperty("java.home")
 
 @Suppress("UnstableApiUsage")
 fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
-	if (!proGuardInstalled) {
-		println("proguard is not installed; skipping obfuscation of $outputJar")
-		return
-	}
-	
 	val inputJar = outputJar.copyTo(
 		outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}_.jar"), true)
 //	inputJar.deleteOnExit()
 	
 	val proguardCommand = ArrayList<String>()
 	proguardCommand.addAll(arrayOf(
-		"proguard",
 		"-ignorewarnings",
 		"-optimizationpasses", "10",
 		"-optimizations", "!class/merging/*,!method/marking/private",
@@ -209,14 +196,18 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	
 	proguardCommand.add("-libraryjars")
 	proguardCommand.add(libraries.joinToString(":") { "\"$it\"" })
+
+	val configuration = Configuration()
+	ConfigurationParser(proguardCommand.toTypedArray(), System.getProperties()).use { parser ->
+		parser.parse(configuration)
+	}
 	
-	val process = ProcessBuilder(proguardCommand)
-		.inheritIO()
-		.start()
-	val exitCode = process.waitFor()
-//	inputJar.delete()
-	if (exitCode != 0) {
-		error("ProGuard failed for $outputJar")
+	try {
+		ProGuard(configuration).execute()
+	} catch(ex: Exception) {
+		throw IllegalStateException("ProGuard failed for $outputJar", ex)
+	} finally {
+		//inputJar.delete()
 	}
 }
 
