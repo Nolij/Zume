@@ -153,7 +153,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	
 	val inputJar = outputJar.copyTo(
 		outputJar.parentFile.resolve("${outputJar.nameWithoutExtension}_.jar"), true)
-	inputJar.deleteOnExit()
+//	inputJar.deleteOnExit()
 	
 	val proguardCommand = ArrayList<String>()
 	proguardCommand.addAll(arrayOf(
@@ -181,10 +181,11 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 			"public void render(int,int,float); " +
 			"public void tick(); " +
 			"public void init(); }",
+		"-keepclassmembers,allowoptimization", "class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen { public *; }",
 		"-keep,allowoptimization", "class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory", // Legacy Forge config providers
 		"-keep,allowoptimization", "class dev.nolij.zume.FabricZumeBootstrapper", // referenced in FMJ
 		"-keep,allowoptimization", "class dev.nolij.zume.modern.integration.ZumeModMenuIntegration", // referenced in FMJ
-		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar { *; }", // referenced in FMJ
+		"-keep,allowoptimization", "class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }", // referenced in FMJ
 		"-keep,allowoptimization", "class io.github.prospector.modmenu.** { *; }", // ugly classloader hack
 	))
 	
@@ -213,7 +214,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 		.inheritIO()
 		.start()
 	val exitCode = process.waitFor()
-	inputJar.delete()
+//	inputJar.delete()
 	if (exitCode != 0) {
 		error("ProGuard failed for $outputJar")
 	}
