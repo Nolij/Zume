@@ -19,6 +19,7 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import java.nio.file.Files
 import java.time.ZonedDateTime
 
 plugins {
@@ -280,6 +281,28 @@ tasks.jar {
 	enabled = false
 }
 
+val sourcesJar = tasks.create<Jar>("sourcesJar") {
+	group = "build"
+
+	archiveClassifier = "sources"
+	isPreserveFileTimestamps = false
+	isReproducibleFileOrder = true
+	
+	from("LICENSE") {
+		rename { "${it}_${"mod_id"()}" }
+	}
+	
+	arrayOf(
+		sourceSets, 
+		project(":api").sourceSets, 
+		uniminedImpls.flatMap { implName -> project(":${implName}").sourceSets }
+	).forEach { projectSourceSets ->
+		projectSourceSets.forEach { sourceSet -> 
+			from(sourceSet.allSource) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+		}
+	}
+}
+
 tasks.shadowJar {
 	transform(MixinConfigMergingTransformer::class.java) {
 		modId = "mod_id"()
@@ -341,7 +364,7 @@ tasks.shadowJar {
 }
 
 tasks.assemble {
-	dependsOn(tasks.shadowJar)
+	dependsOn(tasks.shadowJar, sourcesJar)
 }
 
 val compressJar = tasks.register<CompressJarTask>("compressJar") {
@@ -362,12 +385,13 @@ afterEvaluate {
 		publications {
 			create<MavenPublication>("mod_id"()) {
 				artifact(tasks.shadowJar)
+				artifact(sourcesJar)
 			}
 		}
 	}
 
 	tasks.withType<AbstractPublishToMaven> {
-		dependsOn(tasks.shadowJar)
+		dependsOn(tasks.shadowJar, sourcesJar)
 	}
 	
 	fun getChangelog(): String {
@@ -376,6 +400,8 @@ afterEvaluate {
 	
 	publishMods {
 		file = compressJar.get().outputJar
+		additionalFiles.from(sourcesJar.archiveFile)
+		// TODO: add proguard mappings to `additionalFiles`
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version
@@ -471,11 +497,11 @@ afterEvaluate {
 	}
 	
 	tasks.withType<PublishModTask> {
-		dependsOn(compressJar)
+		dependsOn(compressJar, sourcesJar)
 	}
 
 	tasks.publishMods {
-		if (releaseChannel.releaseType == null) {
+		if (!publishMods.dryRun.get() && releaseChannel.releaseType == null) {
 			doLast {
 				val http = HttpUtils()
 
@@ -498,7 +524,7 @@ afterEvaluate {
 				
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val releaseChangeLog = getChangelog()
-				val file = compressJar.get().outputJar
+				val file = publishMods.file.asFile.get()
 				
 				var content = "# [Zume Test Build ${Zume.version}]" +
 					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
@@ -518,6 +544,15 @@ afterEvaluate {
 					.setType(MultipartBody.FORM)
 					.addFormDataPart("payload_json", http.json.encodeToString(webhook))
 					.addFormDataPart("files[0]", file.name, file.asRequestBody("application/java-archive".toMediaTypeOrNull()))
+				
+				var fileIndex = 1
+				for (additionalFile in publishMods.additionalFiles) {
+					bodyBuilder.addFormDataPart(
+						"files[${fileIndex++}]", 
+						additionalFile.name, 
+						additionalFile.asRequestBody(Files.probeContentType(additionalFile.toPath()).toMediaTypeOrNull())
+					)
+				}
 
 				val requestBuilder = Request.Builder()
 					.url(webhookUrl.get())
