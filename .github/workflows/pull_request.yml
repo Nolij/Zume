@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Packages
-        run: sudo apt-get install -y advancecomp proguard-cli
+        run: sudo apt-get install -y advancecomp
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
