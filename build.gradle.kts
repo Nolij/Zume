@@ -323,13 +323,14 @@ tasks.shadowJar {
 	
 	val apiJar = project(":api").tasks.jar
 	dependsOn(apiJar)
-	from(zipTree(apiJar.get().archiveFile.get()))
+	from(zipTree(apiJar.get().archiveFile.get())) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	
 	uniminedImpls.forEach { impl ->
 		val remapJars = project(":${impl}").tasks.withType<RemapJarTask>()
 		dependsOn(remapJars)
 		remapJars.forEach { remapJar ->
 			from(zipTree(remapJar.archiveFile.get())) {
+				duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 			}
 		}
