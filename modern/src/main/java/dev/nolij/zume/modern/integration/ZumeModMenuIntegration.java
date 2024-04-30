@@ -4,7 +4,6 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import io.github.prospector.modmenu.api.ModMenuApi;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.*;
 
@@ -20,26 +19,6 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 		MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraft.class_2585"),
 		MethodType.methodType(Text.class, String.class),
 		String.class);
-	
-	private static final class ModernZumeConfigScreen extends Screen {
-		private final Screen parent;
-		
-		private ModernZumeConfigScreen(Text arg, Screen parent) {
-			super(arg);
-			this.parent = parent;
-		}
-		
-		@Override
-		public void init() {
-			ZumeAPI.openConfigFile();
-			
-			MinecraftClient.getInstance().setScreen(parent);
-		}
-		
-		public void render(int mouseX, int mouseY, float delta) {
-			init();
-		}
-	}
 	
 	@Override
 	public String getModId() {
