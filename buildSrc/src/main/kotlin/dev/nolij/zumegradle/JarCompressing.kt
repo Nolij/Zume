@@ -145,7 +145,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	
 	val proguardCommand = ArrayList<String>()
 	proguardCommand.addAll(arrayOf(
-		"-ignorewarnings",
+		"-ignorewarnings", "-dontnote",
 		"-optimizationpasses", "10",
 		"-optimizations", "!class/merging/*,!method/marking/private",
 		"-allowaccessmodification",
