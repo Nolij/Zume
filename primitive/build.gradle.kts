@@ -1,18 +1,14 @@
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 
-operator fun String.invoke(): String {
-	return (rootProject.properties[this] as String?)!!
-}
+operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 unimined.minecraft {
 	side("client")
 
 	version("primitive_minecraft_version"())
 	
-	runs {
-		config("client") {
-			javaVersion = JavaVersion.VERSION_17
-		}
+	runs.config("client") {
+		javaVersion = JavaVersion.VERSION_17
 	}
 
 	babric {
@@ -24,8 +20,6 @@ unimined.minecraft {
 		biny("primitive_mappings_version"())
 		devFallbackNamespace("intermediary")
 	}
-
-	defaultRemapJar = true
 }
 
 tasks.withType<RemapJarTask> {

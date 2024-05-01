@@ -1,15 +1,7 @@
-operator fun String.invoke(): String {
-	return (rootProject.properties[this] as String?)!!
-}
+operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 unimined.minecraft {
 	version("modern_minecraft_version"())
-	
-	runs {
-		config("server") {
-			disabled = true
-		}
-	}
 
 	fabric {
 		loader("fabric_version"())
@@ -20,8 +12,6 @@ unimined.minecraft {
 		yarn("modern_mappings_version"())
 		devFallbackNamespace("intermediary")
 	}
-
-	defaultRemapJar = true
 }
 
 repositories {

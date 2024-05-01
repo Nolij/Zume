@@ -19,6 +19,7 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import xyz.wagyourtail.unimined.api.unimined
 import java.nio.file.Files
 import java.time.ZonedDateTime
 import java.util.zip.ZipEntry
@@ -233,20 +234,21 @@ subprojects {
 		dependencies {
 			implementation(project(":api"))
 		}
+		unimined.minecraft(sourceSets["main"], lateApply = true) {
+			if (implName != "primitive") {
+				runs.config("server") {
+					disabled = true
+				}
+			}
+			defaultRemapJar = true
+		}
 	}
 }
 
 unimined.minecraft {
 	version("modern_minecraft_version"())
 	
-	runs {
-		config("client") {
-			disabled = true
-		}
-		config("server") {
-			disabled = true
-		}
-	}
+	runs.off = true
 
 	fabric {
 		loader("fabric_version"())

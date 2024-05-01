@@ -1,15 +1,7 @@
-operator fun String.invoke(): String {
-	return (rootProject.properties[this] as String?)!!
-}
+operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 unimined.minecraft {
 	version("neoforge_minecraft_version"())
-
-	runs {
-		config("server") {
-			disabled = true
-		}
-	}
 
 	neoForged {
 		loader("neoforge_version"())
@@ -23,8 +15,6 @@ unimined.minecraft {
 		mojmap()
 //		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
 	}
-
-	defaultRemapJar = true
 }
 
 dependencies {
