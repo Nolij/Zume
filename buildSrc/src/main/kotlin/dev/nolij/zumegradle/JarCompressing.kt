@@ -211,6 +211,9 @@ open class CompressJarTask : DefaultTask() {
 	@get:OutputFile
 	val outputJar get() = inputJar // compressed jar will replace the input jar
 	
+	@get:OutputFile
+	val mappingsFile get() = inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
+	
 	@Option(option = "class-file-compression", description = "How to process class files")
 	fun setClassShrinkingType(value: String) {
 		classShrinkingType = ClassShrinkingType.valueOf(value.uppercase())
