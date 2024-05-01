@@ -18,15 +18,8 @@ buildConfig {
 	buildConfigField("VINTAGE_VERSION_RANGE", "vintage_minecraft_range"())
 }
 
-repositories {
-	maven("https://repo.spongepowered.org/repository/maven-public/")
-}
-
 dependencies {
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
-	
-	compileOnly("org.ow2.asm:asm-tree:${"asm_version"()}")
-	compileOnly("org.spongepowered:mixin:${"mixin_version"()}")
 }
 
 tasks.processResources {
