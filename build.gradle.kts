@@ -71,11 +71,6 @@ enum class ReleaseChannel(
 		proguard = true),
 }
 
-val isRelease = rootProject.hasProperty("release_channel")
-val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
-
-println("Release Channel: $releaseChannel")
-
 val headDateTime: ZonedDateTime = grgit.head().dateTime
 
 val branchName = grgit.branch.current().name!!
@@ -83,8 +78,36 @@ val releaseTagPrefix = "release/"
 
 val releaseTags = grgit.tag.list()
 	.filter { tag -> tag.name.startsWith(releaseTagPrefix) }
-	.sortedByDescending { tag -> tag.commit.dateTime }
+	.sortedWith { tag1, tag2 -> 
+		if (tag1.commit.dateTime == tag2.commit.dateTime)
+			if (tag1.name.length != tag2.name.length)
+				return@sortedWith tag1.name.length.compareTo(tag2.name.length)
+			else
+				return@sortedWith tag1.name.compareTo(tag2.name)
+		else
+			return@sortedWith tag2.commit.dateTime.compareTo(tag1.commit.dateTime)
+	}
 	.dropWhile { tag -> tag.commit.dateTime > headDateTime }
+
+val isExternalCI = (rootProject.properties["external_publish"] as String?).toBoolean()
+val isRelease = rootProject.hasProperty("release_channel") || isExternalCI
+val releaseIncrement = if (isRelease && !isExternalCI) 1 else 0
+val releaseChannel: ReleaseChannel = 
+	if (isExternalCI) {
+		val tagName = releaseTags.first().name
+		val suffix = """\-(\w+)\.\d+$""".toRegex().find(tagName)?.groupValues?.get(1)
+		if (suffix != null)
+			ReleaseChannel.values().find { channel -> channel.suffix == suffix }!!
+		else
+			ReleaseChannel.RELEASE
+	} else {
+		if (isRelease)
+			ReleaseChannel.valueOf("release_channel"())
+		else
+			ReleaseChannel.DEV_BUILD
+	}
+
+println("Release Channel: $releaseChannel")
 
 val minorVersion = "mod_version"()
 val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
@@ -98,7 +121,7 @@ val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
 val patch = 
 	maxPatch?.plus(
 		if (patchHistory.contains(maxPatch.toString()))
-			1
+			releaseIncrement
 		else
 			0
 	) ?: 0
@@ -114,7 +137,7 @@ if (releaseChannel.suffix != null) {
 			.mapNotNull { it.removePrefix(patchAndSuffix).toIntOrNull() }
 			.maxOrNull()
 		
-		val build = (maxBuild?.plus(1)) ?: 1
+		val build = (maxBuild?.plus(releaseIncrement)) ?: 1
 		patchAndSuffix += build.toString()
 	}
 }
@@ -371,10 +394,6 @@ tasks.shadowJar {
 	}
 }
 
-tasks.assemble {
-	dependsOn(tasks.shadowJar, sourcesJar)
-}
-
 val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
@@ -390,18 +409,27 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	}
 }
 
+tasks.assemble {
+	dependsOn(compressJar, sourcesJar)
+}
+
 afterEvaluate {
 	publishing {
+		repositories {
+			if (!System.getenv("local_maven_url").isNullOrEmpty())
+				maven(System.getenv("local_maven_url"))
+		}
+		
 		publications {
 			create<MavenPublication>("mod_id"()) {
-				artifact(tasks.shadowJar)
+				artifact(compressJar)
 				artifact(sourcesJar)
 			}
 		}
 	}
 
 	tasks.withType<AbstractPublishToMaven> {
-		dependsOn(tasks.shadowJar, sourcesJar)
+		dependsOn(compressJar, sourcesJar)
 	}
 	
 	fun getChangelog(): String {
