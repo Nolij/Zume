@@ -3,7 +3,7 @@ package dev.nolij.zume.vintage;
 import dev.nolij.zume.api.platform.v0.CameraPerspective;
 import dev.nolij.zume.api.platform.v0.IZumeImplementation;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
-import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.client.event.EntityViewRenderEvent;

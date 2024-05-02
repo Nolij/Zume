@@ -3,7 +3,7 @@ package dev.nolij.zume.primitive;
 import dev.nolij.zume.api.platform.v0.CameraPerspective;
 import dev.nolij.zume.api.platform.v0.IZumeImplementation;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
-import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.mixin.primitive.GameRendererAccessor;
 import dev.nolij.zume.mixin.primitive.MinecraftAccessor;
 import net.fabricmc.api.ClientModInitializer;

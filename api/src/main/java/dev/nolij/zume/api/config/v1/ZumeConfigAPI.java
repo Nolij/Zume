@@ -1,4 +1,4 @@
-package dev.nolij.zume.api.config.v0;
+package dev.nolij.zume.api.config.v1;
 
 import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;

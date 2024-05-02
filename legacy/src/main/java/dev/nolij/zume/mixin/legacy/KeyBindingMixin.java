@@ -1,6 +1,6 @@
 package dev.nolij.zume.mixin.legacy;
 
-import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import net.minecraft.client.option.KeyBinding;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

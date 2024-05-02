@@ -3,7 +3,7 @@ package dev.nolij.zume.neoforge;
 import dev.nolij.zume.api.platform.v0.CameraPerspective;
 import dev.nolij.zume.api.platform.v0.IZumeImplementation;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
-import dev.nolij.zume.api.config.v0.ZumeConfigAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
