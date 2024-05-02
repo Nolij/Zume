@@ -407,8 +407,8 @@ tasks.assemble {
 afterEvaluate {
 	publishing {
 		repositories {
-			if (!System.getenv("local_maven").isNullOrEmpty())
-				maven("file://${System.getenv("local_maven")}")
+			if (!System.getenv("local_maven_url").isNullOrEmpty())
+				maven(System.getenv("local_maven_url"))
 		}
 		
 		publications {
