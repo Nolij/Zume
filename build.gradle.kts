@@ -420,7 +420,7 @@ afterEvaluate {
 		
 		publications {
 			create<MavenPublication>("mod_id"()) {
-				artifact(compressJar)
+				artifact(compressJar.get().outputJar)
 				artifact(sourcesJar)
 			}
 		}
