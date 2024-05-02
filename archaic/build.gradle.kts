@@ -1,17 +1,9 @@
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 
-operator fun String.invoke(): String {
-	return (rootProject.properties[this] as String?)!!
-}
+operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 unimined.minecraft {
 	version("archaic_minecraft_version"())
-	
-	runs {
-		config("server") {
-			disabled = true
-		}
-	}
 	
 	minecraftForge {
 		loader("archaic_forge_version"())
@@ -22,8 +14,6 @@ unimined.minecraft {
 		searge()
 		mcp("stable", "archaic_mappings_version"())
 	}
-	
-	defaultRemapJar = true
 }
 
 tasks.withType<RemapJarTask> {
