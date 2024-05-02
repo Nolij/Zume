@@ -72,7 +72,7 @@ enum class ReleaseChannel(
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
-val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
+val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"().uppercase()) else ReleaseChannel.DEV_BUILD
 
 println("Release Channel: $releaseChannel")
 
@@ -97,7 +97,10 @@ val patchHistory = releaseTags
 val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
 val patch = 
 	maxPatch?.plus(
-		if (patchHistory.contains(maxPatch.toString())) 1 else 0
+		if (patchHistory.contains(maxPatch.toString()))
+			1
+		else
+			0
 	) ?: 0
 var patchAndSuffix = patch.toString()
 
@@ -283,30 +286,27 @@ tasks.jar {
 	enabled = false
 }
 
-val sourcesJar = tasks.register<Jar>("sourcesJar") {
-	dependsOn(compressJar)
+val sourcesJar = tasks.create<Jar>("sourcesJar") {
 	group = "build"
 
 	archiveClassifier = "sources"
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
-
+	
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
 	}
-
-	from(compressJar.mappingsFile) {
-		rename { "mapping.txt" }
-	}
-
+	
 	arrayOf(
-		sourceSets,
-		project(":api").sourceSets,
+		sourceSets, 
+		project(":api").sourceSets, 
 		uniminedImpls.flatMap { implName -> project(":${implName}").sourceSets }
-	).flatMap{it}.forEach { sourceSet ->
-		from(sourceSet.allSource) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+	).forEach { projectSourceSets ->
+		projectSourceSets.forEach { sourceSet -> 
+			from(sourceSet.allSource) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
+		}
 	}
-}.get()
+}
 
 tasks.shadowJar {
 	transform(MixinConfigMergingTransformer::class.java) {
@@ -325,7 +325,6 @@ tasks.shadowJar {
 	archiveClassifier = null
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	
 	val apiJar = project(":api").tasks.jar
 	dependsOn(apiJar)
@@ -374,6 +373,10 @@ tasks.shadowJar {
 	}
 }
 
+tasks.assemble {
+	dependsOn(tasks.shadowJar, sourcesJar)
+}
+
 val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
@@ -387,10 +390,6 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	if(releaseChannel.proguard) {
 		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
 	}
-}.get()
-
-tasks.assemble {
-	dependsOn(tasks.shadowJar, sourcesJar)
 }
 
 afterEvaluate {
@@ -412,8 +411,9 @@ afterEvaluate {
 	}
 	
 	publishMods {
-		file = compressJar.outputJar
-		additionalFiles.from(sourcesJar.archiveFile, compressJar.mappingsFile)
+		file = compressJar.get().outputJar
+		additionalFiles.from(sourcesJar.archiveFile)
+		// TODO: add proguard mappings to `additionalFiles`
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version
