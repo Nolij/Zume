@@ -4,6 +4,7 @@ import dev.nolij.zume.api.platform.v0.CameraPerspective;
 import dev.nolij.zume.api.platform.v0.IZumeImplementation;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
+import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -11,6 +12,7 @@ import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -18,6 +20,8 @@ import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 
 import static dev.nolij.zume.impl.ZumeConstants.*;
 
@@ -80,11 +84,18 @@ public class VintageZume implements IZumeImplementation {
 		}
 	}
 	
+	private static final MethodHandle SET_CANCELED = MethodHandleHelper.PUBLIC.getMethodOrNull(
+		Event.class,
+		"setCanceled",
+		MethodType.methodType(void.class, MouseEvent.class, boolean.class),
+		boolean.class);
+	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void mouseEvent(MouseEvent mouseEvent) {
+	public void mouseEvent(MouseEvent mouseEvent) throws Throwable {
 		final int scrollAmount = mouseEvent.getDwheel();
 		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
-			mouseEvent.setCanceled(true);
+			//noinspection DataFlowIssue
+			SET_CANCELED.invokeExact(mouseEvent, true);
 		}
 	}
 	
