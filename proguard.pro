@@ -6,7 +6,7 @@
 #noinspection ShrinkerInvalidFlags
 -optimizeaggressively
 -overloadaggressively
--repackageclasses dev.nolij.zume
+-repackageclasses zume
 -keepattributes RuntimeVisibleAnnotations # keep annotations
 
 -keep,allowoptimization public class dev.nolij.zume.api.** { public *; } # public APIs
