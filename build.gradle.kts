@@ -22,9 +22,6 @@ import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
 import java.nio.file.Files
 import java.time.ZonedDateTime
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
 
 plugins {
     id("java")
@@ -388,10 +385,6 @@ tasks.shadowJar {
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
 		)
 	}
-	
-	doLast {
-		removeDuplicateEntries(archiveFile.get().asFile)
-	}
 }
 
 val compressJar = tasks.register<CompressJarTask>("compressJar") {
@@ -600,24 +593,5 @@ afterEvaluate {
 				http.httpClient.newCall(requestBuilder.build()).execute().close()
 			}
 		}
-	}
-}
-
-fun removeDuplicateEntries(zip: File) {
-	val contents = linkedMapOf<String, ByteArray>()
-	ZipFile(zip).use {
-		it.entries().asIterator().forEach { entry ->
-			if(!entry.isDirectory)
-				contents[entry.name] = it.getInputStream(entry).readAllBytes()
-		}
-	}
-	zip.delete()
-	ZipOutputStream(zip.outputStream()).use { out ->
-		contents.forEach { (name, bytes) ->
-			out.putNextEntry(ZipEntry(name))
-			out.write(bytes)
-			out.closeEntry()
-		}
-		out.finish()
 	}
 }
