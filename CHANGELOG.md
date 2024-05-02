@@ -2,5 +2,6 @@
 - created APIs for 3rd-party integrations with Zume (other mods that integrate with Zume should only use these API classes from now on)
 - compressed JAR even more (@rhysdh540 is a mad man)
 - added ProGuard optimization & obfuscation to further reduce JAR size (with much help from @rhysdh540 and @embeddedt)
+- publish releases to maven (thanks @jaredlll08)
 - many internal refactors
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
