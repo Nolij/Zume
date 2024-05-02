@@ -38,34 +38,16 @@ enum class ReleaseChannel(
 	val suffix: String? = null,
 	val releaseType: ReleaseType? = null,
 	val deflation: JarShrinkingType = JarShrinkingType.SEVENZIP,
-	val classes: ClassShrinkingType = ClassShrinkingType.STRIP_NONE,
-	val json: JsonShrinkingType = JsonShrinkingType.PRETTY_PRINT,
-	val proguard: Boolean = false,
+	val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
+	val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
+	val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		deflation = JarShrinkingType.SEVENZIP,
-		classes = ClassShrinkingType.STRIP_ALL,
-		json = JsonShrinkingType.MINIFY,
-		proguard = true),
-	PRE_RELEASE(
-		suffix = "pre",
-		deflation = JarShrinkingType.SEVENZIP,
-		classes = ClassShrinkingType.STRIP_ALL,
-		json = JsonShrinkingType.MINIFY,
-		proguard = true),
-	RELEASE_CANDIDATE(
-		suffix = "rc",
-		deflation = JarShrinkingType.SEVENZIP,
-		classes = ClassShrinkingType.STRIP_ALL,
-		json = JsonShrinkingType.MINIFY,
-		proguard = true),
-	RELEASE(
-		releaseType = ReleaseType.STABLE,
-		deflation = JarShrinkingType.SEVENZIP,
-		classes = ClassShrinkingType.STRIP_ALL,
-		json = JsonShrinkingType.MINIFY,
-		proguard = true),
+		json = JsonShrinkingType.PRETTY_PRINT),
+	PRE_RELEASE("pre"),
+	RELEASE_CANDIDATE("rc"),
+	RELEASE(releaseType = ReleaseType.STABLE),
 }
 
 val headDateTime: ZonedDateTime = grgit.head().dateTime
