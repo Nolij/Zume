@@ -147,7 +147,7 @@ fun applyProguard(outputJar: File, minecraftConfigs: List<MinecraftConfig>) {
 	proguardCommand.addAll(arrayOf(
 		"-ignorewarnings", "-dontnote",
 		"-optimizationpasses", "10",
-		"-optimizations", "!class/merging/*,!method/marking/private",
+		"-optimizations", "!class/merging/*,!method/marking/private,!*/specialization/*",
 		"-allowaccessmodification",
 		"-optimizeaggressively",
 		"-overloadaggressively",
