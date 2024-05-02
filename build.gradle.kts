@@ -307,7 +307,6 @@ tasks.jar {
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
-	dependsOn(compressJar)
 	group = "build"
 
 	archiveClassifier = "sources"
@@ -318,8 +317,12 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 		rename { "${it}_${"mod_id"()}" }
 	}
 	
-	from(compressJar.get().mappingsFile) {
-		rename { "mapping.txt" }
+	if (releaseChannel.proguard) {
+		dependsOn(compressJar)
+		
+		from(compressJar.get().mappingsFile) {
+			rename { "mappings.txt" }
+		}
 	}
 	
 	listOf(
@@ -353,7 +356,7 @@ tasks.shadowJar {
 	dependsOn(apiJar)
 	from(zipTree(apiJar.get().archiveFile.get())) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	
-	uniminedImpls.map { project(it).tasks.withType<RemapJarTask>() }.flatten().forEach { remapJar ->
+	uniminedImpls.flatMap { project(it).tasks.withType<RemapJarTask>() }.forEach { remapJar ->
 		dependsOn(remapJar)
 		from(zipTree(remapJar.archiveFile.get())) {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -434,7 +437,6 @@ afterEvaluate {
 	publishMods {
 		file = compressJar.get().outputJar
 		additionalFiles.from(sourcesJar.get().archiveFile)
-		// TODO: add proguard mappings to `additionalFiles`
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version
