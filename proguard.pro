@@ -1,7 +1,7 @@
 -ignorewarnings
 -dontnote
 -optimizationpasses 10
--optimizations !class/merging/*,!method/marking/private
+-optimizations !class/merging/*,!method/marking/private,!*/specialization/*
 -allowaccessmodification
 #noinspection ShrinkerInvalidFlags
 -optimizeaggressively

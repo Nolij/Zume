@@ -72,7 +72,7 @@ enum class ReleaseChannel(
 }
 
 val isRelease = rootProject.hasProperty("release_channel")
-val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"().uppercase()) else ReleaseChannel.DEV_BUILD
+val releaseChannel = if (isRelease) ReleaseChannel.valueOf("release_channel"()) else ReleaseChannel.DEV_BUILD
 
 println("Release Channel: $releaseChannel")
 
@@ -286,7 +286,7 @@ tasks.jar {
 	enabled = false
 }
 
-val sourcesJar = tasks.create<Jar>("sourcesJar") {
+val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	group = "build"
 
 	archiveClassifier = "sources"
@@ -297,14 +297,16 @@ val sourcesJar = tasks.create<Jar>("sourcesJar") {
 		rename { "${it}_${"mod_id"()}" }
 	}
 	
-	arrayOf(
+	from(compressJar.get().mappingsFile) {
+		rename { "mapping.txt" }
+	}
+	
+	listOf(
 		sourceSets, 
 		project(":api").sourceSets, 
-		uniminedImpls.flatMap { implName -> project(":${implName}").sourceSets }
-	).forEach { projectSourceSets ->
-		projectSourceSets.forEach { sourceSet -> 
-			from(sourceSet.allSource) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
-		}
+		uniminedImpls.flatMap { project(":${it}").sourceSets }
+	).flatten().forEach {
+		from(it.allSource) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	}
 }
 
@@ -330,14 +332,10 @@ tasks.shadowJar {
 	dependsOn(apiJar)
 	from(zipTree(apiJar.get().archiveFile.get())) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	
-	uniminedImpls.forEach { impl ->
-		val remapJars = project(":${impl}").tasks.withType<RemapJarTask>()
-		dependsOn(remapJars)
-		remapJars.forEach { remapJar ->
-			from(zipTree(remapJar.archiveFile.get())) {
-				duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-				exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
-			}
+	uniminedImpls.map { project(it).tasks.withType<RemapJarTask>() }.flatten().forEach { remapJar ->
+		from(zipTree(remapJar.archiveFile.get())) {
+			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 		}
 	}
 	
@@ -412,7 +410,7 @@ afterEvaluate {
 	
 	publishMods {
 		file = compressJar.get().outputJar
-		additionalFiles.from(sourcesJar.archiveFile)
+		additionalFiles.from(sourcesJar.get().archiveFile)
 		// TODO: add proguard mappings to `additionalFiles`
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
