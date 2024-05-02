@@ -307,6 +307,7 @@ tasks.jar {
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
+	dependsOn(compressJar)
 	group = "build"
 
 	archiveClassifier = "sources"
@@ -353,6 +354,7 @@ tasks.shadowJar {
 	from(zipTree(apiJar.get().archiveFile.get())) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	
 	uniminedImpls.map { project(it).tasks.withType<RemapJarTask>() }.flatten().forEach { remapJar ->
+		dependsOn(remapJar)
 		from(zipTree(remapJar.archiveFile.get())) {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
