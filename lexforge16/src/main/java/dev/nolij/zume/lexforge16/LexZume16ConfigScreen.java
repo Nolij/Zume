@@ -31,6 +31,11 @@ final class LexZume16ConfigScreen {
 			Minecraft.getInstance().setScreen(parent);
 		}
 		
+		@SuppressWarnings("unused")
+		public void render(int mouseX, int mouseY, float delta) {
+			init();
+		}
+		
 	}
 	
 }
