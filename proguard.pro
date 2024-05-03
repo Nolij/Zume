@@ -31,7 +31,7 @@
 	void render(int,int,float);
 	void tick();
 	void init();
-	void method_25423();
+	void method_25423(); # intermediary name for init()
 }
 -keepclassmembers,allowoptimization class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen {
 	public *; 
