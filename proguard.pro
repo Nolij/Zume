@@ -27,14 +27,14 @@
 }
 
 # screens
--keepclassmembers class dev.nolij.zume.** {
-	void render(int,int,float);
-	void tick();
-	void init();
-	void method_25423(); # intermediary name for init()
+-keepclassmembers class dev.nolij.zume.** extends net.minecraft.class_437 {
+	public *;
 }
--keepclassmembers,allowoptimization class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen {
-	public *; 
+-keepclassmembers class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen {
+	public *;
+}
+-keepclassmembers class dev.nolij.zume.** extends net.minecraft.client.gui.screen.Screen {
+	public *;
 }
 
 # Legacy Forge config providers
