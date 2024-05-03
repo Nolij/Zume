@@ -12,26 +12,34 @@
 -keep,allowoptimization public class dev.nolij.zume.api.** { public *; } # public APIs
 -keepclassmembers class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; } # dont rename config fields
 -keep,allowoptimization class dev.nolij.zume.ZumeMixinPlugin # dont rename mixin plugin
--keep class dev.nolij.zume.mixin.** { *; } # dont touch mixins
+-keep @org.spongepowered.asm.mixin.Mixin class dev.nolij.zume.** { *; } # dont touch mixins
 
--keep,allowobfuscation @*.*.fml.common.Mod class dev.nolij.zume.** { # Forge entrypoints
+# Forge entrypoints
+-keep,allowobfuscation @*.*.fml.common.Mod class dev.nolij.zume.** {
 	public <init>(...);
 }
--keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v0.IZumeImplementation { # Platform implementations
+
+# Platform implementations
+-keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v0.IZumeImplementation {
+	# Forge Event Subscribers
 	@*.*.fml.common.Mod$EventHandler <methods>;
 	@*.*.fml.common.eventhandler.SubscribeEvent <methods>;
 }
 
--keepclassmembers class dev.nolij.zume.** { # screens
+# screens
+-keepclassmembers class dev.nolij.zume.** {
 	void render(int,int,float);
 	void tick();
 	void init();
+	void method_25423();
 }
--keep,allowoptimization class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory # Legacy Forge config providers
--keep,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig { *; } # Legacy Forge config providers
 -keepclassmembers,allowoptimization class dev.nolij.zume.** extends net.minecraft.client.gui.screens.Screen {
 	public *; 
 }
+
+# Legacy Forge config providers
+-keep,allowoptimization class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory
+-keep,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig { *; }
 
 -keep,allowoptimization class io.github.prospector.modmenu.** { *; } # ugly classloader hack
 
