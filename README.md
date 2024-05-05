@@ -45,8 +45,8 @@ the following conditions are met**:
   time. [Sinytra Connector](https://github.com/Sinytra/Connector) is a 3rd-party compatibility layer, so explicit 
   Forge support will be provided.
 - Must not manually maintain overridden game options; implementations that look like 
-  https://github.com/embeddedt/Mooz will not be accepted - no offense [embeddedt](https://github.com/embeddedt). 
-  Direct ASM is fine as long as functionality is similar enough.
+  [Mooz's](https://github.com/embeddedt/Mooz/blob/92570f7449a7e71c1c0b988788027b10c00f1346/src/main/java/org/embeddedt/mooz/ClientProxy.java#L35-L56)
+  will not be accepted - no offense [embeddedt](https://github.com/embeddedt). Direct ASM is fine as long as functionality is similar enough.
 - Must make a reasonable effort to be maximize compatibility with existing mods on target platforms - see use of 
   Neo/LexForge API over mixins in Neo/LexForge implementations, and use of `@WrapWithCondition` and 
   `@ModifyExpressionValue` and such from MixinExtras over `@Redirect` in most implementations.
