@@ -75,25 +75,33 @@ public class NeoZume implements IZumeImplementation {
 		
 		ZumeAPI.getLogger().info("Loading NeoZume...");
 		
-		try {
-			//noinspection DataFlowIssue
-			REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
-				try {
-					if (CONFIG_SCREEN_EXT_RECORD == null) {
-						return NeoZumeConfigScreenFactory.class.getDeclaredConstructor().newInstance();
-					} else {
-						return CONFIG_SCREEN_EXT_RECORD
-							.getDeclaredConstructor(BiFunction.class)
-							.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
-								new NeoZumeConfigScreen(parent));
+		if (REGISTER_EXT_POINT != null &&
+			CONFIG_SCREEN_EXT != null &&
+			(CONFIG_SCREEN_EXT_RECORD != null || CONFIG_SCREEN_EXT_INTERFACE != null)) {
+			try {
+				REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
+					try {
+						if (CONFIG_SCREEN_EXT_INTERFACE != null) {
+							return NeoZumeConfigScreenFactory.class
+								.getDeclaredConstructor()
+								.newInstance();
+						} else //noinspection ConstantValue,UnreachableCode
+							if (CONFIG_SCREEN_EXT_RECORD != null) {
+							return CONFIG_SCREEN_EXT_RECORD
+								.getDeclaredConstructor(BiFunction.class)
+								.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
+									new NeoZumeConfigScreen(parent));
+						} else {
+							return null;
+						}
+					} catch (InstantiationException | IllegalAccessException |
+					         InvocationTargetException | NoSuchMethodException e) {
+						throw new RuntimeException(e);
 					}
-				} catch (InstantiationException | IllegalAccessException | 
-				         InvocationTargetException | NoSuchMethodException e) {
-					throw new AssertionError(e);
-				}
-			});
-		} catch (Throwable e) {
-			throw new AssertionError(e);
+				});
+			} catch (Throwable e) {
+				throw new RuntimeException(e);
+			}
 		}
 		
 		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
