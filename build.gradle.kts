@@ -70,7 +70,7 @@ val releaseTags = grgit.tag.list()
 
 val isExternalCI = (rootProject.properties["external_publish"] as String?).toBoolean()
 val isRelease = rootProject.hasProperty("release_channel") || isExternalCI
-val releaseIncrement = if (isRelease && !isExternalCI) 1 else 0
+val releaseIncrement = if (isExternalCI) 0 else 1
 val releaseChannel: ReleaseChannel = 
 	if (isExternalCI) {
 		val tagName = releaseTags.first().name
