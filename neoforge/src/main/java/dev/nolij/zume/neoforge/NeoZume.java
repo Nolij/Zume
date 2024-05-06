@@ -112,9 +112,14 @@ public class NeoZume implements IZumeImplementation {
 		if (RENDER_FRAME_EVENT != null) {
 			//noinspection unchecked
 			NeoForge.EVENT_BUS.addListener((Class<? extends Event>) RENDER_FRAME_EVENT, this::render);
-		} else if (RENDER_TICK_EVENT != null) {
+		} else if (
+			RENDER_TICK_EVENT != null && 
+			RENDER_TICK_EVENT_PHASE_GETTER != null && 
+			TICK_EVENT_PHASE_START != null) {
 			//noinspection unchecked
 			NeoForge.EVENT_BUS.addListener((Class<? extends Event>) RENDER_TICK_EVENT, this::renderLegacy);
+		} else {
+			throw new AssertionError("NeoZume doesn't support this version of NeoForge");
 		}
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
