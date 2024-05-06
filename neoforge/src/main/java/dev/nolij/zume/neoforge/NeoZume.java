@@ -7,6 +7,7 @@ import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
 
 import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 
-@Mod(MOD_ID)
+@Mod(value = MOD_ID, dist = Dist.CLIENT)
 public class NeoZume implements IZumeImplementation {
 	
 	private static final MethodHandleHelper METHOD_HANDLE_HELPER =
