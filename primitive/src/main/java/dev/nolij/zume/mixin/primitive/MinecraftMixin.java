@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = Minecraft.class, priority = 500)
-public class MinecraftMixin {
+public abstract class MinecraftMixin {
 	
 	@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;method_692(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, int scrollAmount) {

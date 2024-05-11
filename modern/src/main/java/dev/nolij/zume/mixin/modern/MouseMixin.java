@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 
 @Mixin(value = Mouse.class, priority = 500)
-public class MouseMixin {
+public abstract class MouseMixin {
 	
 	@Dynamic
 	@ModifyExpressionValue(method = {
