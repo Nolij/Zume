@@ -24,32 +24,24 @@ public final class Zson {
 			Object value = entry.getValue();
 			
 			if (!comment.isEmpty()) {
-				writeComment(sb, comment);
+				String[] lines = comment.split("\n");
+				for (String line : lines) {
+					sb.append(indent).append("// ").append(line).append("\n");
+				}
 			}
 			
-			sb.append(indent).append(key).append(": ");
-			if (value instanceof Map<?, ?>) {
-				//noinspection unchecked
-				String inner = stringify((Map<Map.Entry<String, String>, Object>) value);
-				sb.append(inner.replace("\n", "\n" + indent));
-			} else {
-				sb.append(value(value));
-			}
-			
-			sb.append(",\n");
+			sb.append(indent).append(key).append(": ").append(value(value)).append(",\n");
 		}
 		
 		return sb.append("}").toString();
 	}
 	
-	private void writeComment(StringBuilder sb, String comment) {
-		String[] lines = comment.split("\n");
-		for (String line : lines) {
-			sb.append(indent).append("// ").append(line).append("\n");
-		}
-	}
-	
 	private String value(Object value) {
+		if(value instanceof Map<?, ?>) {
+			//noinspection unchecked
+			return stringify((Map<Map.Entry<String, String>, Object>) value)
+				.replace("\n", "\n" + indent);
+		}
 		if (value instanceof String) {
 			return "\"" + ((String) value).replace("\"", "\\\"") + "\"";
 		} else {
