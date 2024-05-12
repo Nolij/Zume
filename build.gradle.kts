@@ -21,7 +21,6 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
-import xyz.wagyourtail.unimined.internal.mapping.extension.MixinRemapExtension
 import java.nio.file.Files
 import java.time.ZonedDateTime
 
@@ -51,6 +50,8 @@ enum class ReleaseChannel(
 	RELEASE_CANDIDATE("rc"),
 	RELEASE(releaseType = ReleaseType.STABLE),
 }
+
+//region Git Versioning
 
 val headDateTime: ZonedDateTime = grgit.head().dateTime
 
@@ -122,6 +123,8 @@ if (releaseChannel.suffix != null) {
 		patchAndSuffix += build.toString()
 	}
 }
+
+//endregion
 
 Zume.version = "${minorVersion}.${patchAndSuffix}"
 println("Zume Version: ${Zume.version}")

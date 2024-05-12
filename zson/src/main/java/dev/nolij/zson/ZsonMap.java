@@ -17,11 +17,12 @@ public class ZsonMap extends LinkedHashMap<Map.Entry<String, String>, Object> {
 		}
 	}
 
-	public Object put(String key, String comment, Object value) {
-		return this.put(new AbstractMap.SimpleEntry<>(key, comment), value);
+	public ZsonMap put(String key, String comment, Object value) {
+		this.put(new AbstractMap.SimpleEntry<>(key, comment), value);
+		return this;
 	}
 
-	public Object put(String key, Object value) {
-		return this.put(new AbstractMap.SimpleEntry<>(key, ""), value);
+	public ZsonMap put(String key, Object value) {
+		return this.put(key, "", value);
 	}
 }

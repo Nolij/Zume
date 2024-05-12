@@ -22,32 +22,33 @@ public final class Zson {
 			String key = keyPair.getKey(), comment = keyPair.getValue();
 			Object value = entry.getValue();
 			
-			if (!comment.isEmpty()) {
-				String[] lines = comment.split("\n");
-				for (String line : lines) {
+			if (comment != null && !comment.isEmpty()) {
+				for (String line : comment.split("\n")) {
 					sb.append(indent).append("// ").append(line).append("\n");
 				}
 			}
 			
-			sb.append(indent).append(key).append(": ").append(value(value)).append(",\n");
+			sb.append(indent).append('"').append(key).append("\": ").append(value(value)).append(",\n");
 		}
 		
 		return sb.append("}").toString();
 	}
 	
 	private String value(Object value) {
-		if(value instanceof ZsonMap zson) {
-			try {
-				return stringify(zson).replace("\n", "\n" + indent);
-			} catch (StackOverflowError e) {
-				throw new StackOverflowError("Map is circular");
+		return switch (value) {
+			case ZsonMap zson -> {
+				try {
+					yield stringify(zson).replace("\n", "\n" + indent);
+				} catch (StackOverflowError e) {
+					throw new StackOverflowError("Map is circular");
+				}
 			}
-		}
-		if (value instanceof String) {
-			return "\"" + ((String) value).replace("\"", "\\\"") + "\"";
-		} else {
-			return String.valueOf(value);
-		}
+			case String s -> "\"" + s.replace("\"", "\\\"") + "\"";
+			case Number n -> n.toString();
+			case Boolean b -> b.toString();
+			case null -> "null";
+			default -> throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
+		};
 	}
 	
 	public static Map.Entry<Map.Entry<String, String>, Object> entry(String key, String comment, Object value) {
