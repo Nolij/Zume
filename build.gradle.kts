@@ -15,11 +15,13 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
+import org.ajoberstar.grgit.Tag
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
+import xyz.wagyourtail.unimined.internal.mapping.extension.MixinRemapExtension
 import java.nio.file.Files
 import java.time.ZonedDateTime
 
@@ -245,6 +247,14 @@ subprojects {
 			defaultRemapJar = true
 		}
 	}
+	
+	if(implName in lexForgeImpls) {
+		tasks.withType<RemapJarTask> {
+			mixinRemap {
+				disableRefmap()
+			}
+		}
+	}
 }
 
 unimined.minecraft {
@@ -343,23 +353,19 @@ tasks.shadowJar {
 		from(zipTree(remapJar.archiveFile.get())) {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+
+			filesMatching("**/*.class") {
+				val reader = ClassReader(this.open())
+				val node = ClassNode()
+				reader.accept(node, 0)
+
+				node.visibleAnnotations?.removeIf { it.desc == "Lnet/minecraftforge/fml/common/Mod;" }
+
+				val writer = ClassWriter(0)
+				node.accept(writer)
+				this.file.writeBytes(writer.toByteArray())
+			}
 		}
-	}
-	
-	filesMatching(immutableListOf(
-			"dev/nolij/zume/lexforge/LexZume.class", 
-			"dev/nolij/zume/lexforge18/LexZume18.class", 
-			"dev/nolij/zume/lexforge16/LexZume16.class", 
-			"dev/nolij/zume/vintage/VintageZume.class")) {
-		val reader = ClassReader(this.open())
-		val node = ClassNode()
-		reader.accept(node, 0)
-		
-		node.visibleAnnotations.removeIf { it.desc == "Lnet/minecraftforge/fml/common/Mod;" }
-		
-		val writer = ClassWriter(0)
-		node.accept(writer)
-		this.file.writeBytes(writer.toByteArray())
 	}
 	
 	relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
@@ -392,6 +398,14 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 tasks.assemble {
 	dependsOn(compressJar, sourcesJar)
 }
+
+//tasks.register("cleassemble") {
+//	group = "build"
+//	doLast {
+//		//run clean THEN assemble
+//		tasks.clean.get().
+//	}
+//}
 
 afterEvaluate {
 	publishing {
@@ -524,7 +538,7 @@ afterEvaluate {
 			doLast {
 				val http = HttpUtils()
 
-				val currentTag = releaseTags.getOrNull(0)
+				val currentTag: Tag? = releaseTags.getOrNull(0)
 				val buildChangeLog =
 					grgit.log {
 						if (currentTag != null)

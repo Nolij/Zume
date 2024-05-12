@@ -1,3 +1,5 @@
+import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 unimined.minecraft {
@@ -11,6 +13,12 @@ unimined.minecraft {
 		intermediary()
 		yarn("modern_mappings_version"())
 		devFallbackNamespace("intermediary")
+	}
+}
+
+tasks.withType<RemapJarTask> {
+	mixinRemap {
+		disableRefmap()
 	}
 }
 

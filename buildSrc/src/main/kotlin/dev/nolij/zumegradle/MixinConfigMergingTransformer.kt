@@ -56,32 +56,38 @@ class MixinConfigMergingTransformer : Transformer {
 	override fun modifyOutputStream(os: ZipOutputStream?, preserveFileTimestamps: Boolean) {
 		val mixinConfigEntry = ZipEntry("${modId}.mixins.json")
 		os!!.putNextEntry(mixinConfigEntry)
-		os.write(
-			JsonOutput.prettyPrint(
-				JsonOutput.toJson(mapOf(
-					"required" to true,
-					"minVersion" to "0.8",
-					"package" to packageName,
-					"plugin" to mixinPlugin,
-					"compatibilityLevel" to "JAVA_8",
-					"client" to mixins,
-					"injectors" to mapOf(
-						"defaultRequire" to 1,
-					),
-					"refmap" to "${modId}-refmap.json",
-				))).toByteArray())
+		
+		val mixinConfigJson = mutableMapOf(
+			"required" to true,
+			"minVersion" to "0.8",
+			"package" to packageName,
+			"plugin" to mixinPlugin,
+			"compatibilityLevel" to "JAVA_8",
+			"client" to mixins,
+			"injectors" to mapOf(
+				"defaultRequire" to 1,
+			)
+		)
+		
+		if(refMaps.isNotEmpty()) {
+			val refmapName = "${modId}-refmap.json"
+			mixinConfigJson["refmap"] = refmapName
+			os.putNextEntry(ZipEntry(refmapName))
+			os.write(
+				JsonOutput.prettyPrint(
+					JsonOutput.toJson(
+						mapOf(
+							"mappings" to refMaps,
+						)
+					)
+				).toByteArray()
+			)
+		}
 
-		val refMapEntry = ZipEntry("${modId}-refmap.json")
-		os.putNextEntry(refMapEntry)
-		os.write(
-			JsonOutput.prettyPrint(
-				JsonOutput.toJson(mapOf(
-					"mappings" to refMaps,
-				))).toByteArray())
+		os.write(JsonOutput.prettyPrint(JsonOutput.toJson(mixinConfigJson)).toByteArray())
 
 		transformed = false
 		mixins.clear()
 		refMaps.clear()
 	}
-	
 }
