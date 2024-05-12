@@ -14,6 +14,13 @@ public class Main {
 			new Object[] {"1234 Elm St", "Springfield"}
 		));
 		System.out.println(zson.stringify(zsonMap));
+		
+		Map<Map.Entry<String, String>, Object> map2 = new LinkedHashMap<>();
+		Map<Map.Entry<String, String>, Object> map3 = new LinkedHashMap<>();
+		map3.put(Zson.key("test", "a"), map2);
+		map2.put(Zson.key("test", "b"), map3);
+		
+		System.out.println(zson.stringify(map2));
 	}
 	
 	private static <K, V> Map<K, V> map(K[] keys, V[] values) {

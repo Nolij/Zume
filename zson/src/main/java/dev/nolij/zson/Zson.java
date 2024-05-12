@@ -19,8 +19,7 @@ public final class Zson {
 		
 		for (Map.Entry<Map.Entry<String, String>, Object> entry : zson.entrySet()) {
 			Map.Entry<String, String> keyPair = entry.getKey();
-			String key = keyPair.getKey();
-			String comment = keyPair.getValue();
+			String key = keyPair.getKey(), comment = keyPair.getValue();
 			Object value = entry.getValue();
 			
 			if (!comment.isEmpty()) {
@@ -38,9 +37,15 @@ public final class Zson {
 	
 	private String value(Object value) {
 		if(value instanceof Map<?, ?>) {
-			//noinspection unchecked
-			return stringify((Map<Map.Entry<String, String>, Object>) value)
-				.replace("\n", "\n" + indent);
+			try {
+				//noinspection unchecked
+				return stringify((Map<Map.Entry<String, String>, Object>) value)
+					.replace("\n", "\n" + indent);
+			} catch (ClassCastException e) {
+				throw new IllegalArgumentException("Map must have keys of type Map.Entry<String, String>", e);
+			} catch (StackOverflowError e) {
+				throw new StackOverflowError("Map is circular");
+			}
 		}
 		if (value instanceof String) {
 			return "\"" + ((String) value).replace("\"", "\\\"") + "\"";
