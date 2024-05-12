@@ -12,6 +12,7 @@ rootProject.name = "zume"
 
 include("stubs")
 include("api")
+include("zson")
 include("modern")
 include("legacy")
 include("primitive")
