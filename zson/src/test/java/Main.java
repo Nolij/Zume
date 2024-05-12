@@ -1,36 +1,34 @@
 import dev.nolij.zson.Zson;
+import dev.nolij.zson.ZsonMap;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Throwable {
 		Zson zson = new Zson("  ");
-		Map<Map.Entry<String, String>, Object> zsonMap = new LinkedHashMap<>();
-		zsonMap.put(Zson.key("name", "The name of the person\nlook, a second line!"), "John Doe");
-		zsonMap.put(Zson.key("age", "The age of the person"), 30);
-		zsonMap.put(Zson.key("address", "The address of the person"), map(
-			new Map.Entry[] {Zson.key("street", "The street of the address"), Zson.key("city", "The city of the address")},
-			new Object[] {"1234 Elm St", "Springfield"}
+		ZsonMap zsonMap = new ZsonMap();
+		zsonMap.put("name", "The name of the person\nlook, a second line!", "John Doe");
+		zsonMap.put("age", "The age of the person", 30);
+		zsonMap.put("address", "The address of the person", new ZsonMap(
+			Zson.entry("street", "The street of the address", "123 Main St"),
+			Zson.entry("city", "The city of the address", "Springfield"),
+			Zson.entry("state", "The state of the address", "IL"),
+			Zson.entry("zip", "The zip code of the address", 62701)
 		));
-		System.out.println(zson.stringify(zsonMap));
+		zsonMap.put("phoneNumbers", "The phone numbers of the person", new ZsonMap(
+			Zson.entry("home", "217-555-1234"),
+			Zson.entry("cell", "217-555-5678")
+		));
+		Files.write(Paths.get("person.json5"), zson.stringify(zsonMap).getBytes(StandardCharsets.UTF_8));
 		
-		Map<Map.Entry<String, String>, Object> map2 = new LinkedHashMap<>();
-		Map<Map.Entry<String, String>, Object> map3 = new LinkedHashMap<>();
-		map3.put(Zson.key("test", "a"), map2);
-		map2.put(Zson.key("test", "b"), map3);
+		ZsonMap map2 = new ZsonMap();
+		ZsonMap map3 = new ZsonMap();
+		map3.put("test", "a", map2);
+		map2.put("test", "b", map3);
 		
 		System.out.println(zson.stringify(map2));
-	}
-	
-	private static <K, V> Map<K, V> map(K[] keys, V[] values) {
-		if(keys.length != values.length) {
-			throw new IllegalArgumentException("Keys and values must have the same length");
-		}
-		Map<K, V> map = new LinkedHashMap<>();
-		for (int i = 0; i < keys.length; i++) {
-			map.put(keys[i], values[i]);
-		}
-		return map;
 	}
 }

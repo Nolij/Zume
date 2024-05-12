@@ -10,14 +10,14 @@ public final class Zson {
 		this.indent = indent;
 	}
 	
-	public Map<Map.Entry<String, String>, Object> parse(String json) {
+	public ZsonMap parse(String json) {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
-	public String stringify(Map<Map.Entry<String, String>, Object> zson) {
+	public String stringify(ZsonMap zson) {
 		StringBuilder sb = new StringBuilder("{\n");
 		
-		for (Map.Entry<Map.Entry<String, String>, Object> entry : zson.entrySet()) {
+		for (var entry : zson.entrySet()) {
 			Map.Entry<String, String> keyPair = entry.getKey();
 			String key = keyPair.getKey(), comment = keyPair.getValue();
 			Object value = entry.getValue();
@@ -36,13 +36,9 @@ public final class Zson {
 	}
 	
 	private String value(Object value) {
-		if(value instanceof Map<?, ?>) {
+		if(value instanceof ZsonMap zson) {
 			try {
-				//noinspection unchecked
-				return stringify((Map<Map.Entry<String, String>, Object>) value)
-					.replace("\n", "\n" + indent);
-			} catch (ClassCastException e) {
-				throw new IllegalArgumentException("Map must have keys of type Map.Entry<String, String>", e);
+				return stringify(zson).replace("\n", "\n" + indent);
 			} catch (StackOverflowError e) {
 				throw new StackOverflowError("Map is circular");
 			}
@@ -54,7 +50,11 @@ public final class Zson {
 		}
 	}
 	
-	public static Map.Entry<String, String> key(String key, String comment) {
-		return new AbstractMap.SimpleEntry<>(key, comment);
+	public static Map.Entry<Map.Entry<String, String>, Object> entry(String key, String comment, Object value) {
+		return new AbstractMap.SimpleEntry<>(new AbstractMap.SimpleEntry<>(key, comment), value);
+	}
+	
+	public static Map.Entry<Map.Entry<String, String>, Object> entry(String key, Object value) {
+		return entry(key, "", value);
 	}
 }
