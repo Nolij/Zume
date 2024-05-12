@@ -5,9 +5,9 @@ import org.lwjgl.input.Keyboard;
 
 public enum ZumeKeyBind {
 	
-	ZOOM("key.zume.zoom", Keyboard.KEY_Z),
-	ZOOM_IN("key.zume.zoom_in", Keyboard.KEY_EQUALS),
-	ZOOM_OUT("key.zume.zoom_out", Keyboard.KEY_MINUS),
+	ZOOM("zume.zoom", Keyboard.KEY_Z),
+	ZOOM_IN("zume.zoom_in", Keyboard.KEY_EQUALS),
+	ZOOM_OUT("zume.zoom_out", Keyboard.KEY_MINUS),
 	
 	;
 	
@@ -22,7 +22,7 @@ public enum ZumeKeyBind {
 	}
 	
 	ZumeKeyBind(String translationKey, int code) {
-		this(translationKey, code, "category.zume");
+		this(translationKey, code, "zume");
 	}
 	
 }

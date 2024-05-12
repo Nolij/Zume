@@ -75,25 +75,33 @@ public class NeoZume implements IZumeImplementation {
 		
 		ZumeAPI.getLogger().info("Loading NeoZume...");
 		
-		try {
-			//noinspection DataFlowIssue
-			REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
-				try {
-					if (CONFIG_SCREEN_EXT_RECORD == null) {
-						return NeoZumeConfigScreenFactory.class.getDeclaredConstructor().newInstance();
-					} else {
-						return CONFIG_SCREEN_EXT_RECORD
-							.getDeclaredConstructor(BiFunction.class)
-							.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
-								new NeoZumeConfigScreen(parent));
+		if (REGISTER_EXT_POINT != null &&
+			CONFIG_SCREEN_EXT != null &&
+			(CONFIG_SCREEN_EXT_RECORD != null || CONFIG_SCREEN_EXT_INTERFACE != null)) {
+			try {
+				REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
+					try {
+						if (CONFIG_SCREEN_EXT_INTERFACE != null) {
+							return NeoZumeConfigScreenFactory.class
+								.getDeclaredConstructor()
+								.newInstance();
+						} else //noinspection ConstantValue,UnreachableCode
+							if (CONFIG_SCREEN_EXT_RECORD != null) {
+							return CONFIG_SCREEN_EXT_RECORD
+								.getDeclaredConstructor(BiFunction.class)
+								.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
+									new NeoZumeConfigScreen(parent));
+						} else {
+							return null;
+						}
+					} catch (InstantiationException | IllegalAccessException |
+					         InvocationTargetException | NoSuchMethodException e) {
+						throw new RuntimeException(e);
 					}
-				} catch (InstantiationException | IllegalAccessException | 
-				         InvocationTargetException | NoSuchMethodException e) {
-					throw new AssertionError(e);
-				}
-			});
-		} catch (Throwable e) {
-			throw new AssertionError(e);
+				});
+			} catch (Throwable e) {
+				throw new RuntimeException(e);
+			}
 		}
 		
 		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
@@ -104,9 +112,14 @@ public class NeoZume implements IZumeImplementation {
 		if (RENDER_FRAME_EVENT != null) {
 			//noinspection unchecked
 			NeoForge.EVENT_BUS.addListener((Class<? extends Event>) RENDER_FRAME_EVENT, this::render);
-		} else if (RENDER_TICK_EVENT != null) {
+		} else if (
+			RENDER_TICK_EVENT != null && 
+			RENDER_TICK_EVENT_PHASE_GETTER != null && 
+			TICK_EVENT_PHASE_START != null) {
 			//noinspection unchecked
 			NeoForge.EVENT_BUS.addListener((Class<? extends Event>) RENDER_TICK_EVENT, this::renderLegacy);
+		} else {
+			throw new AssertionError("NeoZume doesn't support this version of NeoForge");
 		}
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);

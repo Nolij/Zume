@@ -24,9 +24,9 @@ public class KeyBindingMixin {
 	private static void static$TAIL(CallbackInfo ci) {
 		if (ZumeConfigAPI.isDisabled()) return;
 		
-		categories.add("category.zume");
+		categories.add("zume");
 		if (field_15867 != null)
-			field_15867.put("category.zume", 8);
+			field_15867.put("zume", 8);
 	}
 	
 }
