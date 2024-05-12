@@ -6,9 +6,9 @@ import org.lwjgl.glfw.GLFW;
 
 public enum ZumeKeyBind {
 	
-	ZOOM("key.zume.zoom", GLFW.GLFW_KEY_Z),
-	ZOOM_IN("key.zume.zoom_in", GLFW.GLFW_KEY_EQUAL),
-	ZOOM_OUT("key.zume.zoom_out", GLFW.GLFW_KEY_MINUS),
+	ZOOM("zume.zoom", GLFW.GLFW_KEY_Z),
+	ZOOM_IN("zume.zoom_in", GLFW.GLFW_KEY_EQUAL),
+	ZOOM_OUT("zume.zoom_out", GLFW.GLFW_KEY_MINUS),
 	
 	;
 	
@@ -23,7 +23,7 @@ public enum ZumeKeyBind {
 	}
 	
 	ZumeKeyBind(String translationKey, int code) {
-		this(translationKey, InputUtil.Type.KEYSYM, code, "category.zume");
+		this(translationKey, InputUtil.Type.KEYSYM, code, "zume");
 	}
 	
 }
