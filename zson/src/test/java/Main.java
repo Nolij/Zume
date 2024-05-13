@@ -21,13 +21,14 @@ public class Main {
 			Zson.entry("home", "217-555-1234"),
 			Zson.entry("cell", "217-555-5678")
 		));
-		Files.write(Paths.get("person.json5"), zson.stringify(zsonMap).getBytes(StandardCharsets.UTF_8));
+		String json = zson.stringify(zsonMap);
+		zson.write(zsonMap, Files.newBufferedWriter(Paths.get("person.json5"), StandardCharsets.UTF_8));
+		System.out.println(json);
 		
 		ZsonMap map2 = new ZsonMap();
 		ZsonMap map3 = new ZsonMap();
 		map3.put("test", "a", map2);
 		map2.put("test", "b", map3);
-		
 		System.out.println(zson.stringify(map2));
 	}
 }

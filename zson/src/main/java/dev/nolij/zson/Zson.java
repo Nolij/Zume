@@ -1,5 +1,8 @@
 package dev.nolij.zson;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.AbstractMap;
 import java.util.Map;
 
@@ -15,23 +18,42 @@ public final class Zson {
 	}
 	
 	public String stringify(ZsonMap zson) {
-		StringBuilder sb = new StringBuilder("{\n");
+		StringWriter writer = new StringWriter();
+		try {
+			write(zson, writer);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return writer.toString();
+	}
+	
+	public void write(ZsonMap zson, Writer writer) throws IOException {
+		writer.write("{\n");
 		
 		for (var entry : zson.entrySet()) {
-			Map.Entry<String, String> keyPair = entry.getKey();
-			String key = keyPair.getKey(), comment = keyPair.getValue();
+			ZsonKey keyPair = entry.getKey();
+			String key = keyPair.key, comment = keyPair.comment;
 			Object value = entry.getValue();
 			
-			if (comment != null && !comment.isEmpty()) {
+			if (comment != null) {
 				for (String line : comment.split("\n")) {
-					sb.append(indent).append("// ").append(line).append("\n");
+					writer.write(indent);
+					writer.write("// ");
+					writer.write(line);
+					writer.write("\n");
 				}
 			}
 			
-			sb.append(indent).append('"').append(key).append("\": ").append(value(value)).append(",\n");
+			writer.write(indent);
+			writer.write('"');
+			writer.write(key);
+			writer.write("\": ");
+			writer.write(value(value));
+			writer.write(",\n");
 		}
 		
-		return sb.append("}").toString();
+		writer.write("}");
+		writer.flush();
 	}
 	
 	private String value(Object value) {
@@ -55,11 +77,11 @@ public final class Zson {
 		}
 	}
 	
-	public static Map.Entry<Map.Entry<String, String>, Object> entry(String key, String comment, Object value) {
-		return new AbstractMap.SimpleEntry<>(new AbstractMap.SimpleEntry<>(key, comment), value);
+	public static Map.Entry<ZsonKey, Object> entry(String key, String comment, Object value) {
+		return new AbstractMap.SimpleEntry<>(new ZsonKey(key, comment), value);
 	}
 	
-	public static Map.Entry<Map.Entry<String, String>, Object> entry(String key, Object value) {
-		return entry(key, "", value);
+	public static Map.Entry<ZsonKey, Object> entry(String key, Object value) {
+		return new AbstractMap.SimpleEntry<>(new ZsonKey(key), value);
 	}
 }
