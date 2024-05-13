@@ -10,7 +10,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatte
 import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
 import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
@@ -98,12 +98,12 @@ public class ZumeEmbeddiumConfigPage implements EventHandlerRegistrar.Handler<Op
 	
 	private Control<Integer> exponentControl(final Option<Integer> option) {
 		return new SliderControl(option, 100, 500, 25, v -> switch (v) {
-			case 100 -> Text.translatable("zume.linear");
-			case 200 -> Text.translatable("zume.quad");
-			case 300 -> Text.translatable("zume.cubic");
-			case 400 -> Text.translatable("zume.quart");
-			case 500 -> Text.translatable("zume.quint");
-			default -> Text.literal("x^" + (v / 100D));
+			case 100 -> Component.translatable("zume.linear");
+			case 200 -> Component.translatable("zume.quad");
+			case 300 -> Component.translatable("zume.cubic");
+			case 400 -> Component.translatable("zume.quart");
+			case 500 -> Component.translatable("zume.quint");
+			default -> Component.literal("x^" + (v / 100D));
 		});
 	}
 	
@@ -177,8 +177,8 @@ public class ZumeEmbeddiumConfigPage implements EventHandlerRegistrar.Handler<Op
 					.setControl(option -> 
 						new SliderControl(option, 0, 500, 25, 
 							v -> v > 0 
-							     ? Text.literal(v + "ms") 
-							     : Text.translatable("zume.instant")))
+							     ? Component.literal(v + "ms") 
+							     : Component.translatable("zume.instant")))
 					.setBinding(
 						(config, value) -> config.zoomSmoothnessMilliseconds = value.shortValue(),
 						config -> (int) config.zoomSmoothnessMilliseconds)
@@ -191,8 +191,8 @@ public class ZumeEmbeddiumConfigPage implements EventHandlerRegistrar.Handler<Op
 					.setControl(option ->
 						new SliderControl(option, 0, 30, 1,
 							v -> v > 0
-							     ? Text.translatable("zume.blocks", v) 
-							     : Text.translatable("zume.disabled")))
+							     ? Component.translatable("zume.blocks", v) 
+							     : Component.translatable("zume.disabled")))
 					.setBinding(
 						(config, value) -> config.maximumThirdPersonZoomBlocks = value,
 						config -> (int) config.maximumThirdPersonZoomBlocks)
@@ -202,8 +202,8 @@ public class ZumeEmbeddiumConfigPage implements EventHandlerRegistrar.Handler<Op
 					.setControl(option ->
 						new SliderControl(option, 0, 10, 1,
 							v -> v > 0 
-							     ? Text.translatable("zume.blocks", v) 
-							     : Text.translatable("zume.blocks", 0.5)))
+							     ? Component.translatable("zume.blocks", v) 
+							     : Component.translatable("zume.blocks", 0.5)))
 					.setBinding(
 						(config, value) -> config.minimumThirdPersonZoomBlocks = value > 0 ? value : 0.5,
 						config -> (int) config.minimumThirdPersonZoomBlocks)
@@ -233,7 +233,7 @@ public class ZumeEmbeddiumConfigPage implements EventHandlerRegistrar.Handler<Op
 					.setId(MIN_FOV)
 					.setControl(option ->
 						new SliderControl(option, -2, 1, 1, 
-							v -> Text.literal(String.valueOf(Math.pow(10, v)))))
+							v -> Component.literal(String.valueOf(Math.pow(10, v)))))
 					.setBinding(
 						(config, value) -> config.minimumFOV = Math.pow(10, value),
 						config -> (int) Math.log10(config.minimumFOV))
@@ -249,12 +249,12 @@ public class ZumeEmbeddiumConfigPage implements EventHandlerRegistrar.Handler<Op
 				.build());
 		
 		event.getPages().add(new OptionPage(
-			GENERAL, 
-			Text.translatable("zume.options.pages.general"),
+			GENERAL,
+			Component.translatable("zume.options.pages.general"),
 			ImmutableList.copyOf(generalGroups)));
 		event.getPages().add(new OptionPage(
-			ADVANCED, 
-			Text.translatable("zume.options.pages.advanced"),
+			ADVANCED,
+			Component.translatable("zume.options.pages.advanced"),
 			ImmutableList.copyOf(advancedGroups)));
 	}
 	

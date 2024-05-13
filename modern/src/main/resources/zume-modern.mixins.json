@@ -6,7 +6,7 @@
 	"client": [
 		"modern.CameraMixin",
 		"modern.GameRendererMixin",
-		"modern.MouseMixin"
+		"modern.MouseHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

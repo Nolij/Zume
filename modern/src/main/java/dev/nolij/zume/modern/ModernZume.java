@@ -10,8 +10,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
@@ -45,7 +45,7 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	
 	@Override
 	public boolean isZoomPressed() {
-		return MinecraftClient.getInstance().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
+		return Minecraft.getInstance().screen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -59,22 +59,22 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	}
 	
 	private static final MethodHandle GET_PERSPECTIVE = MethodHandleHelper.PUBLIC.getMethodOrNull(
-		GameOptions.class,
+		Options.class,
 		FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary",
 			"net.minecraft.class_315", "method_31044", "()Lnet/minecraft/class_5498;"),
-		MethodType.methodType(Enum.class, GameOptions.class));
+		MethodType.methodType(Enum.class, Options.class));
 	private static final MethodHandle PERSPECTIVE =
-		MethodHandleHelper.PUBLIC.getGetterOrNull(GameOptions.class, "field_1850", int.class);
+		MethodHandleHelper.PUBLIC.getGetterOrNull(Options.class, "field_1850", int.class);
 	
 	@Override
 	public @NotNull CameraPerspective getCameraPerspective() {
 		int ordinal;
 		try {
 			if (GET_PERSPECTIVE != null)
-				ordinal = ((Enum<?>) GET_PERSPECTIVE.invokeExact(MinecraftClient.getInstance().options)).ordinal();
+				ordinal = ((Enum<?>) GET_PERSPECTIVE.invokeExact(Minecraft.getInstance().options)).ordinal();
 			else
 				//noinspection DataFlowIssue
-				ordinal = (int) PERSPECTIVE.invokeExact(MinecraftClient.getInstance().options);
+				ordinal = (int) PERSPECTIVE.invokeExact(Minecraft.getInstance().options);
 		} catch (Throwable e) {
 			throw new AssertionError(e);
 		}

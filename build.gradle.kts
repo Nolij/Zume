@@ -258,7 +258,7 @@ unimined.minecraft {
 
 	mappings {
 		intermediary()
-		yarn("modern_mappings_version"())
+		mojmap()
 		devFallbackNamespace("intermediary")
 	}
 
