@@ -1,15 +1,15 @@
 package dev.nolij.zume.modern.integration;
 
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 public class ModernZumeConfigScreen extends Screen {
 	
 	private final Screen parent;
 	
-	public ModernZumeConfigScreen(Text arg, Screen parent) {
+	public ModernZumeConfigScreen(Component arg, Screen parent) {
 		super(arg);
 		this.parent = parent;
 	}
@@ -18,7 +18,7 @@ public class ModernZumeConfigScreen extends Screen {
 	public void init() {
 		ZumeAPI.openConfigFile();
 		
-		MinecraftClient.getInstance().setScreen(parent);
+		Minecraft.getInstance().setScreen(parent);
 	}
 	
 	@SuppressWarnings("unused")

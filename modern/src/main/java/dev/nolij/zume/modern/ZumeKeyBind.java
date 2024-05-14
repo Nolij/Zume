@@ -1,7 +1,7 @@
 package dev.nolij.zume.modern;
 
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
 public enum ZumeKeyBind {
@@ -12,18 +12,18 @@ public enum ZumeKeyBind {
 	
 	;
 	
-	public final KeyBinding value;
+	public final KeyMapping value;
 	
 	public boolean isPressed() {
-		return value.isPressed();
+		return value.isDown();
 	}
 	
-	ZumeKeyBind(String translationKey, InputUtil.Type type, int code, String category) {
-		this.value = new KeyBinding(translationKey, type, code, category);
+	ZumeKeyBind(String translationKey, InputConstants.Type type, int code, String category) {
+		this.value = new KeyMapping(translationKey, type, code, category);
 	}
 	
 	ZumeKeyBind(String translationKey, int code) {
-		this(translationKey, InputUtil.Type.KEYSYM, code, "zume");
+		this(translationKey, InputConstants.Type.KEYSYM, code, "zume");
 	}
 	
 }

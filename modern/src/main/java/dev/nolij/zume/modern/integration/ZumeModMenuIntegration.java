@@ -4,8 +4,8 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
 import io.github.prospector.modmenu.api.ModMenuApi;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.*;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -17,7 +17,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	
 	private static final MethodHandle LITERALTEXT_INIT = MethodHandleHelper.PUBLIC.getConstructorOrNull(
 		MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraft.class_2585"),
-		MethodType.methodType(Text.class, String.class),
+		MethodType.methodType(Component.class, String.class),
 		String.class);
 	
 	@Override
@@ -30,7 +30,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 		return (parent) -> {
             try {
 	            //noinspection DataFlowIssue
-	            return new ModernZumeConfigScreen((Text) LITERALTEXT_INIT.invokeExact(""), parent);
+	            return new ModernZumeConfigScreen((Component) LITERALTEXT_INIT.invokeExact(""), parent);
             } catch (Throwable e) {
 				ZumeAPI.getLogger().error("Error opening config screen: ", e);
 				return null;
@@ -40,7 +40,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return (parent) -> new ModernZumeConfigScreen(Text.literal(""), parent);
+		return (parent) -> new ModernZumeConfigScreen(Component.literal(""), parent);
 	}
 	
 }

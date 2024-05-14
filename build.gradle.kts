@@ -149,13 +149,13 @@ val lexForgeImpls = arrayOf(
 	"lexforge",
 	"lexforge18",
 	"lexforge16",
-	*legacyForgeImpls,
 )
 val neoForgeImpls = arrayOf(
 	"neoforge",
 )
 val uniminedImpls = arrayOf(
 	*fabricImpls,
+	*legacyForgeImpls,
 	*lexForgeImpls,
 	*neoForgeImpls,
 )
@@ -237,16 +237,16 @@ subprojects {
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
-
-		dependencies {
-			implementation(project(":api"))
-		}
+		
 		unimined.minecraft(sourceSets["main"], lateApply = true) {
+			combineWith(project(":api").sourceSets.main.get())
+
 			if (implName != "primitive") {
 				runs.config("server") {
 					disabled = true
 				}
 			}
+			
 			defaultRemapJar = true
 		}
 	}
@@ -271,7 +271,7 @@ unimined.minecraft {
 
 	mappings {
 		intermediary()
-		yarn("modern_mappings_version"())
+		mojmap()
 		devFallbackNamespace("intermediary")
 	}
 

@@ -2,7 +2,7 @@ package dev.nolij.zume.mixin.modern;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
