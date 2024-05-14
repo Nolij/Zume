@@ -170,6 +170,7 @@ allprojects {
 				excludeGroup("ca.weblite")
 			}
 		}
+		mavenLocal()
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		maven("https://api.modrinth.com/maven") {
@@ -232,7 +233,7 @@ subprojects {
 	}
 	
 	dependencies {
-		implementation("blue.endless:jankson:${"jankson_version"()}")
+		implementation("dev.nolij:zson:${"zson_version"()}")
 	}
 
 	if (implName in uniminedImpls) {
@@ -244,6 +245,10 @@ subprojects {
 			if (implName != "primitive") {
 				runs.config("server") {
 					disabled = true
+				}
+				
+				runs.config("client") {
+					jvmArgs += "-Dzume.configPathOverride=${rootProject.file("zume.json5").absolutePath}"
 				}
 			}
 			
@@ -284,7 +289,7 @@ val shade: Configuration by configurations.creating {
 }
 
 dependencies {
-	shade("blue.endless:jankson:${"jankson_version"()}")
+	shade("dev.nolij:zson:${"zson_version"()}")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
@@ -371,7 +376,7 @@ tasks.shadowJar {
 		}
 	}
 	
-	relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
+	relocate("dev.nolij.zson", "dev.nolij.zume.shadow.dev.nolij.zson")
 	
 	manifest {
 		attributes(
