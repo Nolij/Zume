@@ -346,6 +346,7 @@ tasks.shadowJar {
 	}
 	
 	exclude("*.xcf")
+	exclude("LICENSE_ZSON")
 	
 	configurations = immutableListOf(shade)
 	archiveClassifier = null
@@ -406,14 +407,6 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 tasks.assemble {
 	dependsOn(compressJar, sourcesJar)
 }
-
-//tasks.register("cleassemble") {
-//	group = "build"
-//	doLast {
-//		//run clean THEN assemble
-//		tasks.clean.get().
-//	}
-//}
 
 afterEvaluate {
 	publishing {

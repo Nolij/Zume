@@ -7,6 +7,7 @@ import dev.nolij.zson.ZsonWriter;
 import dev.nolij.zume.impl.Zume;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -171,13 +172,32 @@ public class ZumeConfigImpl {
 		ZumeConfigImpl result = new ZumeConfigImpl();
 		for (var field : ZumeConfigImpl.class.getDeclaredFields()) {
 			if(Modifier.isStatic(field.getModifiers())) continue;
-			try {
-				field.set(result, map.get(field.getName()).value);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
+			setField(field, result, map.get(field.getName()).value);
 		}
 		return result;
+	}
+	
+	private static <T> void setField(Field field, ZumeConfigImpl config, Object value) {
+		@SuppressWarnings("unchecked")
+		Class<T> type = (Class<T>) field.getType();
+		try {
+			if (type == boolean.class) {
+				field.setBoolean(config, (boolean) value);
+			} else if(type == int.class) {
+				field.setInt(config, (int) value);
+			} else if (type == double.class) {
+				field.setDouble(config, (double) value);
+			} else if (type == short.class) {
+				field.setShort(config, (short) (int) value);
+			} else {
+				field.set(config, value);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(
+				"Failed to set field " + field.getName() + " (type " + type.getSimpleName() + ") to " + value + " " +
+					"(type " + value.getClass().getSimpleName() + ")", e
+			);
+		}
 	}
 	
 	private static ConfigConsumer consumer;
