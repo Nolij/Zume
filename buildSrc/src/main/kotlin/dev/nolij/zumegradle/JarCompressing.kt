@@ -2,6 +2,10 @@ package dev.nolij.zumegradle
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import net.fabricmc.mappingio.MappingReader
+import net.fabricmc.mappingio.format.MappingFormat
+import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
+import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -48,7 +52,7 @@ enum class JsonShrinkingType {
 	NONE, MINIFY, PRETTY_PRINT
 }
 
-fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType) {
+fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType, mappingsFile: File) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -57,7 +61,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 			}
 		}
 	}
-
+	
 	jar.delete()
 	
 	val json = JsonSlurper()
@@ -65,6 +69,11 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
+			if(name == "fabric.mod.json" && mappingsFile.exists()) {
+				println("remapping $name")
+				bytes = remapFMJ(bytes, mappingsFile)
+			}
+			
 			if (jsonProcessing != JsonShrinkingType.NONE && 
 				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
 				bytes = when (jsonProcessing) {
@@ -84,6 +93,46 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 		}
 		out.finish()
 	}
+}
+
+private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
+	val mappingTree = MemoryMappingTree()
+	MappingReader.read(mappingsFile.toPath(), MappingFormat.PROGUARD, mappingTree)
+	
+	val dstNamespaceIndex = mappingTree.getNamespaceId(mappingTree.dstNamespaces[0])
+	
+	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
+	//look for entrypoints, should be an object with string keys and array of strings values
+	var entrypoints = (json["entrypoints"] as Map<String, List<String>>?)?.toMutableMap()
+	if (entrypoints == null) {
+		throw IllegalStateException("fabric.mod.json does not contain entrypoints")
+	}
+	
+	val mappings = mutableMapOf<String, String>()
+
+	@Suppress("INACCESSIBLE_TYPE")
+	for (clazz: ClassMapping in mappingTree.classes) {
+		val dst = clazz.getDstName(dstNamespaceIndex).replace('/', '.')
+		val src = clazz.srcName.replace('/', '.')
+		mappings[src] = dst
+	}
+
+	val newEntrypoints = mutableMapOf<String, MutableList<String>>()
+	for ((type, classes) in entrypoints) {
+		for (old in classes) {
+			println("checking $old")
+			for ((src, dst) in mappings) {
+				if(src == old) {
+					println("remapping $src to $dst")
+					newEntrypoints.computeIfAbsent(type) { mutableListOf() }.add(dst)
+				}
+			}
+		}
+	}
+	
+	json["entrypoints"] = newEntrypoints
+
+	return JsonOutput.toJson(json).toByteArray()
 }
 
 private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType): ByteArray {
@@ -240,7 +289,7 @@ open class CompressJarTask : DefaultTask() {
 	fun compressJar() {
 		if (useProguard)
 			applyProguard(inputJar, minecraftConfigs, project.rootDir)
-		squishJar(inputJar, classShrinkingType, jsonShrinkingType)
+		squishJar(inputJar, classShrinkingType, jsonShrinkingType, mappingsFile)
 		deflate(outputJar, jarShrinkingType)
 	}
 }

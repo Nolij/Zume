@@ -22,6 +22,7 @@ fun DependencyHandler.plugin(id: String, version: String) {
 
 dependencies {
 	implementation("org.ow2.asm:asm-tree:9.7")
+	implementation("net.fabricmc:mapping-io:0.3.0")
 
 	implementation("org.apache.ant:ant:1.10.13")
 	implementation("com.guardsquare:proguard-base:7.4.2")
