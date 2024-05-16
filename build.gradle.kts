@@ -21,7 +21,6 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
-import xyz.wagyourtail.unimined.internal.mapping.extension.MixinRemapExtension
 import java.nio.file.Files
 import java.time.ZonedDateTime
 
@@ -51,6 +50,8 @@ enum class ReleaseChannel(
 	RELEASE_CANDIDATE("rc"),
 	RELEASE(releaseType = ReleaseType.STABLE),
 }
+
+//region Git Versioning
 
 val headDateTime: ZonedDateTime = grgit.head().dateTime
 
@@ -123,6 +124,8 @@ if (releaseChannel.suffix != null) {
 	}
 }
 
+//endregion
+
 Zume.version = "${minorVersion}.${patchAndSuffix}"
 println("Zume Version: ${Zume.version}")
 
@@ -146,13 +149,13 @@ val lexForgeImpls = arrayOf(
 	"lexforge",
 	"lexforge18",
 	"lexforge16",
-	*legacyForgeImpls,
 )
 val neoForgeImpls = arrayOf(
 	"neoforge",
 )
 val uniminedImpls = arrayOf(
 	*fabricImpls,
+	*legacyForgeImpls,
 	*lexForgeImpls,
 	*neoForgeImpls,
 )
@@ -167,6 +170,7 @@ allprojects {
 				excludeGroup("ca.weblite")
 			}
 		}
+		mavenLocal()
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		maven("https://api.modrinth.com/maven") {
@@ -229,21 +233,25 @@ subprojects {
 	}
 	
 	dependencies {
-		implementation("blue.endless:jankson:${"jankson_version"()}")
+		implementation("dev.nolij:zson:${"zson_version"()}")
 	}
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
-
-		dependencies {
-			implementation(project(":api"))
-		}
+		
 		unimined.minecraft(sourceSets["main"], lateApply = true) {
+			combineWith(project(":api").sourceSets.main.get())
+
 			if (implName != "primitive") {
 				runs.config("server") {
 					disabled = true
 				}
+				
+				runs.config("client") {
+					jvmArgs += "-Dzume.configPathOverride=${rootProject.file("zume.json5").absolutePath}"
+				}
 			}
+			
 			defaultRemapJar = true
 		}
 	}
@@ -268,7 +276,7 @@ unimined.minecraft {
 
 	mappings {
 		intermediary()
-		yarn("modern_mappings_version"())
+		mojmap()
 		devFallbackNamespace("intermediary")
 	}
 
@@ -281,7 +289,7 @@ val shade: Configuration by configurations.creating {
 }
 
 dependencies {
-	shade("blue.endless:jankson:${"jankson_version"()}")
+	shade("dev.nolij:zson:${"zson_version"()}")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
@@ -338,6 +346,7 @@ tasks.shadowJar {
 	}
 	
 	exclude("*.xcf")
+	exclude("LICENSE_ZSON")
 	
 	configurations = immutableListOf(shade)
 	archiveClassifier = null
@@ -368,7 +377,7 @@ tasks.shadowJar {
 		}
 	}
 	
-	relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
+	relocate("dev.nolij.zson", "dev.nolij.zume.shadow.dev.nolij.zson")
 	
 	manifest {
 		attributes(
@@ -398,14 +407,6 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 tasks.assemble {
 	dependsOn(compressJar, sourcesJar)
 }
-
-//tasks.register("cleassemble") {
-//	group = "build"
-//	doLast {
-//		//run clean THEN assemble
-//		tasks.clean.get().
-//	}
-//}
 
 afterEvaluate {
 	publishing {

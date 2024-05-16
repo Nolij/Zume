@@ -16,8 +16,10 @@ for increasing and decreasing the zoom level.
 
 #### Q: Where is the config?
 
-A: You'll find the config at `.minecraft/config/zume.json5`. You can modify the file while the game is running, and
-the config will be automatically reloaded.
+A: You'll find the config at `.minecraft/global/zume.json5` (note that this is the default `.minecraft` folder, not 
+the instance `.minecraft`). You can modify the file while the game is running, and the config will be automatically 
+reloaded. On platforms which have mod menus (such as Forge, and Fabric with [Mod Menu](https://modrinth.com/mod/modmenu) 
+installed), the config button for Zume will open this file in your system text editor.
 
 #### Q: discord where
 A: https://discord.gg/6ZjX4mvCMR

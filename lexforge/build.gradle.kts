@@ -1,8 +1,6 @@
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 unimined.minecraft {
-	combineWith(project(":api").sourceSets.main.get())
-	
 	version("lexforge_minecraft_version"())
 
 	minecraftForge {
@@ -19,5 +17,5 @@ unimined.minecraft {
 dependencies {
 	compileOnly(project(":stubs"))
 
-	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
+	"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}")
 }

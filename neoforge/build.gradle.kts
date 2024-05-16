@@ -13,14 +13,12 @@ unimined.minecraft {
 
 	mappings {
 		mojmap()
-//		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
+		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
 	}
 }
 
 dependencies {
 	compileOnly(project(":stubs"))
 	
-	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
-	
-	"minecraftLibraries"(project(":api"))
+	"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}")
 }

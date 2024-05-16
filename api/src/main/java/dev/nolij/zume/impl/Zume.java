@@ -1,5 +1,6 @@
 package dev.nolij.zume.impl;
 
+import dev.nolij.zume.api.util.v0.MathHelper;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
 import dev.nolij.zume.api.util.v0.EasingHelper;
 import org.apache.logging.log4j.LogManager;
@@ -27,22 +28,12 @@ public class Zume {
 		
 		if (OS_NAME.contains("linux"))
 			HOST_PLATFORM = HostPlatform.LINUX;
-		else if (OS_NAME.contains("win"))
-			HOST_PLATFORM = HostPlatform.WINDOWS;
 		else if (OS_NAME.contains("mac"))
 			HOST_PLATFORM = HostPlatform.MAC_OS;
+		else if (OS_NAME.contains("win"))
+			HOST_PLATFORM = HostPlatform.WINDOWS;
 		else
 			HOST_PLATFORM = HostPlatform.UNKNOWN;
-	}
-	//endregion
-	
-	//region Helper Methods
-	private static int sign(final int input) {
-		return input >> (Integer.SIZE - 1) | 1;
-	}
-	
-	private static double clamp(final double value) {
-		return Math.max(Math.min(value, 1D), 0D);
 	}
 	//endregion
 	
@@ -83,11 +74,11 @@ public class Zume {
 	}
 	
 	private static void setZoom(final double targetZoom) {
-		zoom.set(clamp(targetZoom));
+		zoom.set(MathHelper.clamp(targetZoom, 0D, 1D));
 	}
 	
 	private static void setZoom(final double fromZoom, final double targetZoom) {
-		zoom.set(clamp(fromZoom), clamp(targetZoom));
+		zoom.set(MathHelper.clamp(fromZoom, 0D, 1D), MathHelper.clamp(targetZoom, 0D, 1D));
 	}
 	
 	private static double getThirdPersonStartZoom() {
@@ -179,7 +170,7 @@ public class Zume {
         if (!shouldCancelScroll() || scrollDelta == 0)
             return false;
 		
-        Zume.scrollDelta += sign(scrollDelta);
+        Zume.scrollDelta += MathHelper.sign(scrollDelta);
         return true;
     }
 	
