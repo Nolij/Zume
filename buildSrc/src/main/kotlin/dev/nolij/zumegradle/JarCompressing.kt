@@ -70,7 +70,6 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
 			if(name == "fabric.mod.json" && mappingsFile.exists()) {
-				println("remapping $name")
 				bytes = remapFMJ(bytes, mappingsFile)
 			}
 			
@@ -102,7 +101,6 @@ private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
 	val dstNamespaceIndex = mappingTree.getNamespaceId(mappingTree.dstNamespaces[0])
 	
 	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
-	//look for entrypoints, should be an object with string keys and array of strings values
 	var entrypoints = (json["entrypoints"] as Map<String, List<String>>?)?.toMutableMap()
 	if (entrypoints == null) {
 		throw IllegalStateException("fabric.mod.json does not contain entrypoints")
@@ -120,10 +118,8 @@ private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
 	val newEntrypoints = mutableMapOf<String, MutableList<String>>()
 	for ((type, classes) in entrypoints) {
 		for (old in classes) {
-			println("checking $old")
 			for ((src, dst) in mappings) {
 				if(src == old) {
-					println("remapping $src to $dst")
 					newEntrypoints.computeIfAbsent(type) { mutableListOf() }.add(dst)
 				}
 			}
