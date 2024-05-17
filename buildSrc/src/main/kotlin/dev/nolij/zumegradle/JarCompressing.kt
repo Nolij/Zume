@@ -94,6 +94,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 	}
 }
 
+@Suppress("UNCHECKED_CAST")
 private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
 	val mappingTree = MemoryMappingTree()
 	MappingReader.read(mappingsFile.toPath(), MappingFormat.PROGUARD, mappingTree)

@@ -14,7 +14,3 @@ unimined.minecraft {
 		parchment(mcVersion = "lexforge16_minecraft_version"(), version = "lexforge16_parchment_version"())
 	}
 }
-
-dependencies {
-	"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}")
-}

@@ -178,6 +178,7 @@ allprojects {
 				includeGroup("maven.modrinth")
 			}
 		}
+		maven("https://maven.blamejared.com")
 	}
 	
 	tasks.withType<JavaCompile> {
@@ -261,6 +262,10 @@ subprojects {
 			mixinRemap {
 				disableRefmap()
 			}
+		}
+		
+		dependencies {
+			"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}")
 		}
 	}
 }
@@ -364,6 +369,9 @@ tasks.shadowJar {
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 
 			filesMatching("**/*.class") {
+				if(this.name == "dev/nolij/zume/ForgeZumeBootstrapper.class") {
+					return@filesMatching
+				}
 				val reader = ClassReader(this.open())
 				val node = ClassNode()
 				reader.accept(node, 0)
@@ -377,7 +385,7 @@ tasks.shadowJar {
 		}
 	}
 	
-	relocate("dev.nolij.zson", "dev.nolij.zume.shadow.dev.nolij.zson")
+	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
 	
 	manifest {
 		attributes(

@@ -16,6 +16,4 @@ unimined.minecraft {
 
 dependencies {
 	compileOnly(project(":stubs"))
-
-	"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}")
 }

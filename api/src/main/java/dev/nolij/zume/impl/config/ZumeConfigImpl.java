@@ -2,7 +2,6 @@ package dev.nolij.zume.impl.config;
 
 import dev.nolij.zson.Zson;
 import dev.nolij.zson.ZsonParser;
-import dev.nolij.zson.ZsonValue;
 import dev.nolij.zson.ZsonWriter;
 import dev.nolij.zume.impl.Zume;
 
@@ -11,12 +10,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class ZumeConfigImpl {
@@ -79,7 +75,9 @@ public class ZumeConfigImpl {
 		DEFAULT: `true`""")
 	public boolean thirdPersonToggleMode = true;
 	
-	@Comment("Minimum zoom FOV.\nDEFAULT: `1.0`")
+	@Comment("""
+		Minimum zoom FOV.
+		DEFAULT: `1.0`""")
 	public double minFOV = 1D;
 	
 	@Comment("""
@@ -115,7 +113,7 @@ public class ZumeConfigImpl {
 		int i = 0;
 		while (true) {
 			try {
-				return fromMap(ZsonParser.parse(new FileReader(configFile)));
+				return Zson.toObject(ZsonParser.parse(new FileReader(configFile)), ZumeConfigImpl.class);
             } catch (IllegalArgumentException e) {
 				if (++i < MAX_RETRIES) {
                     try {
@@ -147,57 +145,10 @@ public class ZumeConfigImpl {
 	private void writeToFile(final File configFile) {
 		this.configVersion = EXPECTED_VERSION;
 		try (final FileWriter configWriter = new FileWriter(configFile)) {
-			ZSON.write(this.toMap(), configWriter);
+			ZSON.write(Zson.fromObject(this), configWriter);
 			configWriter.flush();
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to write config file", e);
-		}
-	}
-	
-	private Map<String, ZsonValue> toMap() {
-		Map<String, ZsonValue> map = Zson.object();
-		for (Field field : ZumeConfigImpl.class.getDeclaredFields()) {
-			if(Modifier.isStatic(field.getModifiers())) continue;
-			Comment comment = field.getAnnotation(Comment.class);
-			if (comment == null) continue;
-			try {
-				map.put(field.getName(), new ZsonValue(comment.value(), field.get(this)));
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException("Failed to get field " + field.getName(), e);
-			}
-		}
-		return map;
-	}
-	
-	private static ZumeConfigImpl fromMap(final Map<String, ZsonValue> map) {
-		ZumeConfigImpl result = new ZumeConfigImpl();
-		for (Field field : ZumeConfigImpl.class.getDeclaredFields()) {
-			if(Modifier.isStatic(field.getModifiers())) continue;
-			setField(field, result, map.get(field.getName()).value);
-		}
-		return result;
-	}
-	
-	private static <T> void setField(Field field, ZumeConfigImpl config, Object value) {
-		@SuppressWarnings("unchecked")
-		Class<T> type = (Class<T>) field.getType();
-		try {
-			if(type.isPrimitive()) {
-				switch (type.getName()) {
-					case "boolean" -> field.setBoolean(config, (boolean) value);
-					case "short" -> field.setShort(config, (short) (int) value);
-					case "int" -> field.setInt(config, (int) value);
-					case "float" -> field.setFloat(config, (float) (double) value);
-					case "double" -> field.setDouble(config, (double) value);
-				}
-			} else {
-				field.set(config, type.cast(value));
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(
-				"Failed to set field " + field.getName() + " (type " + type.getSimpleName() + ") to " + value + " " +
-					"(type " + value.getClass().getSimpleName() + ")", e
-			);
 		}
 	}
 	
