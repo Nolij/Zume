@@ -3,13 +3,10 @@ package dev.nolij.zume.impl.config;
 import dev.nolij.zson.Zson;
 import dev.nolij.zson.ZsonParser;
 import dev.nolij.zson.ZsonWriter;
+import dev.nolij.zson.Comment;
 import dev.nolij.zume.impl.Zume;
 
 import java.io.*;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -248,11 +245,5 @@ public class ZumeConfigImpl {
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to create file watcher", e);
 		}
-	}
-	
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface Comment {
-		String value();
 	}
 }
