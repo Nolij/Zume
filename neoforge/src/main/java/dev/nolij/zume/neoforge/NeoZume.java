@@ -5,6 +5,7 @@ import dev.nolij.zume.api.platform.v0.IZumeImplementation;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
+import dev.nolij.zume.integration.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
@@ -125,6 +126,10 @@ public class NeoZume implements IZumeImplementation {
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::calculateTurnPlayerValues);
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateDetachedCameraDistance);
+		
+		if (METHOD_HANDLE_HELPER.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
+			new ZumeEmbeddiumConfigScreen();
+		}
 	}
 	
 	@Override

@@ -5,7 +5,7 @@ import dev.nolij.zume.api.platform.v0.IZumeImplementation;
 import dev.nolij.zume.api.platform.v0.ZumeAPI;
 import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v0.MethodHandleHelper;
-import dev.nolij.zume.modern.integration.ZumeEmbeddiumConfigPage;
+import dev.nolij.zume.integration.embeddium.ZumeEmbeddiumConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.InvocationTargetException;
 
 public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	
@@ -35,11 +34,7 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 		}
 		
 		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
-			try {
-				ZumeEmbeddiumConfigPage.class.getDeclaredConstructor().newInstance();
-			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				throw new RuntimeException(e);
-			}
+			new ZumeEmbeddiumConfigScreen();
 		}
 	}
 	
