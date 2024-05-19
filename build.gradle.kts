@@ -257,9 +257,7 @@ unimined.minecraft {
 	}
 
 	mappings {
-		intermediary()
 		mojmap()
-		devFallbackNamespace("intermediary")
 	}
 
 	defaultRemapJar = false
@@ -384,7 +382,7 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	jarShrinkingType = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
-	if(releaseChannel.proguard) {
+	if (releaseChannel.proguard) {
 		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
 	}
 }
