@@ -2,7 +2,7 @@ package dev.nolij.zume.mixin.legacy;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import net.minecraft.client.render.GameRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;

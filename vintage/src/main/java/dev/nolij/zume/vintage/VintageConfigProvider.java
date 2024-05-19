@@ -1,6 +1,6 @@
 package dev.nolij.zume.vintage;
 
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;

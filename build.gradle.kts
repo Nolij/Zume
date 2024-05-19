@@ -1,4 +1,5 @@
 @file:Suppress("UnstableApiUsage")
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.nolij.zumegradle.ClassShrinkingType
 import dev.nolij.zumegradle.JarShrinkingType
 import dev.nolij.zumegradle.JsonShrinkingType
@@ -239,6 +240,7 @@ subprojects {
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
+		apply(plugin = "com.github.johnrengelman.shadow")
 		
 		unimined.minecraft(sourceSets["main"], lateApply = true) {
 			combineWith(project(":api").sourceSets.main.get())
@@ -254,6 +256,31 @@ subprojects {
 			}
 			
 			defaultRemapJar = true
+		}
+		
+		val outputJar = tasks.register<ShadowJar>("outputJar") {
+			group = "build"
+			
+			val remapJarTasks = tasks.withType<RemapJarTask>()
+			dependsOn(remapJarTasks)
+			mustRunAfter(remapJarTasks)
+			remapJarTasks.forEach { remapJar ->
+				remapJar.archiveFile.also { archiveFile ->
+					from(zipTree(archiveFile))
+					inputs.file(archiveFile)
+				}
+			}
+
+			configurations = emptyList()
+			archiveClassifier = "output"
+			isPreserveFileTimestamps = false
+			isReproducibleFileOrder = true
+			
+			relocate("dev.nolij.zume.integration", "dev.nolij.zume.${implName}.integration")
+		}
+
+		tasks.assemble {
+			dependsOn(outputJar)
 		}
 	}
 	
@@ -280,9 +307,7 @@ unimined.minecraft {
 	}
 
 	mappings {
-		intermediary()
 		mojmap()
-		devFallbackNamespace("intermediary")
 	}
 
 	defaultRemapJar = false
@@ -333,6 +358,7 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	listOf(
 		sourceSets, 
 		project(":api").sourceSets, 
+		project(":integration:embeddium").sourceSets,
 		uniminedImpls.flatMap { project(":${it}").sourceSets }
 	).flatten().forEach {
 		from(it.allSource) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
@@ -362,9 +388,9 @@ tasks.shadowJar {
 	dependsOn(apiJar)
 	from(zipTree(apiJar.get().archiveFile.get())) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
 	
-	uniminedImpls.flatMap { project(it).tasks.withType<RemapJarTask>() }.forEach { remapJar ->
-		dependsOn(remapJar)
-		from(zipTree(remapJar.archiveFile.get())) {
+	uniminedImpls.map { project(it).tasks.named<ShadowJar>("outputJar").get() }.forEach { implJarTask ->
+		dependsOn(implJarTask)
+		from(zipTree(implJarTask.archiveFile.get())) {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 
@@ -407,7 +433,7 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	jarShrinkingType = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
-	if(releaseChannel.proguard) {
+	if (releaseChannel.proguard) {
 		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
 	}
 }

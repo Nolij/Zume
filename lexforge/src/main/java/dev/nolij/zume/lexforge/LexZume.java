@@ -1,10 +1,11 @@
 package dev.nolij.zume.lexforge;
 
-import dev.nolij.zume.api.platform.v0.CameraPerspective;
-import dev.nolij.zume.api.platform.v0.IZumeImplementation;
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.CameraPerspective;
+import dev.nolij.zume.api.platform.v1.IZumeImplementation;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
-import dev.nolij.zume.api.util.v0.MethodHandleHelper;
+import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.integration.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -41,6 +42,10 @@ public class LexZume implements IZumeImplementation {
 		MinecraftForge.EVENT_BUS.addListener(this::render);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
+		
+		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
+			new ZumeEmbeddiumConfigScreen();
+		}
 	}
 	
 	@Override

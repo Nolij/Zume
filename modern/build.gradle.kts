@@ -7,6 +7,8 @@ val modRuntimeOnly: Configuration by configurations.creating {
 }
 
 unimined.minecraft {
+	combineWith(project(":integration:embeddium").sourceSets.main.get())
+	
 	version("modern_minecraft_version"())
 
 	fabric {
@@ -41,7 +43,7 @@ dependencies {
 	"modImplementation"(fabricApi.fabricModule("fabric-key-binding-api-v1", "modern_fabric_api_version"()))
 	
 	"modImplementation"("com.terraformersmc:modmenu:7.+")
-	
-	"modImplementation"("org.embeddedt:embeddium-fabric-1.20.1:0.3.18-git-e88a7ad+mc1.20.1")
+
+	modRuntimeOnly("org.embeddedt:embeddium-fabric-1.20.1:${"embeddium_fabric_version"()}")
 	modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${"modern_fabric_api_version"()}")
 }

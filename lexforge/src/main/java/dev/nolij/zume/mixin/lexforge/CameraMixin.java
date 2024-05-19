@@ -1,6 +1,6 @@
 package dev.nolij.zume.mixin.lexforge;
 
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

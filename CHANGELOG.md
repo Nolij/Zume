@@ -1,1 +1,2 @@
+- added Embeddium config screen integration
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience

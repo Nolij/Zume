@@ -1,6 +1,6 @@
 package dev.nolij.zume;
 
-import dev.nolij.zume.api.util.v0.MethodHandleHelper;
+import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;

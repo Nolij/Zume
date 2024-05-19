@@ -210,9 +210,12 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 		libraries.add(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile().absolutePath)
 		
 		libraries.addAll(minecraftConfig.mods.getClasspathAs(prodNamespace, prodNamespace,
-				minecraftConfig.sourceSet.compileClasspath.files
-					.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
-					.toSet())
+			listOf(
+				minecraftConfig.sourceSet.compileClasspath.files,
+				minecraftConfig.sourceSet.runtimeClasspath.files)
+				.flatten()
+				.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
+				.toHashSet())
 			.filter { it.extension == "jar" }
 			.filter { !it.name.startsWith("zume") }
 			.map { it.absolutePath })

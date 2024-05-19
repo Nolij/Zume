@@ -1,8 +1,8 @@
 package dev.nolij.zume.modern.integration;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
-import dev.nolij.zume.api.util.v0.MethodHandleHelper;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

@@ -1,4 +1,4 @@
-package dev.nolij.zume.api.platform.v0;
+package dev.nolij.zume.api.platform.v1;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
