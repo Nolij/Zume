@@ -171,11 +171,16 @@ allprojects {
 				excludeGroup("ca.weblite")
 			}
 		}
-		mavenLocal()
+		mavenLocal {
+			content {
+				includeGroup("dev.nolij")
+			}
+		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
-		maven("https://api.modrinth.com/maven") {
-			content {
+		exclusiveContent { 
+			forRepository { maven("https://api.modrinth.com/maven") }
+			filter { 
 				includeGroup("maven.modrinth")
 			}
 		}

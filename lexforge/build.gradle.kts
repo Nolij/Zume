@@ -43,8 +43,6 @@ repositories {
 
 dependencies {
 	compileOnly(project(":stubs"))
-
-	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
 	
 	// mixins fail to apply due to Unimined not liking Embeddium's empty mixin list; test in prod
 //	modRuntimeOnly("org.embeddedt:embeddium-1.20.1:${"embeddium_lexforge_version"()}")

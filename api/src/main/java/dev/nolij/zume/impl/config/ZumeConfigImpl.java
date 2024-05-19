@@ -110,7 +110,7 @@ public class ZumeConfigImpl {
 		int i = 0;
 		while (true) {
 			try {
-				return Zson.toObject(ZsonParser.parse(new FileReader(configFile)), ZumeConfigImpl.class);
+				return Zson.map2Obj(ZsonParser.parse(new FileReader(configFile)), ZumeConfigImpl.class);
             } catch (IllegalArgumentException e) {
 				if (++i < MAX_RETRIES) {
                     try {
@@ -142,7 +142,7 @@ public class ZumeConfigImpl {
 	private void writeToFile(final File configFile) {
 		this.configVersion = EXPECTED_VERSION;
 		try (final FileWriter configWriter = new FileWriter(configFile)) {
-			ZSON.write(Zson.fromObject(this), configWriter);
+			ZSON.write(Zson.obj2Map(this), configWriter);
 			configWriter.flush();
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to write config file", e);
