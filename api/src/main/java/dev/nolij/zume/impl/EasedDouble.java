@@ -1,6 +1,6 @@
 package dev.nolij.zume.impl;
 
-import dev.nolij.zume.api.util.v0.EasingHelper;
+import dev.nolij.zume.api.util.v1.EasingHelper;
 
 public class EasedDouble {
 	

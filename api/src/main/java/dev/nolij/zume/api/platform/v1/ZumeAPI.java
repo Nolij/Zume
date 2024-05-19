@@ -1,4 +1,4 @@
-package dev.nolij.zume.api.platform.v0;
+package dev.nolij.zume.api.platform.v1;
 
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.Zume;

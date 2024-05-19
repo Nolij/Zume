@@ -1,6 +1,6 @@
 package dev.nolij.zume;
 
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import dev.nolij.zume.modern.ModernZume;
 import dev.nolij.zume.primitive.PrimitiveZume;
 import dev.nolij.zume.legacy.LegacyZume;

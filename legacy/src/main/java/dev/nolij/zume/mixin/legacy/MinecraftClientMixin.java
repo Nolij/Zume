@@ -1,7 +1,7 @@
 package dev.nolij.zume.mixin.legacy;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.asm.mixin.Dynamic;

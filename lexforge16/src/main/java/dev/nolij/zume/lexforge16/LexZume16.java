@@ -1,11 +1,11 @@
 package dev.nolij.zume.lexforge16;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import dev.nolij.zume.api.platform.v0.CameraPerspective;
-import dev.nolij.zume.api.platform.v0.IZumeImplementation;
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.CameraPerspective;
+import dev.nolij.zume.api.platform.v1.IZumeImplementation;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
-import dev.nolij.zume.api.util.v0.MethodHandleHelper;
+import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraftforge.client.event.EntityViewRenderEvent;

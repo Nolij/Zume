@@ -1,8 +1,8 @@
 package dev.nolij.zume.impl;
 
-import dev.nolij.zume.api.util.v0.MathHelper;
+import dev.nolij.zume.api.util.v1.MathHelper;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
-import dev.nolij.zume.api.util.v0.EasingHelper;
+import dev.nolij.zume.api.util.v1.EasingHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

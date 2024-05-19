@@ -1,4 +1,4 @@
-package dev.nolij.zume.api.util.v0;
+package dev.nolij.zume.api.util.v1;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

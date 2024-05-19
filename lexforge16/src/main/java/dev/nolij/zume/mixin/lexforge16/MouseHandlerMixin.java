@@ -1,6 +1,6 @@
 package dev.nolij.zume.mixin.lexforge16;
 
-import dev.nolij.zume.api.platform.v0.ZumeAPI;
+import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.Options;
 import org.spongepowered.asm.mixin.Mixin;
