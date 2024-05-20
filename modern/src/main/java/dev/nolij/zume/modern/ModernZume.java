@@ -5,7 +5,7 @@ import dev.nolij.zume.api.platform.v1.IZumeImplementation;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
-import dev.nolij.zume.integration.embeddium.ZumeEmbeddiumConfigScreen;
+import dev.nolij.zume.integration.implementation.embeddium.ZumeEmbeddiumConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;

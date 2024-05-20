@@ -276,7 +276,7 @@ subprojects {
 			isPreserveFileTimestamps = false
 			isReproducibleFileOrder = true
 			
-			relocate("dev.nolij.zume.integration", "dev.nolij.zume.${implName}.integration")
+			relocate("dev.nolij.zume.integration.implementation", "dev.nolij.zume.${implName}.integration")
 		}
 
 		tasks.assemble {
@@ -345,14 +345,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
-	}
-	
-	if (releaseChannel.proguard) {
-		dependsOn(compressJar)
-		
-		from(compressJar.get().mappingsFile) {
-			rename { "mappings.txt" }
-		}
 	}
 	
 	listOf(
@@ -469,6 +461,9 @@ afterEvaluate {
 	publishMods {
 		file = compressJar.get().outputJar
 		additionalFiles.from(sourcesJar.get().archiveFile)
+		if (releaseChannel.proguard)
+			additionalFiles.from(compressJar.get().mappingsFile)
+		
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version

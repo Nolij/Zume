@@ -1,7 +1,7 @@
 -ignorewarnings
 -dontnote
 -optimizationpasses 10
--optimizations !class/merging/*,!method/marking/private,!*/specialization/*
+-optimizations !class/merging/*,!method/marking/private,!*/specialization/*,!method/removal/parameter
 -allowaccessmodification
 #noinspection ShrinkerInvalidFlags
 -optimizeaggressively
@@ -45,5 +45,5 @@
 
 # Fabric entrypoints
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.FabricZumeBootstrapper
--keep,allowoptimization,allowobfuscation class dev.nolij.zume.modern.integration.ZumeModMenuIntegration
+-keep,allowoptimization,allowobfuscation class dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }

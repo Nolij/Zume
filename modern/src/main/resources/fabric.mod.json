@@ -20,7 +20,7 @@
 			"dev.nolij.zume.modern.ModernZume"
 		],
 		"modmenu": [
-			"dev.nolij.zume.modern.integration.ZumeModMenuIntegration"
+			"dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration"
 		]
 	},
 	"mixins": [

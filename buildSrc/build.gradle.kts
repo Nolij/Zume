@@ -21,14 +21,23 @@ fun DependencyHandler.plugin(id: String, version: String) {
 }
 
 dependencies {
+	// https://central.sonatype.com/artifact/org.ow2.asm/asm-tree
 	implementation("org.ow2.asm:asm-tree:9.7")
 	implementation("net.fabricmc:mapping-io:0.3.0")
 
-	implementation("org.apache.ant:ant:1.10.13")
+	// https://central.sonatype.com/artifact/org.apache.ant/ant
+	implementation("org.apache.ant:ant:1.10.14")
+	
+	// https://central.sonatype.com/artifact/com.guardsquare/proguard-base
 	implementation("com.guardsquare:proguard-base:7.4.2")
+	// https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow
 	plugin(id = "com.github.johnrengelman.shadow", version = "8.1.1")
-	plugin(id = "xyz.wagyourtail.unimined", version = "1.2.4")
-	plugin(id = "com.github.gmazzo.buildconfig", version = "5.2.0")
+	// https://github.com/unimined/unimined/releases/latest
+	plugin(id = "xyz.wagyourtail.unimined", version = "1.2.6")
+	// https://plugins.gradle.org/plugin/com.github.gmazzo.buildconfig
+	plugin(id = "com.github.gmazzo.buildconfig", version = "5.3.5")
+	// https://github.com/ajoberstar/grgit/releases/latest
 	plugin(id = "org.ajoberstar.grgit", version = "5.2.2")
-	plugin(id = "me.modmuss50.mod-publish-plugin", version = "0.4.5")
+	// https://plugins.gradle.org/plugin/me.modmuss50.mod-publish-plugin
+	plugin(id = "me.modmuss50.mod-publish-plugin", version = "0.5.1")
 }
