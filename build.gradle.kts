@@ -265,7 +265,7 @@ subprojects {
 			isPreserveFileTimestamps = false
 			isReproducibleFileOrder = true
 			
-			relocate("dev.nolij.zume.integration", "dev.nolij.zume.${implName}.integration")
+			relocate("dev.nolij.zume.integration.implementation", "dev.nolij.zume.${implName}.integration")
 		}
 
 		tasks.assemble {
