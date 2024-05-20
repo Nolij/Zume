@@ -394,10 +394,11 @@ tasks.shadowJar {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 
-			filesMatching("**/*.class") {
-				if(this.name == "dev/nolij/zume/ForgeZumeBootstrapper.class") {
-					return@filesMatching
-				}
+			filesMatching(immutableListOf(
+				"dev/nolij/zume/lexforge/LexZume.class",
+				"dev/nolij/zume/lexforge18/LexZume18.class",
+				"dev/nolij/zume/lexforge16/LexZume16.class",
+				"dev/nolij/zume/vintage/VintageZume.class")) {
 				val reader = ClassReader(this.open())
 				val node = ClassNode()
 				reader.accept(node, 0)
