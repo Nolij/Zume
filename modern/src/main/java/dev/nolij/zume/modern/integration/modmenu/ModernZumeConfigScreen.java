@@ -1,4 +1,4 @@
-package dev.nolij.zume.modern.integration;
+package dev.nolij.zume.modern.integration.modmenu;
 
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import net.minecraft.client.Minecraft;

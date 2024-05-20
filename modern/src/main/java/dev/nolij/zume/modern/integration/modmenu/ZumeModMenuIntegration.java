@@ -1,4 +1,4 @@
-package dev.nolij.zume.modern.integration;
+package dev.nolij.zume.modern.integration.modmenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
