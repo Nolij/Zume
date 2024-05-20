@@ -171,11 +171,6 @@ allprojects {
 				excludeGroup("ca.weblite")
 			}
 		}
-		mavenLocal {
-			content {
-				includeGroup("dev.nolij")
-			}
-		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		exclusiveContent { 
@@ -289,7 +284,7 @@ subprojects {
 		}
 	}
 	
-	if(implName in lexForgeImpls) {
+	if(implName in arrayOf(*lexForgeImpls, *neoForgeImpls)) {
 		tasks.withType<RemapJarTask> {
 			mixinRemap {
 				disableRefmap()
@@ -382,7 +377,7 @@ tasks.shadowJar {
 	}
 	
 	exclude("*.xcf")
-	exclude("LICENSE_ZSON")
+	exclude("LICENSE_zson")
 	
 	configurations = immutableListOf(shade)
 	archiveClassifier = null
