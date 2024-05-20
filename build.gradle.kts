@@ -235,7 +235,7 @@ subprojects {
 	}
 	
 	dependencies {
-		implementation("dev.nolij:zson:${"zson_version"()}")
+		implementation("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 	}
 
 	if (implName in uniminedImpls) {
@@ -284,7 +284,7 @@ subprojects {
 		}
 	}
 	
-	if(implName in arrayOf(*lexForgeImpls, *neoForgeImpls)) {
+	if(implName in lexForgeImpls) {
 		tasks.withType<RemapJarTask> {
 			mixinRemap {
 				disableRefmap()
@@ -292,7 +292,7 @@ subprojects {
 		}
 		
 		dependencies {
-			"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}")
+			"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 		}
 	}
 }
@@ -319,7 +319,7 @@ val shade: Configuration by configurations.creating {
 }
 
 dependencies {
-	shade("dev.nolij:zson:${"zson_version"()}")
+	shade("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
