@@ -324,14 +324,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 		rename { "${it}_${"mod_id"()}" }
 	}
 	
-	if (releaseChannel.proguard) {
-		dependsOn(compressJar)
-		
-		from(compressJar.get().mappingsFile) {
-			rename { "mappings.txt" }
-		}
-	}
-	
 	listOf(
 		sourceSets, 
 		project(":api").sourceSets, 
@@ -445,6 +437,9 @@ afterEvaluate {
 	publishMods {
 		file = compressJar.get().outputJar
 		additionalFiles.from(sourcesJar.get().archiveFile)
+		if (releaseChannel.proguard)
+			additionalFiles.from(compressJar.get().mappingsFile)
+		
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version
