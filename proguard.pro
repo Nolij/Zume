@@ -45,5 +45,5 @@
 
 # Fabric entrypoints
 -keep,allowoptimization class dev.nolij.zume.FabricZumeBootstrapper
--keep,allowoptimization class dev.nolij.zume.modern.integration.ZumeModMenuIntegration
+-keep,allowoptimization class dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration
 -keep,allowoptimization class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }
