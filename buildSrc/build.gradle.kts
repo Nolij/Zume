@@ -26,7 +26,7 @@ dependencies {
 	implementation("org.apache.ant:ant:1.10.13")
 	implementation("com.guardsquare:proguard-base:7.4.2")
 	plugin(id = "com.github.johnrengelman.shadow", version = "8.1.1")
-	plugin(id = "xyz.wagyourtail.unimined", version = "1.2.4")
+	plugin(id = "xyz.wagyourtail.unimined", version = "1.2.6")
 	plugin(id = "com.github.gmazzo.buildconfig", version = "5.2.0")
 	plugin(id = "org.ajoberstar.grgit", version = "5.2.2")
 	plugin(id = "me.modmuss50.mod-publish-plugin", version = "0.4.5")
