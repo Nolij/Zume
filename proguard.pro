@@ -11,7 +11,7 @@
 
 -keep,allowoptimization public class dev.nolij.zume.api.** { public *; } # public APIs
 -keepclassmembers class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; } # dont rename config fields
--keep,allowoptimization class dev.nolij.zume.ZumeMixinPlugin # dont rename mixin plugin
+-keep,allowoptimization,allowobfuscation class dev.nolij.zume.ZumeMixinPlugin
 -keep @org.spongepowered.asm.mixin.Mixin class dev.nolij.zume.** { *; } # dont touch mixins
 
 # Forge entrypoints

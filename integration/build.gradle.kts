@@ -1,0 +1,1 @@
+tasks.jar { enabled = false }

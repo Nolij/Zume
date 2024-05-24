@@ -16,6 +16,7 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.MethodNode
 import proguard.Configuration
 import proguard.ConfigurationParser
 import proguard.ProGuard
@@ -73,6 +74,10 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 				bytes = remapFMJ(bytes, mappingsFile)
 			}
 			
+			if(name.endsWith("mixins.json") && mappingsFile.exists()) {
+				bytes = remapMixinConfig(bytes, mappingsFile)
+			}
+			
 			if (jsonProcessing != JsonShrinkingType.NONE && 
 				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
 				bytes = when (jsonProcessing) {
@@ -96,34 +101,19 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 
 @Suppress("UNCHECKED_CAST")
 private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
-	val mappingTree = MemoryMappingTree()
-	MappingReader.read(mappingsFile.toPath(), MappingFormat.PROGUARD, mappingTree)
-	
-	val dstNamespaceIndex = mappingTree.getNamespaceId(mappingTree.dstNamespaces[0])
+	val mappings = mappings(mappingsFile)
 	
 	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
 	var entrypoints = (json["entrypoints"] as Map<String, List<String>>?)?.toMutableMap()
 	if (entrypoints == null) {
 		throw IllegalStateException("fabric.mod.json does not contain entrypoints")
 	}
-	
-	val mappings = mutableMapOf<String, String>()
-
-	@Suppress("INACCESSIBLE_TYPE")
-	for (clazz: ClassMapping in mappingTree.classes) {
-		val dst = clazz.getDstName(dstNamespaceIndex).replace('/', '.')
-		val src = clazz.srcName.replace('/', '.')
-		mappings[src] = dst
-	}
 
 	val newEntrypoints = mutableMapOf<String, MutableList<String>>()
 	for ((type, classes) in entrypoints) {
 		for (old in classes) {
-			for ((src, dst) in mappings) {
-				if(src == old) {
-					newEntrypoints.computeIfAbsent(type) { mutableListOf() }.add(dst)
-				}
-			}
+			val obf = mappings.obfuscate(old)
+			newEntrypoints.computeIfAbsent(type) { mutableListOf() }.add(obf)
 		}
 	}
 	
@@ -132,8 +122,19 @@ private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
 	return JsonOutput.toJson(json).toByteArray()
 }
 
+@Suppress("UNCHECKED_CAST")
+private fun remapMixinConfig(bytes: ByteArray, mappingsFile: File): ByteArray {
+	val mappings = mappings(mappingsFile)
+	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
+	val old = json["plugin"] as String
+	val obf = mappings.obfuscate(old)
+	println("Remapping mixin config $old to $obf")
+	json["plugin"] = obf
+	
+	return JsonOutput.toJson(json).toByteArray()
+}
+
 private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType): ByteArray {
-	if(!classFileSettings.shouldRun()) return bytes
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
 
@@ -146,21 +147,24 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 	if (classFileSettings.shouldStripSourceFiles()) {
 		classNode.sourceFile = null
 	}
+	
+	if(classNode.invisibleAnnotations?.map { it.desc }?.contains("Lorg/spongepowered/asm/mixin/Mixin;")	== true) {
+		classNode.methods.removeAll { it.name == "<init>" }
+	}
 
 	val writer = ClassWriter(0)
 	classNode.accept(writer)
 	return writer.toByteArray()
 }
 
-val advzipInstalled = isAdvzipInstalled()
-
-private fun isAdvzipInstalled(): Boolean {
-	return try {
+val advzipInstalled = {
+	try {
 		ProcessBuilder("advzip", "-V").start().waitFor() == 0
 	} catch (e: Exception) {
 		false
 	}
-}
+}()
+
 
 fun deflate(zip: File, type: JarShrinkingType) {
 	if (type == JarShrinkingType.NONE) return
@@ -185,7 +189,7 @@ val JAVA_HOME = System.getProperty("java.home")
 @Suppress("UnstableApiUsage")
 fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir: File) {
 	val inputJar = jar.copyTo(
-		jar.parentFile.resolve("${jar.nameWithoutExtension}_.jar"), true).also { 
+		jar.parentFile.resolve(".${jar.nameWithoutExtension}_proguardRunning.jar"), true).also { 
 			it.deleteOnExit()
 	}
 	
@@ -209,16 +213,16 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 		
 		libraries.add(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile().absolutePath)
 		
-		libraries.addAll(minecraftConfig.mods.getClasspathAs(prodNamespace, prodNamespace,
-			listOf(
-				minecraftConfig.sourceSet.compileClasspath.files,
-				minecraftConfig.sourceSet.runtimeClasspath.files)
-				.flatten()
-				.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
-				.toHashSet())
-			.filter { it.extension == "jar" }
-			.filter { !it.name.startsWith("zume") }
-			.map { it.absolutePath })
+		val minecrafts = listOf(
+			minecraftConfig.sourceSet.compileClasspath.files, 
+			minecraftConfig.sourceSet.runtimeClasspath.files)
+			.flatten()
+			.filter { it: File -> !minecraftConfig.isMinecraftJar(it.toPath()) }
+			.toHashSet()
+
+		libraries += minecraftConfig.mods.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
+			.filter { it.extension == "jar" && !it.name.startsWith("zume") }
+			.map { it.absolutePath }
 	}
 	
 	proguardCommand.add("-libraryjars")
@@ -292,4 +296,26 @@ open class CompressJarTask : DefaultTask() {
 		squishJar(inputJar, classShrinkingType, jsonShrinkingType, mappingsFile)
 		deflate(outputJar, jarShrinkingType)
 	}
+}
+
+fun mappings(file: File, format: MappingFormat = MappingFormat.PROGUARD): MemoryMappingTree {
+	if (!file.exists()) {
+		error("Mappings file $file does not exist")
+	}
+
+	val mappingTree = MemoryMappingTree()
+	MappingReader.read(file.toPath(), format, mappingTree)
+	return mappingTree
+}
+
+@Suppress("INACCESSIBLE_TYPE", "NAME_SHADOWING")
+fun MemoryMappingTree.obfuscate(src: String): String {
+	val src = src.replace('.', '/')
+	val dstNamespaceIndex = getNamespaceId(dstNamespaces[0])
+	val classMapping = getClass(src) as ClassMapping?
+	if (classMapping == null) {
+		println("Class $src not found in mappings")
+		return src
+	}
+	return classMapping.getDstName(dstNamespaceIndex).replace('/', '.')
 }
