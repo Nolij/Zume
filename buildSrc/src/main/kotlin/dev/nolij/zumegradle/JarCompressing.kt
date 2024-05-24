@@ -224,7 +224,7 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	}
 	
 	proguardCommand.add("-libraryjars")
-	proguardCommand.add(libraries.joinToString(":") { "\"$it\"" })
+	proguardCommand.add(libraries.joinToString(File.separator) { "\"$it\"" })
 
 	val configuration = Configuration()
 	ConfigurationParser(proguardCommand.toTypedArray(), System.getProperties()).use { parser ->
