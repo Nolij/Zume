@@ -66,16 +66,18 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 	jar.delete()
 	
 	val json = JsonSlurper()
+	
+	val mappings = if (mappingsFile.exists()) mappings(mappingsFile) else null
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
 			if(name == "fabric.mod.json" && mappingsFile.exists()) {
-				bytes = remapFMJ(bytes, mappingsFile)
+				bytes = remapFMJ(bytes, mappings!!)
 			}
 			
 			if(name.endsWith("mixins.json") && mappingsFile.exists()) {
-				bytes = remapMixinConfig(bytes, mappingsFile)
+				bytes = remapMixinConfig(bytes, mappings!!)
 			}
 			
 			if (jsonProcessing != JsonShrinkingType.NONE && 
@@ -100,9 +102,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
-	val mappings = mappings(mappingsFile)
-	
+private fun remapFMJ(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
 	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
 	var entrypoints = (json["entrypoints"] as Map<String, List<String>>?)?.toMutableMap()
 	if (entrypoints == null) {
@@ -123,12 +123,10 @@ private fun remapFMJ(bytes: ByteArray, mappingsFile: File): ByteArray {
 }
 
 @Suppress("UNCHECKED_CAST")
-private fun remapMixinConfig(bytes: ByteArray, mappingsFile: File): ByteArray {
-	val mappings = mappings(mappingsFile)
+private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
 	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
 	val old = json["plugin"] as String
 	val obf = mappings.obfuscate(old)
-	println("Remapping mixin config $old to $obf")
 	json["plugin"] = obf
 	
 	json["package"] = "zume.mixin"
@@ -151,7 +149,7 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 	}
 	
 	if(classNode.invisibleAnnotations?.map { it.desc }?.contains("Lorg/spongepowered/asm/mixin/Mixin;")	== true) {
-		classNode.methods.removeAll { it.name == "<init>" }
+		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN
 	}
 
 	val writer = ClassWriter(0)
@@ -159,13 +157,11 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 	return writer.toByteArray()
 }
 
-val advzipInstalled = {
-	try {
-		ProcessBuilder("advzip", "-V").start().waitFor() == 0
-	} catch (e: Exception) {
-		false
-	}
-}()
+val advzipInstalled = try {
+	ProcessBuilder("advzip", "-V").start().waitFor() == 0
+} catch (e: Exception) {		
+	false
+}
 
 
 fun deflate(zip: File, type: JarShrinkingType) {
@@ -314,7 +310,7 @@ fun mappings(file: File, format: MappingFormat = MappingFormat.PROGUARD): Memory
 fun MemoryMappingTree.obfuscate(src: String): String {
 	val src = src.replace('.', '/')
 	val dstNamespaceIndex = getNamespaceId(dstNamespaces[0])
-	val classMapping = getClass(src) as ClassMapping?
+	val classMapping: ClassMapping? = getClass(src)
 	if (classMapping == null) {
 		println("Class $src not found in mappings")
 		return src
