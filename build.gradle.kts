@@ -405,6 +405,9 @@ tasks.shadowJar {
 	}
 	
 	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
+	if(releaseChannel.proguard) {
+		relocate("dev.nolij.zume.mixin", "zume.mixin")
+	}
 	
 	manifest {
 		attributes(

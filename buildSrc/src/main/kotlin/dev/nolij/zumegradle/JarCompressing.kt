@@ -131,6 +131,8 @@ private fun remapMixinConfig(bytes: ByteArray, mappingsFile: File): ByteArray {
 	println("Remapping mixin config $old to $obf")
 	json["plugin"] = obf
 	
+	json["package"] = "zume.mixin"
+	
 	return JsonOutput.toJson(json).toByteArray()
 }
 
