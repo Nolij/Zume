@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.nolij.zumegradle.ClassShrinkingType
-import dev.nolij.zumegradle.JarShrinkingType
+import dev.nolij.zumegradle.DeflateAlgorithm
 import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
 import dev.nolij.zumegradle.CompressJarTask
@@ -37,12 +37,12 @@ plugins {
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 enum class ReleaseChannel(
-	val suffix: String? = null,
-	val releaseType: ReleaseType? = null,
-	val deflation: JarShrinkingType = JarShrinkingType.SEVENZIP,
-	val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
-	val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
-	val proguard: Boolean = true,
+    val suffix: String? = null,
+    val releaseType: ReleaseType? = null,
+    val deflation: DeflateAlgorithm = DeflateAlgorithm.SEVENZIP,
+    val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
+    val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
+    val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
@@ -426,7 +426,7 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	val shadowJar = tasks.shadowJar.get()
 	inputJar = shadowJar.archiveFile.get().asFile
 	
-	jarShrinkingType = releaseChannel.deflation
+	deflateAlgorithm = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
 	if (releaseChannel.proguard) {

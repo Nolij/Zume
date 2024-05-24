@@ -16,7 +16,6 @@ import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.MethodNode
 import proguard.Configuration
 import proguard.ConfigurationParser
 import proguard.ProGuard
@@ -27,7 +26,7 @@ import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.Deflater
 
-enum class JarShrinkingType(val id: Int?) {
+enum class DeflateAlgorithm(val id: Int?) {
 	NONE(null),
 	LIBDEFLATE(2),
 	SEVENZIP(3),
@@ -163,9 +162,8 @@ val advzipInstalled = try {
 	false
 }
 
-
-fun deflate(zip: File, type: JarShrinkingType) {
-	if (type == JarShrinkingType.NONE) return
+fun deflate(zip: File, type: DeflateAlgorithm) {
+	if (type == DeflateAlgorithm.NONE) return
 	if (!advzipInstalled) {
 		println("advzip is not installed; skipping re-deflation of $zip")
 		return
@@ -249,7 +247,7 @@ open class CompressJarTask : DefaultTask() {
 		get() = if (useProguard) ClassShrinkingType.STRIP_NONE else field
 
 	@Input
-	var jarShrinkingType = JarShrinkingType.LIBDEFLATE
+	var deflateAlgorithm = DeflateAlgorithm.LIBDEFLATE
 	
 	@Input
 	var jsonShrinkingType = JsonShrinkingType.NONE
@@ -270,11 +268,11 @@ open class CompressJarTask : DefaultTask() {
 		classShrinkingType = ClassShrinkingType.valueOf(value.uppercase())
 	}
 	
-	@Option(option = "compression-type", description = "How to compress the jar")
-	fun setJarShrinkingType(value: String) {
-		jarShrinkingType = value.uppercase().let {
-			if(it.matches(Regex("7Z(?:IP)?"))) JarShrinkingType.SEVENZIP
-			else JarShrinkingType.valueOf(it)
+	@Option(option = "compression-type", description = "How to recompress the jar")
+	fun setDeflateAlgorithm(value: String) {
+		deflateAlgorithm = value.uppercase().let {
+			if(it.matches(Regex("7Z(?:IP)?"))) DeflateAlgorithm.SEVENZIP
+			else DeflateAlgorithm.valueOf(it)
 		}
 	}
 	
@@ -292,7 +290,7 @@ open class CompressJarTask : DefaultTask() {
 		if (useProguard)
 			applyProguard(inputJar, minecraftConfigs, project.rootDir)
 		squishJar(inputJar, classShrinkingType, jsonShrinkingType, mappingsFile)
-		deflate(outputJar, jarShrinkingType)
+		deflate(outputJar, deflateAlgorithm)
 	}
 }
 
