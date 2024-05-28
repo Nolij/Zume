@@ -7,9 +7,9 @@ import dev.nolij.zson.Comment;
 import dev.nolij.zume.impl.Zume;
 
 import java.io.*;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 public class ZumeConfigImpl {
@@ -177,9 +177,9 @@ public class ZumeConfigImpl {
 	
 	static {
 		final Path dotMinecraft = switch (Zume.HOST_PLATFORM) {
-			case LINUX, UNKNOWN -> FileSystems.getDefault().getPath(System.getProperty("user.home"), ".minecraft");
-			case WINDOWS -> FileSystems.getDefault().getPath(System.getenv("APPDATA"), ".minecraft");
-			case MAC_OS -> FileSystems.getDefault().getPath(System.getProperty("user.home"), "Library", "Application Support", "minecraft");
+			case LINUX, UNKNOWN -> Paths.get(System.getProperty("user.home"), ".minecraft");
+			case WINDOWS -> Paths.get(System.getenv("APPDATA"), ".minecraft");
+			case MAC_OS -> Paths.get(System.getProperty("user.home"), "Library", "Application Support", "minecraft");
 		};
 		
 		GLOBAL_CONFIG_PATH = dotMinecraft.resolve("global");
