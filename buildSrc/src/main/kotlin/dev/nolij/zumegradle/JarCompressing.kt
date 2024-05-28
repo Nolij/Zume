@@ -9,6 +9,7 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
@@ -262,6 +263,7 @@ open class CompressJarTask : DefaultTask() {
 	val outputJar get() = inputJar // compressed jar will replace the input jar
 	
 	@get:OutputFile
+	@get:Optional
 	val mappingsFile
 		get() = if(useProguard)
 			inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
