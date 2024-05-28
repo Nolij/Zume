@@ -52,7 +52,7 @@ enum class JsonShrinkingType {
 	NONE, MINIFY, PRETTY_PRINT
 }
 
-fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType, mappingsFile: File) {
+fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType, mappingsFile: File?) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -66,16 +66,17 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 	
 	val json = JsonSlurper()
 	
-	val mappings = if (mappingsFile.exists()) mappings(mappingsFile) else null
+	val isObfuscating = mappingsFile?.exists() == true
+	val mappings = if (isObfuscating) mappings(mappingsFile!!) else null
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
 		contents.forEach { var (name, bytes) = it
-			if(name == "fabric.mod.json" && mappingsFile.exists()) {
+			if(name == "fabric.mod.json" && isObfuscating) {
 				bytes = remapFMJ(bytes, mappings!!)
 			}
 			
-			if(name.endsWith("mixins.json") && mappingsFile.exists()) {
+			if(name.endsWith("mixins.json") && isObfuscating) {
 				bytes = remapMixinConfig(bytes, mappings!!)
 			}
 			
@@ -261,7 +262,10 @@ open class CompressJarTask : DefaultTask() {
 	val outputJar get() = inputJar // compressed jar will replace the input jar
 	
 	@get:OutputFile
-	val mappingsFile get() = inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
+	val mappingsFile
+		get() = if(useProguard)
+			inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
+		else null
 	
 	@Option(option = "class-file-compression", description = "How to process class files")
 	fun setClassShrinkingType(value: String) {
