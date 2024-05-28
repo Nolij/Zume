@@ -22,8 +22,9 @@ fun DependencyHandler.plugin(id: String, version: String) {
 	this.implementation(group = id, name = "$id.gradle.plugin", version = version)
 }
 
-val properties = Properties()
-properties.load(file("build.gradle.kts").parentFile.parentFile.resolve("gradle.properties").inputStream())
+val properties = Properties().apply {
+	load(rootDir.parentFile.resolve("gradle.properties").inputStream())
+}
 
 operator fun String.invoke(): String = properties.getProperty(this) ?: error("Property $this not found")
 

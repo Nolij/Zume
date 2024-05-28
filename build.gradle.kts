@@ -26,7 +26,6 @@ import java.nio.file.Files
 import java.time.ZonedDateTime
 
 plugins {
-	idea
     id("java")
 	id("maven-publish")
 	id("com.github.johnrengelman.shadow")
