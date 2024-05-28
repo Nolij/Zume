@@ -23,4 +23,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: zume
-          path: "**/zume-*.jar"
+          path: |
+            **/zume-*.jar
+            **/*mappings.txt
