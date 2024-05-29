@@ -8,6 +8,7 @@
 -overloadaggressively
 -repackageclasses zume
 -keepattributes Runtime*Annotations # keep annotations
+-keepattributes SourceFile,LineNumberTable
 
 -keep,allowoptimization public class dev.nolij.zume.api.** { public *; } # public APIs
 -keepclassmembers class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; } # dont rename config fields
@@ -22,7 +23,7 @@
 }
 
 # Platform implementations
--keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v0.IZumeImplementation {
+-keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v?.IZumeImplementation {
 	# Forge Event Subscribers
 	@*.*.fml.common.Mod$EventHandler <methods>;
 	@*.*.fml.common.eventhandler.SubscribeEvent <methods>;
