@@ -22,6 +22,7 @@ import proguard.ConfigurationParser
 import proguard.ProGuard
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import java.io.File
+import java.util.Properties
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
@@ -221,6 +222,19 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 		libraries += minecraftConfig.mods.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
 			.filter { it.extension == "jar" && !it.name.startsWith("zume") }
 			.map { it.absolutePath }
+	}
+	
+	val debug = Properties().apply { 
+		val gradleproperties = configDir.resolve("gradle.properties")
+		if(gradleproperties.exists()) {
+			load(gradleproperties.inputStream())
+		}
+	}.getProperty("zumegradle.proguard.keepAttrs").toBoolean()
+	
+	if(debug) {
+		proguardCommand.add("-keepattributes")
+		proguardCommand.add("*Annotation*,SourceFile,MethodParameters,L*Table")
+		proguardCommand.add("-dontobfuscate")
 	}
 	
 	proguardCommand.add("-libraryjars")

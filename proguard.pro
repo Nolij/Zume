@@ -8,7 +8,6 @@
 -overloadaggressively
 -repackageclasses zume
 -keepattributes Runtime*Annotations # keep annotations
--keepattributes SourceFile,LineNumberTable
 
 -keep,allowoptimization public class dev.nolij.zume.api.** { public *; } # public APIs
 -keepclassmembers class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; } # dont rename config fields
