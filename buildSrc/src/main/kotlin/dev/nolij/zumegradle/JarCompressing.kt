@@ -93,7 +93,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 			}
 
 			if (name.endsWith(".class")) {
-				bytes = processClassFile(bytes, classProcessing)
+				bytes = processClassFile(bytes, classProcessing, mappings!!)
 			}
 
 			out.putNextEntry(JarEntry(name))
@@ -137,7 +137,7 @@ private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	return JsonOutput.toJson(json).toByteArray()
 }
 
-private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType): ByteArray {
+private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType, mappings: MemoryMappingTree): ByteArray {
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
 
@@ -149,6 +149,18 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 	}
 	if (classFileSettings.shouldStripSourceFiles()) {
 		classNode.sourceFile = null
+	}
+	
+	for(annotation in classNode.visibleAnnotations ?: emptyList()) {
+		if(annotation.desc.endsWith("fml/common/Mod;")) {
+			for (i in 0 until annotation.values.size step 2) {
+				if (annotation.values[i] == "guiFactory") {
+					var old = annotation.values[i + 1] as String
+					annotation.values[i + 1] = mappings.obfuscate(old)
+					println("Remapped guiFactory: $old -> ${annotation.values[i + 1]}")
+				}
+			}
+		}
 	}
 
 	if (classNode.invisibleAnnotations?.map { it.desc }?.contains("Lorg/spongepowered/asm/mixin/Mixin;") == true) {
