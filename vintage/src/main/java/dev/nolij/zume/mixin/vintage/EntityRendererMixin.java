@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin {
 	
-	@ModifyExpressionValue(method = { "updateCameraAndRender", "updateRenderer" },
+	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, 
 		at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;smoothCamera:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
 		return ZumeAPI.cinematicCameraEnabledHook(original);
 	}
 	
-	@ModifyExpressionValue(method = { "updateCameraAndRender", "updateRenderer" },
+	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"},
 		at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;mouseSensitivity:F"))
 	public float zume$updateMouse$mouseSensitivity(float original) {
 		return (float) ZumeAPI.mouseSensitivityHook(original);
@@ -24,7 +24,7 @@ public abstract class EntityRendererMixin {
 	
 	@ModifyVariable(method = "orientCamera", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
 	public double zume$orientCamera$thirdPersonDistance(double original) {
-		return ZumeAPI.thirdPersonCameraHook(original);
+        return ZumeAPI.thirdPersonCameraHook(original);
 	}
-	
+
 }

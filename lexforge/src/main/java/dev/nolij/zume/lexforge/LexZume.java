@@ -1,9 +1,9 @@
 package dev.nolij.zume.lexforge;
 
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.platform.v1.CameraPerspective;
 import dev.nolij.zume.api.platform.v1.IZumeImplementation;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import dev.nolij.zume.integration.implementation.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
@@ -94,13 +94,13 @@ public class LexZume implements IZumeImplementation {
 	);
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
-		final int scrollAmount;
-		try {
-			scrollAmount = (int) (double) GET_SCROLL_DELTA.invokeExact(event);
-		} catch (Throwable e) {
-			throw new AssertionError(e);
-		}
-		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
+        final int scrollAmount;
+        try {
+	        scrollAmount = (int) (double) GET_SCROLL_DELTA.invokeExact(event);
+        } catch (Throwable e) {
+            throw new AssertionError(e);
+        }
+        if (ZumeAPI.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

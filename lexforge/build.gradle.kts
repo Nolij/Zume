@@ -8,7 +8,7 @@ val modRuntimeOnly: Configuration by configurations.creating {
 
 unimined.minecraft {
 	combineWith(project(":integration:embeddium").sourceSets.main.get())
-
+	
 	version("lexforge_minecraft_version"())
 
 	minecraftForge {
@@ -28,14 +28,12 @@ unimined.minecraft {
 			}
 		}
 	}
-
+	
 	runs.config("client") {
-		jvmArgs.addAll(
-			listOf(
-				"-Dmixin.env.remapRefMap=true",
-				"-Dmixin.env.refMapRemappingFile=${(mcPatcher as ForgeLikeMinecraftTransformer).srgToMCPAsSRG}"
-			)
-		)
+		jvmArgs.addAll(listOf(
+			"-Dmixin.env.remapRefMap=true",
+			"-Dmixin.env.refMapRemappingFile=${(mcPatcher as ForgeLikeMinecraftTransformer).srgToMCPAsSRG}"
+		))
 	}
 }
 
@@ -45,7 +43,7 @@ repositories {
 
 dependencies {
 	compileOnly(project(":stubs"))
-
+	
 	// mixins fail to apply due to Unimined not liking Embeddium's empty mixin list; test in prod
 //	modRuntimeOnly("org.embeddedt:embeddium-1.20.1:${"embeddium_lexforge_version"()}")
 }

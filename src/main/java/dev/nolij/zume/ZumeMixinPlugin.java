@@ -39,8 +39,7 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 					"getVersion",
 					MethodType.methodType(String.class)
 				).invokeExact();
-			} catch (Throwable ignored) {
-			}
+			} catch (Throwable ignored) { }
 			
 			if (forgeVersion != null) {
 				final int major = Integer.parseInt(forgeVersion.substring(0, forgeVersion.indexOf('.')));
@@ -64,8 +63,7 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 	}
 	
 	@Override
-	public void onLoad(String mixinPackage) {
-	}
+	public void onLoad(String mixinPackage) {}
 	
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
@@ -81,8 +79,7 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 	}
 	
 	@Override
-	public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-	}
+	public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
 	
 	@Override
 	public List<String> getMixins() {
@@ -90,11 +87,9 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 	}
 	
 	@Override
-	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-	}
+	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 	
 	@Override
-	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-	}
+	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 	
 }

@@ -1,9 +1,9 @@
 package dev.nolij.zume.neoforge;
 
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.platform.v1.CameraPerspective;
 import dev.nolij.zume.api.platform.v1.IZumeImplementation;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import dev.nolij.zume.integration.implementation.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
@@ -16,7 +16,11 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
+import net.neoforged.neoforge.client.event.CalculatePlayerTurnEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +54,6 @@ public class NeoZume implements IZumeImplementation {
 	private static final Class<?> TICK_EVENT_PHASE = METHOD_HANDLE_HELPER.getClassOrNull(
 		"net.neoforged.neoforge.event.TickEvent$Phase");
 	private static final Enum<?> TICK_EVENT_PHASE_START;
-	
 	static {
 		if (TICK_EVENT_PHASE == null) {
 			TICK_EVENT_PHASE_START = null;
@@ -62,7 +65,6 @@ public class NeoZume implements IZumeImplementation {
 			}
 		}
 	}
-	
 	private static final MethodHandle RENDER_TICK_EVENT_PHASE_GETTER = METHOD_HANDLE_HELPER.getGetterOrNull(
 		RENDER_TICK_EVENT, "phase", TICK_EVENT_PHASE, MethodType.methodType(Enum.class, Object.class));
 	private static final Class<?> RENDER_FRAME_EVENT = METHOD_HANDLE_HELPER.getClassOrNull(
@@ -86,13 +88,13 @@ public class NeoZume implements IZumeImplementation {
 								.newInstance();
 						} else //noinspection ConstantValue,UnreachableCode
 							if (CONFIG_SCREEN_EXT_RECORD != null) {
-								return CONFIG_SCREEN_EXT_RECORD
-									.getDeclaredConstructor(BiFunction.class)
-									.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
-										new NeoZumeConfigScreen(parent));
-							} else {
-								return null;
-							}
+							return CONFIG_SCREEN_EXT_RECORD
+								.getDeclaredConstructor(BiFunction.class)
+								.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
+									new NeoZumeConfigScreen(parent));
+						} else {
+							return null;
+						}
 					} catch (InstantiationException | IllegalAccessException |
 					         InvocationTargetException | NoSuchMethodException e) {
 						throw new RuntimeException(e);
@@ -112,9 +114,9 @@ public class NeoZume implements IZumeImplementation {
 			//noinspection unchecked
 			NeoForge.EVENT_BUS.addListener((Class<? extends Event>) RENDER_FRAME_EVENT, this::render);
 		} else if (
-			RENDER_TICK_EVENT != null &&
-				RENDER_TICK_EVENT_PHASE_GETTER != null &&
-				TICK_EVENT_PHASE_START != null) {
+			RENDER_TICK_EVENT != null && 
+			RENDER_TICK_EVENT_PHASE_GETTER != null && 
+			TICK_EVENT_PHASE_START != null) {
 			//noinspection unchecked
 			NeoForge.EVENT_BUS.addListener((Class<? extends Event>) RENDER_TICK_EVENT, this::renderLegacy);
 		} else {
@@ -190,7 +192,7 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-		event.setDistance(ZumeAPI.thirdPersonCameraHook(event.getDistance()));
+        event.setDistance(ZumeAPI.thirdPersonCameraHook(event.getDistance()));
 	}
 	
 }

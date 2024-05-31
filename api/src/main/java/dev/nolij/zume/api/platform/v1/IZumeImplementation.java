@@ -8,21 +8,12 @@ import org.jetbrains.annotations.NotNull;
 @ApiStatus.OverrideOnly
 public interface IZumeImplementation {
 	
-	@Contract(pure = true)
-	boolean isZoomPressed();
+	@Contract(pure = true) boolean isZoomPressed();
+	@Contract(pure = true) boolean isZoomInPressed();
+	@Contract(pure = true) boolean isZoomOutPressed();
 	
-	@Contract(pure = true)
-	boolean isZoomInPressed();
+	@Contract(pure = true) @NotNull CameraPerspective getCameraPerspective();
 	
-	@Contract(pure = true)
-	boolean isZoomOutPressed();
-	
-	@Contract(pure = true)
-	@NotNull
-	CameraPerspective getCameraPerspective();
-	
-	@NonBlocking
-	default void onZoomActivate() {
-	}
+	@NonBlocking default void onZoomActivate() {}
 	
 }

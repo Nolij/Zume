@@ -27,7 +27,7 @@ public final class ZumeAPI {
 	/**
 	 * Invoke this in the initializer of your Zume implementation.
 	 *
-	 * @param implementation     The {@linkplain IZumeImplementation} Zume should use.
+	 * @param implementation The {@linkplain IZumeImplementation} Zume should use. 
 	 * @param instanceConfigPath The {@linkplain Path} Zume should use for storing the instance-specific config.
 	 */
 	public static void registerImplementation(@NotNull final IZumeImplementation implementation,
@@ -61,7 +61,6 @@ public final class ZumeAPI {
 	}
 	
 	//region Query Methods
-	
 	/**
 	 * Returns `true` if Zoom is activated.
 	 */
@@ -88,9 +87,8 @@ public final class ZumeAPI {
 	//endregion
 	
 	//region Hooks
-	
 	/**
-	 * This should be invoked once at the beginning of every frame.
+	 * This should be invoked once at the beginning of every frame. 
 	 * It will handle Keybindings and Zoom Scrolling if the other hooks in this API are used correctly.
 	 */
 	public static void renderHook() {
@@ -98,19 +96,19 @@ public final class ZumeAPI {
 	}
 	
 	/**
-	 * ONLY INVOKE THIS METHOD WHEN {@linkplain ZumeAPI#isFOVHookActive()} RETURNS `true`.
+	 * ONLY INVOKE THIS METHOD WHEN {@linkplain ZumeAPI#isFOVHookActive()} RETURNS `true`. 
 	 * That check was explicitly excluded from this method for efficiency and for mixin compatibility.
 	 * The {@linkplain IZumeImplementation} is responsible for this check.
 	 *
 	 * @param fov The unmodified FOV value
-	 *            {@return The new FOV transformed by Zume}
+	 * {@return The new FOV transformed by Zume}
 	 */
 	public static double fovHook(double fov) {
 		return Zume.transformFOV(fov);
 	}
 	
 	/**
-	 * This method assumes Zume is active and the camera perspective is third-person.
+	 * This method assumes Zume is active and the camera perspective is third-person. 
 	 * If it is not, using this value will cause bugs.
 	 *
 	 * @param distance The vanilla third-person camera distance
@@ -124,7 +122,7 @@ public final class ZumeAPI {
 	 * The return value of this method can be safely used without checking whether Zume is active.
 	 *
 	 * @param mouseSensitivity The unmodified mouse sensitivity
-	 *                         {@return The new mouse sensitivity, transformed by Zume}
+	 * {@return The new mouse sensitivity, transformed by Zume}
 	 */
 	public static double mouseSensitivityHook(double mouseSensitivity) {
 		return Zume.transformMouseSensitivity(mouseSensitivity);
@@ -134,7 +132,7 @@ public final class ZumeAPI {
 	 * The return value of this method can be safely used without checking whether Zume is active.
 	 *
 	 * @param cinematicCameraEnabled The unmodified cinematic camera state
-	 *                               {@return The new cinematic camera state, transformed by Zume}
+	 * {@return The new cinematic camera state, transformed by Zume}
 	 */
 	public static boolean cinematicCameraEnabledHook(boolean cinematicCameraEnabled) {
 		return Zume.transformCinematicCamera(cinematicCameraEnabled);
@@ -144,7 +142,7 @@ public final class ZumeAPI {
 	 * The return value of this method can be safely used without checking whether Zume is active.
 	 *
 	 * @param scrollDelta The scroll delta (magnitude will be ignored, only the sign is used)
-	 *                    {@return `true` if the invoker should prevent further handling of this scroll event}
+	 * {@return `true` if the invoker should prevent further handling of this scroll event}
 	 */
 	public static boolean mouseScrollHook(int scrollDelta) {
 		return Zume.interceptScroll(scrollDelta);

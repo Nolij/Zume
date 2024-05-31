@@ -15,7 +15,7 @@ public abstract class MouseHandlerMixin {
 	
 	@Dynamic
 	@ModifyExpressionValue(method = {
-		"turnPlayer",
+		"turnPlayer", 
 		"method_1606(D)V" // 20.5+ compat
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;smoothCamera:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(boolean original) {
@@ -26,7 +26,7 @@ public abstract class MouseHandlerMixin {
 	@Dynamic
 	@Group(name = "zume$getMouseSensitivity", min = 1, max = 1)
 	@ModifyExpressionValue(method = {
-		"turnPlayer",
+		"turnPlayer", 
 		"method_1606(D)V" // 20.5+ compat
 	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/OptionInstance;get()Ljava/lang/Object;", ordinal = 0), require = 0)
 	public <T> T zume$updateMouse$getMouseSensitivity$getValue(T original) {

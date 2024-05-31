@@ -1,8 +1,8 @@
 package dev.nolij.zume.impl;
 
-import dev.nolij.zume.api.util.v1.EasingHelper;
 import dev.nolij.zume.api.util.v1.MathHelper;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
+import dev.nolij.zume.api.util.v1.EasingHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -83,7 +83,7 @@ public class Zume {
 	
 	private static double getThirdPersonStartZoom() {
 		return EasingHelper.inverseOut(
-			config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance,
+			config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, 
 			4D, config.zoomEasingExponent);
 	}
 	
@@ -167,12 +167,12 @@ public class Zume {
 	}
 	
 	public static boolean interceptScroll(final int scrollDelta) {
-		if (!shouldCancelScroll() || scrollDelta == 0)
-			return false;
+        if (!shouldCancelScroll() || scrollDelta == 0)
+            return false;
 		
-		Zume.scrollDelta += MathHelper.sign(scrollDelta);
-		return true;
-	}
+        Zume.scrollDelta += MathHelper.sign(scrollDelta);
+        return true;
+    }
 	
 	private static boolean getToggleMode() {
 		return shouldUseFirstPersonZoom()
@@ -195,7 +195,7 @@ public class Zume {
 	}
 	
 	private static boolean shouldUseFirstPersonZoom() {
-		return config.maxThirdPersonZoomDistance == 0 ||
+		return config.maxThirdPersonZoomDistance == 0 || 
 			implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON;
 	}
 	

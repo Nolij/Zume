@@ -4,21 +4,19 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import org.apache.tools.zip.ZipEntry
-import org.apache.tools.zip.ZipOutputStream
 import org.gradle.api.file.FileTreeElement
 import org.gradle.api.tasks.Input
+import org.apache.tools.zip.ZipOutputStream
+import org.apache.tools.zip.ZipEntry
 
 class MixinConfigMergingTransformer : Transformer {
-
+	
 	private val JSON = JsonSlurper()
 
 	@Input
 	lateinit var modId: String
-
 	@Input
 	lateinit var packageName: String
-
 	@Input
 	lateinit var mixinPlugin: String
 
@@ -58,7 +56,7 @@ class MixinConfigMergingTransformer : Transformer {
 	override fun modifyOutputStream(os: ZipOutputStream?, preserveFileTimestamps: Boolean) {
 		val mixinConfigEntry = ZipEntry("${modId}.mixins.json")
 		os!!.putNextEntry(mixinConfigEntry)
-
+		
 		val mixinConfigJson = mutableMapOf(
 			"required" to true,
 			"minVersion" to "0.8",
@@ -70,8 +68,8 @@ class MixinConfigMergingTransformer : Transformer {
 				"defaultRequire" to 1,
 			)
 		)
-
-		if (refMaps.isNotEmpty()) {
+		
+		if(refMaps.isNotEmpty()) {
 			val refmapName = "${modId}-refmap.json"
 			mixinConfigJson["refmap"] = refmapName
 			os.putNextEntry(ZipEntry(refmapName))

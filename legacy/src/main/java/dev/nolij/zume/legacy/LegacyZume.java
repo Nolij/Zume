@@ -1,9 +1,9 @@
 package dev.nolij.zume.legacy;
 
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.platform.v1.CameraPerspective;
 import dev.nolij.zume.api.platform.v1.IZumeImplementation;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.mixin.legacy.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -52,15 +52,14 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 			//noinspection JavaReflectionMemberAccess
 			SmoothUtil.class.getMethod("method_10852");
 			useWorkaround = false;
-		} catch (NoSuchMethodException ignored) {
-		}
+		} catch (NoSuchMethodException ignored) { }
 		
 		USE_CINEMATIC_CAMERA_WORKAROUND = useWorkaround;
-	}
+    }
 	
 	@Override
 	public void onZoomActivate() {
-		if (USE_CINEMATIC_CAMERA_WORKAROUND &&
+		if (USE_CINEMATIC_CAMERA_WORKAROUND && 
 			ZumeConfigAPI.isCinematicZoomEnabled() && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
 			gameRenderer.setCursorXSmoother(new SmoothUtil());

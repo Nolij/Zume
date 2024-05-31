@@ -6,7 +6,7 @@ val modRuntimeOnly: Configuration by configurations.creating {
 
 unimined.minecraft {
 	combineWith(project(":integration:embeddium").sourceSets.main.get())
-
+	
 	version("neoforge_minecraft_version"())
 
 	neoForged {
@@ -33,6 +33,6 @@ repositories {
 
 dependencies {
 	compileOnly(project(":stubs"))
-
+	
 	modRuntimeOnly("org.embeddedt:embeddium-1.20.6:${"embeddium_neoforge_version"()}")
 }

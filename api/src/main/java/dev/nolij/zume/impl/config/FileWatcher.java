@@ -75,7 +75,7 @@ public class FileWatcher implements IFileWatcher {
 						try {
 							if ((locked = tryLock()) &&
 								System.currentTimeMillis() > debounce &&
-								Files.exists(changed) &&
+								Files.exists(changed) && 
 								Files.isSameFile(changed, file)) {
 								callback.invoke();
 								debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;

@@ -72,7 +72,7 @@ public class EasedDouble {
 		this.targetValue = target;
 	}
 	
-	public void set(double target) {
+	public void set(double target) {		
 		set(getEased(), target);
 	}
 	
