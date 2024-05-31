@@ -22,11 +22,12 @@ import proguard.ConfigurationParser
 import proguard.ProGuard
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import java.io.File
-import java.util.*
+import java.util.Properties
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.Deflater
+import kotlin.collections.HashSet
 
 enum class DeflateAlgorithm(val id: Int?) {
 	NONE(null),
