@@ -6,7 +6,7 @@ unimined.minecraft {
 	side("client")
 
 	version("primitive_minecraft_version"())
-	
+
 	runs.config("client") {
 		javaVersion = JavaVersion.VERSION_17
 	}
@@ -34,7 +34,12 @@ repositories {
 }
 
 dependencies {
-	"modImplementation"(fabricApi.stationModule(moduleName = "station-keybindings-v0", version = "station_api_version"())) {
+	"modImplementation"(
+		fabricApi.stationModule(
+			moduleName = "station-keybindings-v0",
+			version = "station_api_version"()
+		)
+	) {
 		exclude(module = "fabric-loader")
 		exclude(group = "org.ow2.asm")
 	}
@@ -43,9 +48,9 @@ dependencies {
 		exclude(module = "fabric-loader")
 		exclude(group = "org.ow2.asm")
 	}
-	
+
 	implementation("io.github.llamalad7:mixinextras-fabric:${"mixinextras_version"()}")
 
-    implementation("org.slf4j:slf4j-api:${"slf4j_version"()}")
-    implementation("org.apache.logging.log4j:log4j-slf4j18-impl:${"log4j_slf4j_version"()}")
+	implementation("org.slf4j:slf4j-api:${"slf4j_version"()}")
+	implementation("org.apache.logging.log4j:log4j-slf4j18-impl:${"log4j_slf4j_version"()}")
 }

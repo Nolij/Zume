@@ -10,16 +10,22 @@ public interface GameRendererAccessor {
 	
 	@Accessor("cursorXSmoother")
 	void setCursorXSmoother(SmoothUtil value);
+	
 	@Accessor("cursorYSmoother")
 	void setCursorYSmoother(SmoothUtil value);
+	
 	@Accessor("cursorDeltaX")
 	void setCursorDeltaX(float value);
+	
 	@Accessor("cursorDeltaY")
 	void setCursorDeltaY(float value);
+	
 	@Accessor("smoothedCursorDeltaX")
 	void setSmoothedCursorDeltaX(float value);
+	
 	@Accessor("smoothedCursorDeltaY")
 	void setSmoothedCursorDeltaY(float value);
+	
 	@Accessor("lastTickDelta")
 	void setLastTickDelta(float value);
 	

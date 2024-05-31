@@ -15,10 +15,12 @@ import java.util.Set;
 @Mixin(KeyBinding.class)
 public class KeyBindingMixin {
 	
-	@SuppressWarnings({"MissingUnique", "unused", "MismatchedQueryAndUpdateOfCollection"})	
+	@SuppressWarnings({ "MissingUnique", "unused", "MismatchedQueryAndUpdateOfCollection" })
 	private static Map<String, Integer> field_15867; // vintage intermediary
 	
-	@Shadow @Final private static Set<String> categories;
+	@Shadow
+	@Final
+	private static Set<String> categories;
 	
 	@Inject(method = "<clinit>", at = @At("TAIL"))
 	private static void static$TAIL(CallbackInfo ci) {

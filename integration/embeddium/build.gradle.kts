@@ -6,9 +6,9 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 
 unimined.minecraft {
 	combineWith(project(":api").sourceSets.main.get())
-	
+
 	version("modern_minecraft_version"())
-	
+
 	runs.off = true
 
 	fabric {
@@ -18,7 +18,7 @@ unimined.minecraft {
 	mappings {
 		mojmap()
 	}
-	
+
 	defaultRemapJar = false
 }
 

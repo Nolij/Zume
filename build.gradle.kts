@@ -1,10 +1,7 @@
 @file:Suppress("UnstableApiUsage")
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.nolij.zumegradle.ClassShrinkingType
-import dev.nolij.zumegradle.DeflateAlgorithm
-import dev.nolij.zumegradle.JsonShrinkingType
-import dev.nolij.zumegradle.MixinConfigMergingTransformer
-import dev.nolij.zumegradle.CompressJarTask
+import dev.nolij.zumegradle.*
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PublishModTask
@@ -26,7 +23,7 @@ import java.nio.file.Files
 import java.time.ZonedDateTime
 
 plugins {
-    id("java")
+	id("java")
 	id("maven-publish")
 	id("com.github.johnrengelman.shadow")
 	id("me.modmuss50.mod-publish-plugin")
@@ -37,16 +34,17 @@ plugins {
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 enum class ReleaseChannel(
-    val suffix: String? = null,
-    val releaseType: ReleaseType? = null,
-    val deflation: DeflateAlgorithm = DeflateAlgorithm.SEVENZIP,
-    val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
-    val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
-    val proguard: Boolean = true,
-	) {
+	val suffix: String? = null,
+	val releaseType: ReleaseType? = null,
+	val deflation: DeflateAlgorithm = DeflateAlgorithm.SEVENZIP,
+	val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
+	val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
+	val proguard: Boolean = true,
+) {
 	DEV_BUILD(
 		suffix = "dev",
-		json = JsonShrinkingType.PRETTY_PRINT),
+		json = JsonShrinkingType.PRETTY_PRINT
+	),
 	PRE_RELEASE("pre"),
 	RELEASE_CANDIDATE("rc"),
 	RELEASE(releaseType = ReleaseType.STABLE),
@@ -61,7 +59,7 @@ val releaseTagPrefix = "release/"
 
 val releaseTags = grgit.tag.list()
 	.filter { tag -> tag.name.startsWith(releaseTagPrefix) }
-	.sortedWith { tag1, tag2 -> 
+	.sortedWith { tag1, tag2 ->
 		if (tag1.commit.dateTime == tag2.commit.dateTime)
 			if (tag1.name.length != tag2.name.length)
 				return@sortedWith tag1.name.length.compareTo(tag2.name.length)
@@ -75,7 +73,7 @@ val releaseTags = grgit.tag.list()
 val isExternalCI = (rootProject.properties["external_publish"] as String?).toBoolean()
 val isRelease = rootProject.hasProperty("release_channel") || isExternalCI
 val releaseIncrement = if (isExternalCI) 0 else 1
-val releaseChannel: ReleaseChannel = 
+val releaseChannel: ReleaseChannel =
 	if (isExternalCI) {
 		val tagName = releaseTags.first().name
 		val suffix = """\-(\w+)\.\d+$""".toRegex().find(tagName)?.groupValues?.get(1)
@@ -101,7 +99,7 @@ val patchHistory = releaseTags
 	.map { name -> name.substring(minorTagPrefix.length) }
 
 val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
-val patch = 
+val patch =
 	maxPatch?.plus(
 		if (patchHistory.contains(maxPatch.toString()))
 			releaseIncrement
@@ -112,14 +110,14 @@ var patchAndSuffix = patch.toString()
 
 if (releaseChannel.suffix != null) {
 	patchAndSuffix += "-${releaseChannel.suffix}"
-	
+
 	if (isRelease) {
 		patchAndSuffix += "."
-		
+
 		val maxBuild = patchHistory
 			.mapNotNull { it.removePrefix(patchAndSuffix).toIntOrNull() }
 			.maxOrNull()
-		
+
 		val build = (maxBuild?.plus(releaseIncrement)) ?: 1
 		patchAndSuffix += build.toString()
 	}
@@ -161,7 +159,7 @@ val uniminedImpls = arrayOf(
 	*neoForgeImpls,
 )
 
-allprojects {	
+allprojects {
 	apply(plugin = "java")
 	apply(plugin = "maven-publish")
 
@@ -173,15 +171,15 @@ allprojects {
 		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
-		exclusiveContent { 
+		exclusiveContent {
 			forRepository { maven("https://api.modrinth.com/maven") }
-			filter { 
+			filter {
 				includeGroup("maven.modrinth")
 			}
 		}
 		maven("https://maven.blamejared.com")
 	}
-	
+
 	tasks.withType<JavaCompile> {
 		if (name !in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) {
 			options.encoding = "UTF-8"
@@ -192,7 +190,7 @@ allprojects {
 			}
 		}
 	}
-	
+
 	dependencies {
 		compileOnly("org.jetbrains:annotations:${"jetbrains_annotations_version"()}")
 		"com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
@@ -213,7 +211,14 @@ allprojects {
 			.mapValues { entry -> entry.value as String })
 		props["mod_version"] = Zume.version
 
-		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
+		filesMatching(
+			immutableListOf(
+				"fabric.mod.json",
+				"mcmod.info",
+				"META-INF/mods.toml",
+				"META-INF/neoforge.mods.toml"
+			)
+		) {
 			expand(props)
 		}
 	}
@@ -222,18 +227,18 @@ allprojects {
 subprojects {
 	val subProject = this
 	val implName = subProject.name
-	
+
 	group = "maven_group"()
 	version = Zume.version
-	
+
 	base {
 		archivesName = "${"mod_id"()}-${subProject.name}"
 	}
-	
+
 	tasks.withType<GenerateModuleMetadata> {
 		enabled = false
 	}
-	
+
 	dependencies {
 		implementation("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 	}
@@ -241,7 +246,7 @@ subprojects {
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
 		apply(plugin = "com.github.johnrengelman.shadow")
-		
+
 		unimined.minecraft(sourceSets["main"], lateApply = true) {
 			combineWith(project(":api").sourceSets.main.get())
 
@@ -249,18 +254,18 @@ subprojects {
 				runs.config("server") {
 					disabled = true
 				}
-				
+
 				runs.config("client") {
 					jvmArgs += "-Dzume.configPathOverride=${rootProject.file("zume.json5").absolutePath}"
 				}
 			}
-			
+
 			defaultRemapJar = true
 		}
-		
+
 		val outputJar = tasks.register<ShadowJar>("outputJar") {
 			group = "build"
-			
+
 			val remapJarTasks = tasks.withType<RemapJarTask>()
 			dependsOn(remapJarTasks)
 			mustRunAfter(remapJarTasks)
@@ -275,7 +280,7 @@ subprojects {
 			archiveClassifier = "output"
 			isPreserveFileTimestamps = false
 			isReproducibleFileOrder = true
-			
+
 			relocate("dev.nolij.zume.integration.implementation", "dev.nolij.zume.${implName}.integration")
 		}
 
@@ -283,14 +288,14 @@ subprojects {
 			dependsOn(outputJar)
 		}
 	}
-	
-	if(implName in lexForgeImpls) {
+
+	if (implName in lexForgeImpls) {
 		tasks.withType<RemapJarTask> {
 			mixinRemap {
 				disableRefmap()
 			}
 		}
-		
+
 		dependencies {
 			"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 		}
@@ -299,7 +304,7 @@ subprojects {
 
 unimined.minecraft {
 	version("modern_minecraft_version"())
-	
+
 	runs.off = true
 
 	fabric {
@@ -322,12 +327,12 @@ dependencies {
 	shade("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
-	
+
 	compileOnly(project(":stubs"))
-	
+
 	implementation(project(":api"))
-	
-	uniminedImpls.forEach { 
+
+	uniminedImpls.forEach {
 		implementation(project(":${it}")) { isTransitive = false }
 	}
 }
@@ -342,14 +347,14 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	archiveClassifier = "sources"
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
-	
+
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
 	}
-	
+
 	listOf(
-		sourceSets, 
-		project(":api").sourceSets, 
+		sourceSets,
+		project(":api").sourceSets,
 		project(":integration:embeddium").sourceSets,
 		uniminedImpls.flatMap { project(":${it}").sourceSets }
 	).flatten().forEach {
@@ -363,34 +368,37 @@ tasks.shadowJar {
 		packageName = "dev.nolij.zume.mixin"
 		mixinPlugin = "dev.nolij.zume.ZumeMixinPlugin"
 	}
-	
+
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
 	}
-	
+
 	exclude("*.xcf")
 	exclude("LICENSE_zson")
-	
+
 	configurations = immutableListOf(shade)
 	archiveClassifier = null
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
-	
+
 	val apiJar = project(":api").tasks.jar
 	dependsOn(apiJar)
 	from(zipTree(apiJar.get().archiveFile.get())) { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
-	
+
 	uniminedImpls.map { project(it).tasks.named<ShadowJar>("outputJar").get() }.forEach { implJarTask ->
 		dependsOn(implJarTask)
 		from(zipTree(implJarTask.archiveFile.get())) {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 
-			filesMatching(immutableListOf(
-				"dev/nolij/zume/lexforge/LexZume.class",
-				"dev/nolij/zume/lexforge18/LexZume18.class",
-				"dev/nolij/zume/lexforge16/LexZume16.class",
-				"dev/nolij/zume/vintage/VintageZume.class")) {
+			filesMatching(
+				immutableListOf(
+					"dev/nolij/zume/lexforge/LexZume.class",
+					"dev/nolij/zume/lexforge18/LexZume18.class",
+					"dev/nolij/zume/lexforge16/LexZume16.class",
+					"dev/nolij/zume/vintage/VintageZume.class"
+				)
+			) {
 				val reader = ClassReader(this.open())
 				val node = ClassNode()
 				reader.accept(node, 0)
@@ -403,12 +411,12 @@ tasks.shadowJar {
 			}
 		}
 	}
-	
+
 	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
-	if(releaseChannel.proguard) {
+	if (releaseChannel.proguard) {
 		relocate("dev.nolij.zume.mixin", "zume.mixin")
 	}
-	
+
 	manifest {
 		attributes(
 			"FMLCorePluginContainsFMLMod" to true,
@@ -422,10 +430,10 @@ tasks.shadowJar {
 val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	dependsOn(tasks.shadowJar)
 	group = "build"
-	
+
 	val shadowJar = tasks.shadowJar.get()
 	inputJar = shadowJar.archiveFile.get().asFile
-	
+
 	deflateAlgorithm = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
@@ -444,7 +452,7 @@ afterEvaluate {
 			if (!System.getenv("local_maven_url").isNullOrEmpty())
 				maven(System.getenv("local_maven_url"))
 		}
-		
+
 		publications {
 			create<MavenPublication>("mod_id"()) {
 				artifact(compressJar.get().outputJar)
@@ -456,32 +464,32 @@ afterEvaluate {
 	tasks.withType<AbstractPublishToMaven> {
 		dependsOn(compressJar, sourcesJar)
 	}
-	
+
 	fun getChangelog(): String {
 		return file("CHANGELOG.md").readText()
 	}
-	
+
 	publishMods {
 		file = compressJar.get().outputJar
 		additionalFiles.from(sourcesJar.get().archiveFile)
 		if (releaseChannel.proguard)
 			additionalFiles.from(compressJar.get().mappingsFile)
-		
+
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
 		version = Zume.version
 		changelog = getChangelog()
-		
+
 		modLoaders.addAll("fabric", "forge", "neoforge")
 		dryRun = !isRelease
-		
+
 		github {
 			accessToken = providers.environmentVariable("GITHUB_TOKEN")
 			repository = "Nolij/Zume"
 			commitish = branchName
 			tagName = releaseTagPrefix + Zume.version
 		}
-		
+
 		if (dryRun.get() || releaseChannel.releaseType != null) {
 			modrinth {
 				accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -519,9 +527,9 @@ afterEvaluate {
 					start = "1.7.10"
 					end = "1.12.2"
 				}
-				
+
 				minecraftVersions.add("Beta 1.7.3")
-				
+
 				val snapshots: Set<String>
 				if (cfAccessToken.orNull != null) {
 					val cfAPI = CurseforgeApi(cfAccessToken.get(), apiEndpoint.get())
@@ -530,7 +538,7 @@ afterEvaluate {
 						"${it}-Snapshot"
 					}.toHashSet()
 
-					snapshots = 
+					snapshots =
 						cfAPI.getGameVersions().map {
 							it.name
 						}.filter {
@@ -541,9 +549,9 @@ afterEvaluate {
 				} else {
 					snapshots = HashSet()
 				}
-				
+
 				snapshots.add("1.21-Snapshot")
-				
+
 				minecraftVersions.addAll(snapshots)
 			}
 
@@ -562,7 +570,7 @@ afterEvaluate {
 			}
 		}
 	}
-	
+
 	tasks.withType<PublishModTask> {
 		dependsOn(compressJar, sourcesJar)
 	}
@@ -588,15 +596,15 @@ afterEvaluate {
 				val compareStart = currentTag?.name ?: grgit.log().minBy { it.dateTime }.id
 				val compareEnd = releaseTagPrefix + Zume.version
 				val compareLink = "https://github.com/Nolij/Zume/compare/${compareStart}...${compareEnd}"
-				
+
 				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 				val releaseChangeLog = getChangelog()
 				val file = publishMods.file.asFile.get()
-				
+
 				var content = "# [Zume Test Build ${Zume.version}]" +
 					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
 					"Changes since last build: <${compareLink}>"
-				
+
 				if (buildChangeLog.isNotBlank())
 					content += " ```md\n${buildChangeLog}\n```"
 				content += "\nChanges since last release: ```md\n${releaseChangeLog}\n```"
@@ -610,14 +618,20 @@ afterEvaluate {
 				val bodyBuilder = MultipartBody.Builder()
 					.setType(MultipartBody.FORM)
 					.addFormDataPart("payload_json", http.json.encodeToString(webhook))
-					.addFormDataPart("files[0]", file.name, file.asRequestBody("application/java-archive".toMediaTypeOrNull()))
-				
+					.addFormDataPart(
+						"files[0]",
+						file.name,
+						file.asRequestBody("application/java-archive".toMediaTypeOrNull())
+					)
+
 				var fileIndex = 1
 				for (additionalFile in publishMods.additionalFiles) {
 					bodyBuilder.addFormDataPart(
-						"files[${fileIndex++}]", 
-						additionalFile.name, 
-						additionalFile.asRequestBody(Files.probeContentType(additionalFile.toPath()).toMediaTypeOrNull())
+						"files[${fileIndex++}]",
+						additionalFile.name,
+						additionalFile.asRequestBody(
+							Files.probeContentType(additionalFile.toPath()).toMediaTypeOrNull()
+						)
 					)
 				}
 

@@ -1,18 +1,18 @@
 package dev.nolij.zume.archaic;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.platform.v1.CameraPerspective;
 import dev.nolij.zume.api.platform.v1.IZumeImplementation;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import dev.nolij.zume.mixin.archaic.EntityRendererAccessor;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.MouseFilter;
@@ -87,9 +87,9 @@ public class ArchaicZume implements IZumeImplementation {
 	}
 	
 	private static final MethodHandle SET_CANCELED = MethodHandleHelper.PUBLIC.getMethodOrNull(
-		Event.class, 
-		"setCanceled", 
-		MethodType.methodType(void.class, MouseEvent.class, boolean.class), 
+		Event.class,
+		"setCanceled",
+		MethodType.methodType(void.class, MouseEvent.class, boolean.class),
 		boolean.class);
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)

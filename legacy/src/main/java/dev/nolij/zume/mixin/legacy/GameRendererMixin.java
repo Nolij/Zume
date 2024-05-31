@@ -51,7 +51,7 @@ public class GameRendererMixin {
 	
 	@ModifyVariable(method = "transformCamera", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
 	public double zume$transformCamera$thirdPersonDistance(double original) {
-        return ZumeAPI.thirdPersonCameraHook(original);
+		return ZumeAPI.thirdPersonCameraHook(original);
 	}
 	
 }

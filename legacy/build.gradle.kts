@@ -23,5 +23,10 @@ tasks.withType<RemapJarTask> {
 }
 
 dependencies {
-    "modImplementation"(fabricApi.legacyFabricModule("legacy-fabric-keybindings-api-v1-common", "legacy_fabric_api_version"()))
+	"modImplementation"(
+		fabricApi.legacyFabricModule(
+			"legacy-fabric-keybindings-api-v1-common",
+			"legacy_fabric_api_version"()
+		)
+	)
 }

@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface Mod {
 	
 	// Pre/Modern Forge
@@ -14,9 +14,13 @@ public @interface Mod {
 	
 	// Vintage Forge
 	String modid() default "";
+	
 	String name() default "";
+	
 	String version() default "";
+	
 	String acceptedMinecraftVersions() default "";
+	
 	String guiFactory() default "";
 	
 }

@@ -1,9 +1,9 @@
 package dev.nolij.zume.vintage;
 
+import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.platform.v1.CameraPerspective;
 import dev.nolij.zume.api.platform.v1.IZumeImplementation;
 import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
@@ -28,7 +28,7 @@ import static dev.nolij.zume.impl.ZumeConstants.*;
 @Mod(
 	modid = MOD_ID,
 	name = MOD_NAME,
-	version = MOD_VERSION, 
+	version = MOD_VERSION,
 	acceptedMinecraftVersions = VINTAGE_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeImplementation {

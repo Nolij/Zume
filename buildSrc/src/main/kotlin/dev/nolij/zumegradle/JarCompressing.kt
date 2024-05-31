@@ -7,11 +7,8 @@ import net.fabricmc.mappingio.format.MappingFormat
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
 import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
@@ -22,7 +19,7 @@ import proguard.ConfigurationParser
 import proguard.ProGuard
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import java.io.File
-import java.util.Properties
+import java.util.*
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
@@ -34,7 +31,7 @@ enum class DeflateAlgorithm(val id: Int?) {
 	SEVENZIP(3),
 //	ZOPFLI(4), // too slow
 	;
-	
+
 	override fun toString() = name.lowercase().uppercaseFirstChar()
 }
 
@@ -44,7 +41,7 @@ enum class ClassShrinkingType {
 	STRIP_SOURCE_FILES,
 	STRIP_ALL,
 	;
-	
+
 	fun shouldStripLVTs() = this == STRIP_LVTS || this == STRIP_ALL
 	fun shouldStripSourceFiles() = this == STRIP_SOURCE_FILES || this == STRIP_ALL
 	fun shouldRun() = this != STRIP_NONE
@@ -63,30 +60,34 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 			}
 		}
 	}
-	
+
 	jar.delete()
-	
+
 	val json = JsonSlurper()
-	
+
 	val isObfuscating = mappingsFile?.exists() == true
 	val mappings = if (isObfuscating) mappings(mappingsFile!!) else null
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
-		contents.forEach { var (name, bytes) = it
-			if(name == "fabric.mod.json" && isObfuscating) {
+		contents.forEach {
+			var (name, bytes) = it
+			if (name == "fabric.mod.json" && isObfuscating) {
 				bytes = remapFMJ(bytes, mappings!!)
 			}
-			
-			if(name.endsWith("mixins.json") && isObfuscating) {
+
+			if (name.endsWith("mixins.json") && isObfuscating) {
 				bytes = remapMixinConfig(bytes, mappings!!)
 			}
-			
-			if (jsonProcessing != JsonShrinkingType.NONE && 
-				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info") {
+
+			if (jsonProcessing != JsonShrinkingType.NONE &&
+				name.endsWith(".json") || name.endsWith(".mcmeta") || name == "mcmod.info"
+			) {
 				bytes = when (jsonProcessing) {
 					JsonShrinkingType.MINIFY -> JsonOutput.toJson(json.parse(bytes)).toByteArray()
-					JsonShrinkingType.PRETTY_PRINT -> JsonOutput.prettyPrint(JsonOutput.toJson(json.parse(bytes))).toByteArray()
+					JsonShrinkingType.PRETTY_PRINT -> JsonOutput.prettyPrint(JsonOutput.toJson(json.parse(bytes)))
+						.toByteArray()
+
 					else -> throw AssertionError()
 				}
 			}
@@ -118,7 +119,7 @@ private fun remapFMJ(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
 			newEntrypoints.computeIfAbsent(type) { mutableListOf() }.add(obf)
 		}
 	}
-	
+
 	json["entrypoints"] = newEntrypoints
 
 	return JsonOutput.toJson(json).toByteArray()
@@ -130,9 +131,9 @@ private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	val old = json["plugin"] as String
 	val obf = mappings.obfuscate(old)
 	json["plugin"] = obf
-	
+
 	json["package"] = "zume.mixin"
-	
+
 	return JsonOutput.toJson(json).toByteArray()
 }
 
@@ -149,8 +150,8 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 	if (classFileSettings.shouldStripSourceFiles()) {
 		classNode.sourceFile = null
 	}
-	
-	if(classNode.invisibleAnnotations?.map { it.desc }?.contains("Lorg/spongepowered/asm/mixin/Mixin;")	== true) {
+
+	if (classNode.invisibleAnnotations?.map { it.desc }?.contains("Lorg/spongepowered/asm/mixin/Mixin;") == true) {
 		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN
 	}
 
@@ -161,7 +162,7 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 
 val advzipInstalled = try {
 	ProcessBuilder("advzip", "-V").start().waitFor() == 0
-} catch (e: Exception) {		
+} catch (e: Exception) {
 	false
 }
 
@@ -171,7 +172,7 @@ fun deflate(zip: File, type: DeflateAlgorithm) {
 		println("advzip is not installed; skipping re-deflation of $zip")
 		return
 	}
-	
+
 	try {
 		val process = ProcessBuilder("advzip", "-z", "-${type.id}", zip.absolutePath).start()
 		val exitCode = process.waitFor()
@@ -188,10 +189,11 @@ val JAVA_HOME = System.getProperty("java.home")
 @Suppress("UnstableApiUsage")
 fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir: File) {
 	val inputJar = jar.copyTo(
-		jar.parentFile.resolve(".${jar.nameWithoutExtension}_proguardRunning.jar"), true).also { 
-			it.deleteOnExit()
+		jar.parentFile.resolve(".${jar.nameWithoutExtension}_proguardRunning.jar"), true
+	).also {
+		it.deleteOnExit()
 	}
-	
+
 	val config = configDir.resolve("proguard.pro")
 	if (!config.exists()) {
 		error("proguard.pro not found")
@@ -202,19 +204,20 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 		"-injars", inputJar.absolutePath,
 		"-outjars", jar.absolutePath,
 	)
-	
+
 	val libraries = HashSet<String>()
 	libraries.add("${JAVA_HOME}/jmods/java.base.jmod")
 	libraries.add("${JAVA_HOME}/jmods/java.desktop.jmod")
 
 	for (minecraftConfig in minecraftConfigs) {
 		val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
-		
+
 		libraries.add(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile().absolutePath)
-		
+
 		val minecrafts = listOf(
-			minecraftConfig.sourceSet.compileClasspath.files, 
-			minecraftConfig.sourceSet.runtimeClasspath.files)
+			minecraftConfig.sourceSet.compileClasspath.files,
+			minecraftConfig.sourceSet.runtimeClasspath.files
+		)
 			.flatten()
 			.filter { it: File -> !minecraftConfig.isMinecraftJar(it.toPath()) }
 			.toHashSet()
@@ -223,31 +226,30 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 			.filter { it.extension == "jar" && !it.name.startsWith("zume") }
 			.map { it.absolutePath }
 	}
-	
-	val debug = Properties().apply { 
+
+	val debug = Properties().apply {
 		val gradleproperties = configDir.resolve("gradle.properties")
-		if(gradleproperties.exists()) {
+		if (gradleproperties.exists()) {
 			load(gradleproperties.inputStream())
 		}
 	}.getProperty("zumegradle.proguard.keepAttrs").toBoolean()
-	
-	if(debug) {
+
+	if (debug) {
 		proguardCommand.add("-keepattributes")
 		proguardCommand.add("*Annotation*,SourceFile,MethodParameters,L*Table")
 		proguardCommand.add("-dontobfuscate")
 	}
-	
+
 	proguardCommand.add("-libraryjars")
 	proguardCommand.add(libraries.joinToString(File.pathSeparator) { "\"$it\"" })
 
 	val configuration = Configuration()
-	ConfigurationParser(proguardCommand.toTypedArray(), System.getProperties()).use { parser ->
-		parser.parse(configuration)
-	}
-	
+	ConfigurationParser(proguardCommand.toTypedArray(), System.getProperties())
+		.parse(configuration)
+
 	try {
 		ProGuard(configuration).execute()
-	} catch(ex: Exception) {
+	} catch (ex: Exception) {
 		throw IllegalStateException("ProGuard failed for $jar", ex)
 	} finally {
 		inputJar.delete()
@@ -264,43 +266,43 @@ open class CompressJarTask : DefaultTask() {
 
 	@Input
 	var deflateAlgorithm = DeflateAlgorithm.LIBDEFLATE
-	
+
 	@Input
 	var jsonShrinkingType = JsonShrinkingType.NONE
-	
+
 	@get:Input
 	val useProguard get() = !this.minecraftConfigs.isEmpty()
-	
+
 	private var minecraftConfigs: List<MinecraftConfig> = emptyList()
 
 	@get:OutputFile
 	val outputJar get() = inputJar // compressed jar will replace the input jar
-	
+
 	@get:OutputFile
 	@get:Optional
 	val mappingsFile
-		get() = if(useProguard)
+		get() = if (useProguard)
 			inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
 		else null
-	
+
 	@Option(option = "class-file-compression", description = "How to process class files")
 	fun setClassShrinkingType(value: String) {
 		classShrinkingType = ClassShrinkingType.valueOf(value.uppercase())
 	}
-	
+
 	@Option(option = "compression-type", description = "How to recompress the jar")
 	fun setDeflateAlgorithm(value: String) {
 		deflateAlgorithm = value.uppercase().let {
-			if(it.matches(Regex("7Z(?:IP)?"))) DeflateAlgorithm.SEVENZIP
+			if (it.matches(Regex("7Z(?:IP)?"))) DeflateAlgorithm.SEVENZIP
 			else DeflateAlgorithm.valueOf(it)
 		}
 	}
-	
+
 	@Option(option = "json-processing", description = "How to process json files")
 	fun setJsonShrinkingType(value: String) {
 		jsonShrinkingType = JsonShrinkingType.valueOf(value.uppercase())
 	}
-	
+
 	fun useProguard(minecraftConfigs: List<MinecraftConfig>) {
 		this.minecraftConfigs = minecraftConfigs
 	}

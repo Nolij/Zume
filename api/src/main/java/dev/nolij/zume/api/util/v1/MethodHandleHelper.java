@@ -43,13 +43,14 @@ public class MethodHandleHelper {
 		for (final String className : classNames) {
 			try {
 				return Class.forName(className, true, classLoader);
-			} catch (ClassNotFoundException ignored) { }
+			} catch (ClassNotFoundException ignored) {
+			}
 		}
 		
 		return null;
 	}
 	
-	public @Nullable MethodHandle getMethodOrNull(@Nullable final Class<?> clazz, 
+	public @Nullable MethodHandle getMethodOrNull(@Nullable final Class<?> clazz,
 	                                              @NotNull final String methodName,
 	                                              @Nullable Class<?>... parameterTypes) {
 		if (clazz == null || Arrays.stream(parameterTypes).anyMatch(Objects::isNull))
@@ -62,7 +63,7 @@ public class MethodHandleHelper {
 		}
 	}
 	
-	public @Nullable MethodHandle getMethodOrNull(@Nullable final Class<?> clazz, 
+	public @Nullable MethodHandle getMethodOrNull(@Nullable final Class<?> clazz,
 	                                              @NotNull final String methodName,
 	                                              @Nullable final MethodType methodType,
 	                                              @Nullable Class<?>... parameterTypes) {

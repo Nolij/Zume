@@ -4,11 +4,11 @@
 	"package": "dev.nolij.zume.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"client": [
-		"legacy.MinecraftClientMixin",
 		"legacy.GameOptionsMixin",
 		"legacy.GameRendererAccessor",
 		"legacy.GameRendererMixin",
-		"legacy.KeyBindingMixin"
+		"legacy.KeyBindingMixin",
+		"legacy.MinecraftClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

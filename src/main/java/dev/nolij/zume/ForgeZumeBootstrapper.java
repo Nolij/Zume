@@ -1,8 +1,8 @@
 package dev.nolij.zume;
 
 import dev.nolij.zume.lexforge.LexZume;
-import dev.nolij.zume.lexforge18.LexZume18;
 import dev.nolij.zume.lexforge16.LexZume16;
+import dev.nolij.zume.lexforge18.LexZume18;
 import dev.nolij.zume.vintage.VintageZume;
 import net.minecraftforge.fml.common.Mod;
 
@@ -20,11 +20,11 @@ public class ForgeZumeBootstrapper {
 	public ForgeZumeBootstrapper() {
 		if (ZumeMixinPlugin.ZUME_VARIANT == null)
 			throw new AssertionError("""
-				Mixins did not load! Zume requires Mixins in order to work properly.
-				Please install one of the following mixin loaders:
-				14.4 - 16.0: MixinBootstrap
-				8.9 - 12.2: MixinBooter >= 5.0
-				7.10 - 12.2: UniMixins >= 0.1.15""");
+			                         Mixins did not load! Zume requires Mixins in order to work properly.
+			                         Please install one of the following mixin loaders:
+			                         14.4 - 16.0: MixinBootstrap
+			                         8.9 - 12.2: MixinBooter >= 5.0
+			                         7.10 - 12.2: UniMixins >= 0.1.15""");
 		
 		switch (ZumeMixinPlugin.ZUME_VARIANT) {
 			case ZumeVariant.LEXFORGE -> new LexZume();

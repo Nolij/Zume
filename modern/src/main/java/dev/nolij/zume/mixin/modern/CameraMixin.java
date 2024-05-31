@@ -11,7 +11,7 @@ public abstract class CameraMixin {
 	
 	@ModifyArg(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(D)D"))
 	public double zume$update$clipToSpace(double original) {
-        return ZumeAPI.thirdPersonCameraHook(original);
+		return ZumeAPI.thirdPersonCameraHook(original);
 	}
 	
 }

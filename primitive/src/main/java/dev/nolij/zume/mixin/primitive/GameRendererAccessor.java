@@ -10,6 +10,7 @@ public interface GameRendererAccessor {
 	
 	@Accessor("field_2353")
 	void setCinematicYawSmoother(SmoothUtil value);
+	
 	@Accessor("field_2354")
 	void setCinematicPitchSmoother(SmoothUtil value);
 	

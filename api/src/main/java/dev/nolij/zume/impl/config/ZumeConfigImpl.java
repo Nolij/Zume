@@ -1,18 +1,23 @@
 package dev.nolij.zume.impl.config;
 
+import dev.nolij.zson.Comment;
 import dev.nolij.zson.Zson;
 import dev.nolij.zson.ZsonParser;
 import dev.nolij.zson.ZsonWriter;
-import dev.nolij.zson.Comment;
 import dev.nolij.zume.impl.Zume;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 public class ZumeConfigImpl {
+	
+	//@formatter:off
 	
 	@Comment("""
 		Enable Cinematic Camera while zooming.
@@ -95,6 +100,8 @@ public class ZumeConfigImpl {
 		DEFAULT: `false`""")
 	public boolean disable = false;
 	
+	//@formatter:on
+	
 	private static final int EXPECTED_VERSION = 1;
 	
 	@Comment("Used internally. Don't modify this.")
@@ -111,23 +118,23 @@ public class ZumeConfigImpl {
 		while (true) {
 			try {
 				return Zson.map2Obj(ZsonParser.parse(new FileReader(configFile)), ZumeConfigImpl.class);
-            } catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				if (++i < MAX_RETRIES) {
-                    try {
-	                    //noinspection BusyWait
-	                    Thread.sleep(i * 200L);
+					try {
+						//noinspection BusyWait
+						Thread.sleep(i * 200L);
 						continue;
-                    } catch (InterruptedException ignored) {
-                        return null;
-                    }
-                }
+					} catch (InterruptedException ignored) {
+						return null;
+					}
+				}
 				Zume.LOGGER.error("Error parsing config after {} retries: ", i, e);
 				return null;
 			} catch (IOException e) {
 				Zume.LOGGER.error("Error reading config: ", e);
 				return null;
-            }
-        }
+			}
+		}
 	}
 	
 	private static ZumeConfigImpl readConfigFile() {
@@ -184,12 +191,12 @@ public class ZumeConfigImpl {
 		
 		GLOBAL_CONFIG_PATH = dotMinecraft.resolve("global");
 		if (Files.notExists(GLOBAL_CONFIG_PATH)) {
-            try {
-                Files.createDirectories(GLOBAL_CONFIG_PATH);
-            } catch (IOException e) {
-                Zume.LOGGER.error("Failed to create global config path: ", e);
-            }
-        }
+			try {
+				Files.createDirectories(GLOBAL_CONFIG_PATH);
+			} catch (IOException e) {
+				Zume.LOGGER.error("Failed to create global config path: ", e);
+			}
+		}
 	}
 	
 	public static File getConfigFile() {

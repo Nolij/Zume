@@ -4,12 +4,12 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 
 unimined.minecraft {
 	version("archaic_minecraft_version"())
-	
+
 	minecraftForge {
 		loader("archaic_forge_version"())
 		mixinConfig("zume-${project.name}.mixins.json")
 	}
-	
+
 	mappings {
 		searge()
 		mcp("stable", "archaic_mappings_version"())
