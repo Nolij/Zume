@@ -22,6 +22,10 @@ dependencies {
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 }
 
+tasks.clean {
+	finalizedBy(tasks.generateBuildConfig)
+}
+
 tasks.processResources {
 	from("src/main/resources/assets/zume/lang/") {
 		include("*.lang")
