@@ -37,7 +37,7 @@
 
 # Legacy Forge config providers
 -keep,allowoptimization class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory
--keep,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig { *; }
+-keep,allowoptimization,allowobfuscation class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig { *; }
 
 -keep,allowoptimization class io.github.prospector.modmenu.** { *; } # ugly classloader hack
 
