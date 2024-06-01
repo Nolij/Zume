@@ -1,9 +1,5 @@
 package dev.nolij.zume;
 
-import dev.nolij.zume.lexforge.LexZume;
-import dev.nolij.zume.lexforge18.LexZume18;
-import dev.nolij.zume.lexforge16.LexZume16;
-import dev.nolij.zume.vintage.VintageZume;
 import net.minecraftforge.fml.common.Mod;
 
 import static dev.nolij.zume.impl.ZumeConstants.*;
@@ -26,11 +22,17 @@ public class ForgeZumeBootstrapper {
 				8.9 - 12.2: MixinBooter >= 5.0
 				7.10 - 12.2: UniMixins >= 0.1.15""");
 		
-		switch (ZumeMixinPlugin.ZUME_VARIANT) {
-			case ZumeVariant.LEXFORGE -> new LexZume();
-			case ZumeVariant.LEXFORGE18 -> new LexZume18();
-			case ZumeVariant.LEXFORGE16 -> new LexZume16();
-			case ZumeVariant.VINTAGE_FORGE -> new VintageZume();
+		String className = switch (ZumeMixinPlugin.ZUME_VARIANT) {
+			case ZumeVariant.LEXFORGE -> "dev.nolij.zume.lexforge.LexZume";
+			case ZumeVariant.LEXFORGE18 -> "dev.nolij.zume.lexforge18.LexZume18";
+			case ZumeVariant.LEXFORGE16 -> "dev.nolij.zume.lexforge16.LexZume16";
+			case ZumeVariant.VINTAGE_FORGE -> "dev.nolij.zume.vintage.VintageZume";
+			default -> "[unknown variant]";
+		};
+		try {
+			Class.forName(className).getConstructor().newInstance();
+		} catch(ReflectiveOperationException e) {
+			throw null;
 		}
 	}
 	
