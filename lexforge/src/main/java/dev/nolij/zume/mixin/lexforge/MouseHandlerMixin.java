@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(MouseHandler.class)
-public class MouseHandlerMixin {
+public abstract class MouseHandlerMixin {
 	
 	@Redirect(method = "turnPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;smoothCamera:Z"))
 	public boolean zume$updateMouse$smoothCameraEnabled(Options instance) {

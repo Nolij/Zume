@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityRenderer.class)
-public class EntityRendererMixin {
+public abstract class EntityRendererMixin {
 
 	@Inject(method = "updateCameraAndRender", at = @At("HEAD"))
 	public void zume$render$HEAD(CallbackInfo ci) {

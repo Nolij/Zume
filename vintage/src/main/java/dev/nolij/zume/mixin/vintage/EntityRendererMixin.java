@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(EntityRenderer.class)
-public class EntityRendererMixin {
+public abstract class EntityRendererMixin {
 	
 	@ModifyExpressionValue(method = {"updateCameraAndRender", "updateRenderer"}, 
 		at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;smoothCamera:Z"))

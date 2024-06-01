@@ -28,10 +28,10 @@ public class Zume {
 		
 		if (OS_NAME.contains("linux"))
 			HOST_PLATFORM = HostPlatform.LINUX;
-		else if (OS_NAME.contains("win"))
-			HOST_PLATFORM = HostPlatform.WINDOWS;
 		else if (OS_NAME.contains("mac"))
 			HOST_PLATFORM = HostPlatform.MAC_OS;
+		else if (OS_NAME.contains("win"))
+			HOST_PLATFORM = HostPlatform.WINDOWS;
 		else
 			HOST_PLATFORM = HostPlatform.UNKNOWN;
 	}

@@ -34,7 +34,5 @@ repositories {
 dependencies {
 	compileOnly(project(":stubs"))
 	
-	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
-
 	modRuntimeOnly("org.embeddedt:embeddium-1.20.6:${"embeddium_neoforge_version"()}")
 }

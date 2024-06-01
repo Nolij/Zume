@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.nolij.zumegradle.ClassShrinkingType
-import dev.nolij.zumegradle.JarShrinkingType
+import dev.nolij.zumegradle.DeflateAlgorithm
 import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
 import dev.nolij.zumegradle.CompressJarTask
@@ -16,6 +16,7 @@ import okhttp3.MultipartBody
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.immutableListOf
+import org.ajoberstar.grgit.Tag
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -36,12 +37,12 @@ plugins {
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 enum class ReleaseChannel(
-	val suffix: String? = null,
-	val releaseType: ReleaseType? = null,
-	val deflation: JarShrinkingType = JarShrinkingType.SEVENZIP,
-	val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
-	val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
-	val proguard: Boolean = true,
+    val suffix: String? = null,
+    val releaseType: ReleaseType? = null,
+    val deflation: DeflateAlgorithm = DeflateAlgorithm.SEVENZIP,
+    val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
+    val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
+    val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
@@ -50,6 +51,8 @@ enum class ReleaseChannel(
 	RELEASE_CANDIDATE("rc"),
 	RELEASE(releaseType = ReleaseType.STABLE),
 }
+
+//region Git Versioning
 
 val headDateTime: ZonedDateTime = grgit.head().dateTime
 
@@ -122,6 +125,8 @@ if (releaseChannel.suffix != null) {
 	}
 }
 
+//endregion
+
 Zume.version = "${minorVersion}.${patchAndSuffix}"
 println("Zume Version: ${Zume.version}")
 
@@ -168,11 +173,13 @@ allprojects {
 		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
-		maven("https://api.modrinth.com/maven") {
-			content {
+		exclusiveContent { 
+			forRepository { maven("https://api.modrinth.com/maven") }
+			filter { 
 				includeGroup("maven.modrinth")
 			}
 		}
+		maven("https://maven.blamejared.com")
 	}
 	
 	tasks.withType<JavaCompile> {
@@ -228,7 +235,7 @@ subprojects {
 	}
 	
 	dependencies {
-		implementation("blue.endless:jankson:${"jankson_version"()}")
+		implementation("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 	}
 
 	if (implName in uniminedImpls) {
@@ -241,6 +248,10 @@ subprojects {
 			if (implName != "primitive") {
 				runs.config("server") {
 					disabled = true
+				}
+				
+				runs.config("client") {
+					jvmArgs += "-Dzume.configPathOverride=${rootProject.file("zume.json5").absolutePath}"
 				}
 			}
 			
@@ -272,6 +283,18 @@ subprojects {
 			dependsOn(outputJar)
 		}
 	}
+	
+	if(implName in lexForgeImpls) {
+		tasks.withType<RemapJarTask> {
+			mixinRemap {
+				disableRefmap()
+			}
+		}
+		
+		dependencies {
+			"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}:downgraded-8")
+		}
+	}
 }
 
 unimined.minecraft {
@@ -296,7 +319,7 @@ val shade: Configuration by configurations.creating {
 }
 
 dependencies {
-	shade("blue.endless:jankson:${"jankson_version"()}")
+	shade("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
@@ -346,6 +369,7 @@ tasks.shadowJar {
 	}
 	
 	exclude("*.xcf")
+	exclude("LICENSE_zson")
 	
 	configurations = immutableListOf(shade)
 	archiveClassifier = null
@@ -361,26 +385,29 @@ tasks.shadowJar {
 		from(zipTree(implJarTask.archiveFile.get())) {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
+
+			filesMatching(immutableListOf(
+				"dev/nolij/zume/lexforge/LexZume.class",
+				"dev/nolij/zume/lexforge18/LexZume18.class",
+				"dev/nolij/zume/lexforge16/LexZume16.class",
+				"dev/nolij/zume/vintage/VintageZume.class")) {
+				val reader = ClassReader(this.open())
+				val node = ClassNode()
+				reader.accept(node, 0)
+
+				node.visibleAnnotations?.removeIf { it.desc == "Lnet/minecraftforge/fml/common/Mod;" }
+
+				val writer = ClassWriter(0)
+				node.accept(writer)
+				this.file.writeBytes(writer.toByteArray())
+			}
 		}
 	}
 	
-	filesMatching(immutableListOf(
-			"dev/nolij/zume/lexforge/LexZume.class", 
-			"dev/nolij/zume/lexforge18/LexZume18.class", 
-			"dev/nolij/zume/lexforge16/LexZume16.class", 
-			"dev/nolij/zume/vintage/VintageZume.class")) {
-		val reader = ClassReader(this.open())
-		val node = ClassNode()
-		reader.accept(node, 0)
-		
-		node.visibleAnnotations.removeIf { it.desc == "Lnet/minecraftforge/fml/common/Mod;" }
-		
-		val writer = ClassWriter(0)
-		node.accept(writer)
-		this.file.writeBytes(writer.toByteArray())
+	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
+	if(releaseChannel.proguard) {
+		relocate("dev.nolij.zume.mixin", "zume.mixin")
 	}
-	
-	relocate("blue.endless.jankson", "dev.nolij.zume.shadow.blue.endless.jankson")
 	
 	manifest {
 		attributes(
@@ -399,7 +426,7 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	val shadowJar = tasks.shadowJar.get()
 	inputJar = shadowJar.archiveFile.get().asFile
 	
-	jarShrinkingType = releaseChannel.deflation
+	deflateAlgorithm = releaseChannel.deflation
 	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
 	if (releaseChannel.proguard) {
@@ -545,7 +572,7 @@ afterEvaluate {
 			doLast {
 				val http = HttpUtils()
 
-				val currentTag = releaseTags.getOrNull(0)
+				val currentTag: Tag? = releaseTags.getOrNull(0)
 				val buildChangeLog =
 					grgit.log {
 						if (currentTag != null)

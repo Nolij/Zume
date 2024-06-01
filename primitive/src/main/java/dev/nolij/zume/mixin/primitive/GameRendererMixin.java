@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(class_555.class)
-public class GameRendererMixin {
+public abstract class GameRendererMixin {
 	
 	@Inject(method = "method_1844", at = @At("HEAD"))
 	public void zume$render$HEAD(CallbackInfo ci) {

@@ -14,21 +14,6 @@ import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 @SuppressWarnings("unused")
 public class ArchaicConfigProvider implements IModGuiFactory {
 	
-	public static class ArchaicZumeConfigGUI extends GuiConfig {
-		
-		public ArchaicZumeConfigGUI(GuiScreen parentScreen) {
-			super(parentScreen, Collections.emptyList(), MOD_ID, false, false, "config");
-			
-			ZumeAPI.openConfigFile();
-		}
-		
-		@Override
-		public void initGui() {
-			Minecraft.getMinecraft().displayGuiScreen(parentScreen);
-		}
-		
-	}
-	
 	@Override
 	public Class<? extends GuiScreen> mainConfigGuiClass() {
 		return ArchaicZumeConfigGUI.class;

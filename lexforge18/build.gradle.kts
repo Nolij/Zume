@@ -16,6 +16,4 @@ unimined.minecraft {
 
 dependencies {
 	compileOnly(project(":stubs"))
-
-	"minecraftLibraries"("blue.endless:jankson:${"jankson_version"()}")
 }
