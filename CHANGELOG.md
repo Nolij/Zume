@@ -1,2 +1,6 @@
 - added Embeddium config screen integration
+- applied more aggressive jar size reduction techniques (@rhysdh540)
+  - rewrote config file load/save functionality
+  - shrink names of more classes
+  - reduced jar size impact of mixins
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
