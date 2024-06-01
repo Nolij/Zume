@@ -137,21 +137,25 @@ base {
 	archivesName = "mod_id"()
 }
 
-val fabricImpls = arrayOf(
+fun arrayOfProjects(vararg projectNames: String): Array<String> {
+	return listOf(*projectNames).filter { p -> findProject(p) != null }.toTypedArray()
+}
+
+val fabricImpls = arrayOfProjects(
 	"modern",
 	"legacy",
 	"primitive",
 )
-val legacyForgeImpls = arrayOf(
+val legacyForgeImpls = arrayOfProjects(
 	"vintage",
 	"archaic",
 )
-val lexForgeImpls = arrayOf(
+val lexForgeImpls = arrayOfProjects(
 	"lexforge",
 	"lexforge18",
 	"lexforge16",
 )
-val neoForgeImpls = arrayOf(
+val neoForgeImpls = arrayOfProjects(
 	"neoforge",
 )
 val uniminedImpls = arrayOf(
