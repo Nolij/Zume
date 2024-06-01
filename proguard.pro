@@ -22,11 +22,14 @@
 }
 
 # Platform implementations
--keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v?.IZumeImplementation {
+-keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v*.IZumeImplementation {
 	# Forge Event Subscribers
 	@*.*.fml.common.Mod$EventHandler <methods>;
 	@*.*.fml.common.eventhandler.SubscribeEvent <methods>;
 }
+
+-adaptclassstrings
+-adaptresourcefilecontents fabric.mod.json
 
 # screens
 -keepclassmembers class dev.nolij.zume.** extends net.minecraft.class_437,
