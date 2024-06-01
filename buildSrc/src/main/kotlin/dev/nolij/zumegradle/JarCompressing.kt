@@ -74,11 +74,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
-		contents.forEach {
-			var (name, bytes) = it
-			if (name == "fabric.mod.json" && isObfuscating) {
-				bytes = remapFMJ(bytes, mappings!!)
-			}
+		contents.forEach { var (name, bytes) = it
 
 			if (name.endsWith("mixins.json") && isObfuscating) {
 				bytes = remapMixinConfig(bytes, mappings!!)
@@ -106,27 +102,6 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 		}
 		out.finish()
 	}
-}
-
-@Suppress("UNCHECKED_CAST")
-private fun remapFMJ(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
-	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
-	var entrypoints = (json["entrypoints"] as Map<String, List<String>>?)?.toMutableMap()
-	if (entrypoints == null) {
-		throw IllegalStateException("fabric.mod.json does not contain entrypoints")
-	}
-
-	val newEntrypoints = mutableMapOf<String, MutableList<String>>()
-	for ((type, classes) in entrypoints) {
-		for (old in classes) {
-			val obf = mappings.obfuscate(old)
-			newEntrypoints.computeIfAbsent(type) { mutableListOf() }.add(obf)
-		}
-	}
-
-	json["entrypoints"] = newEntrypoints
-
-	return JsonOutput.toJson(json).toByteArray()
 }
 
 @Suppress("UNCHECKED_CAST")
