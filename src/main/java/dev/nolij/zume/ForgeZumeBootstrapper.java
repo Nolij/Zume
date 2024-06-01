@@ -29,11 +29,7 @@ public class ForgeZumeBootstrapper {
 			case ZumeVariant.VINTAGE_FORGE -> "dev.nolij.zume.vintage.VintageZume";
 			default -> "[unknown variant]";
 		};
-		try {
-			Class.forName(className).getConstructor().newInstance();
-		} catch(ReflectiveOperationException e) {
-			throw null;
-		}
+		Class.forName(className).getConstructor().newInstance();
 	}
 	
 }

@@ -29,7 +29,7 @@ tasks.clean {
 tasks.processResources {
 	from("src/main/resources/assets/zume/lang/") {
 		include("*.lang")
-		rename { name -> name.lowercase() }
+		rename { it.lowercase() }
 		into("assets/zume/lang/")
 	}
 

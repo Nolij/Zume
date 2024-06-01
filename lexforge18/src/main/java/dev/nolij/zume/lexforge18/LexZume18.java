@@ -90,12 +90,8 @@ public class LexZume18 implements IZumeImplementation {
 	
 	private void calculateFOV(EntityViewRenderEvent event) {
 		if (event.getClass() == FOV_EVENT_CLASS && ZumeAPI.isFOVHookActive()) {
-			try {
-				//noinspection DataFlowIssue
-				SET_FOV.invokeExact(event, ZumeAPI.fovHook((double) GET_FOV.invokeExact(event)));
-			} catch (Throwable e) {
-				throw new AssertionError(e);
-			}
+			//noinspection DataFlowIssue
+			SET_FOV.invokeExact(event, ZumeAPI.fovHook((double) GET_FOV.invokeExact(event)));
 		}
 	}
 	
