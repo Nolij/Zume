@@ -194,7 +194,7 @@ allprojects {
 			javaCompiler = javaToolchains.compilerFor {
 				languageVersion = JavaLanguageVersion.of(21)
 			}
-			options.compilerArgs.add("-Xplugin:Manifold")
+			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jabel"))
 		}
 	}
 	
@@ -202,6 +202,7 @@ allprojects {
 		compileOnly("org.jetbrains:annotations:${"jetbrains_annotations_version"()}")
 		compileOnly("com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}") {
 			annotationProcessor(this)
+			exclude(group = "net.bytebuddy", module = "byte-buddy")
 		}
 		compileOnly("systems.manifold:manifold-exceptions:${"manifold_version"()}") {
 			annotationProcessor(this)
