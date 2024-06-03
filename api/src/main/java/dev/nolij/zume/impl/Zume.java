@@ -212,7 +212,7 @@ public class Zume {
 		final boolean toggleMode = getToggleMode();
 		
 		if (toggleMode && held && !wasHeld)
-			zooming = !Zume.zooming;
+			zooming = !zooming;
 		else if (!toggleMode)
 			zooming = held;
 		
