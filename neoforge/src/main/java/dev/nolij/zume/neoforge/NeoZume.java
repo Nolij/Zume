@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -58,11 +57,7 @@ public class NeoZume implements IZumeImplementation {
 		if (TICK_EVENT_PHASE == null) {
 			TICK_EVENT_PHASE_START = null;
 		} else {
-			try {
-				TICK_EVENT_PHASE_START = (Enum<?>) TICK_EVENT_PHASE.getField("START").get(null);
-			} catch (IllegalAccessException | NoSuchFieldException e) {
-				throw new AssertionError(e);
-			}
+			TICK_EVENT_PHASE_START = (Enum<?>) TICK_EVENT_PHASE.getField("START").get(null);
 		}
 	}
 	private static final MethodHandle RENDER_TICK_EVENT_PHASE_GETTER = METHOD_HANDLE_HELPER.getGetterOrNull(
@@ -155,13 +150,9 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void renderLegacy(Object event) {
-		try {
-			//noinspection DataFlowIssue
-			if ((Enum<?>) RENDER_TICK_EVENT_PHASE_GETTER.invokeExact(event) == TICK_EVENT_PHASE_START) {
-				ZumeAPI.renderHook();
-			}
-		} catch (Throwable e) {
-			throw new AssertionError(e);
+		//noinspection DataFlowIssue
+		if ((Enum<?>) RENDER_TICK_EVENT_PHASE_GETTER.invokeExact(event) == TICK_EVENT_PHASE_START) {
+			ZumeAPI.renderHook();
 		}
 	}
 	
