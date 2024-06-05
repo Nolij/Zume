@@ -33,8 +33,6 @@ dependencies {
 	implementation("net.fabricmc:mapping-io:${"mapping_io_version"()}")
 	implementation("org.apache.ant:ant:${"shadow_ant_version"()}")
 	implementation("com.guardsquare:proguard-base:${"proguard_version"()}")
-	implementation("net.bytebuddy:byte-buddy-dep:1.14.17")
-	implementation("net.bytebuddy:byte-buddy-agent:1.14.17")
 	
 	plugin(id = "com.github.johnrengelman.shadow", version = "shadow_version"())
 	plugin(id = "xyz.wagyourtail.unimined", version = "unimined_version"())
