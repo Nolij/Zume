@@ -110,6 +110,7 @@ public class ZumeConfigImpl {
 		int i = 0;
 		while (true) {
 			try {
+				//noinspection DataFlowIssue
 				return Zson.map2Obj(ZsonParser.parse(new FileReader(configFile)), ZumeConfigImpl.class);
             } catch (IllegalArgumentException e) {
 				if (++i < MAX_RETRIES) {

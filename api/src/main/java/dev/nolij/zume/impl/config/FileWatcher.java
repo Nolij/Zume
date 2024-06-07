@@ -11,11 +11,6 @@ import java.util.concurrent.Semaphore;
 
 public class FileWatcher implements IFileWatcher {
 	
-	@FunctionalInterface
-	public interface Callback {
-		void invoke() throws InterruptedException;
-	}
-	
 	private static final long DEBOUNCE_DURATION_MS = 500L;
 	
 	/**
@@ -23,7 +18,7 @@ public class FileWatcher implements IFileWatcher {
 	 * A shutdown hook is registered to stop watching. To control this yourself, create an
 	 * instance and use the start/stop methods.
 	 */
-	public static FileWatcher onFileChange(Path file, Callback callback) throws IOException {
+	public static FileWatcher onFileChange(Path file, Runnable callback) throws IOException {
 		final FileWatcher watcher = new FileWatcher();
 		watcher.start(file, callback);
 		
@@ -59,7 +54,7 @@ public class FileWatcher implements IFileWatcher {
 		}
 	}
 	
-	public void start(Path file, Callback callback) throws IOException {
+	public void start(Path file, Runnable callback) throws IOException {
 		watchService = FileSystems.getDefault().newWatchService();
 		Path parent = file.getParent();
 		parent.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE);
@@ -77,7 +72,7 @@ public class FileWatcher implements IFileWatcher {
 								System.currentTimeMillis() > debounce &&
 								Files.exists(changed) && 
 								Files.isSameFile(changed, file)) {
-								callback.invoke();
+								callback.run();
 								debounce = System.currentTimeMillis() + DEBOUNCE_DURATION_MS;
 								break;
 							}

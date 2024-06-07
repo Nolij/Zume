@@ -9,12 +9,16 @@
 -repackageclasses zume
 -keepattributes Runtime*Annotations # keep annotations
 
--keep,allowoptimization public class dev.nolij.zume.api.** { public *; } # public APIs
+-keep public class dev.nolij.zume.api.** { public *; } # public APIs
 -keepclassmembers class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; } # dont rename config fields
 -keepclassmembers,allowoptimization class dev.nolij.zume.ZumeMixinPlugin {
     public *;
 }
--keep @org.spongepowered.asm.mixin.Mixin class * { *; } # dont touch mixins
+-keep @org.spongepowered.asm.mixin.Mixin class * {
+	@org.spongepowered.asm.mixin.Overwrite *;
+	@org.spongepowered.asm.mixin.Shadow *;
+}
+-keepclassmembers,allowobfuscation @org.spongepowered.asm.mixin.Mixin class * { *; }
 
 # Forge entrypoints
 -keep,allowobfuscation @*.*.fml.common.Mod class dev.nolij.zume.** {
@@ -46,9 +50,10 @@
 	public <methods>;
 }
 
--keep,allowoptimization class io.github.prospector.modmenu.** { *; } # ugly classloader hack
-
 # Fabric entrypoints
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.FabricZumeBootstrapper
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }
+
+-keep @dev.nolij.zumegradle.proguard.ProGuardKeep class * { *; }
+-keepclassmembers class * { @dev.nolij.zumegradle.proguard.ProGuardKeep *; }

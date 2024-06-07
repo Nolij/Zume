@@ -1,9 +1,9 @@
 package dev.nolij.zume.impl.config;
 
 public final class NullFileWatcher implements IFileWatcher {
+	
 	@Override
-	public void lock() {
-	}
+	public void lock() {}
 	
 	@Override
 	public boolean tryLock() {
@@ -11,6 +11,6 @@ public final class NullFileWatcher implements IFileWatcher {
 	}
 	
 	@Override
-	public void unlock() {
-	}
+	public void unlock() {}
+	
 }

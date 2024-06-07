@@ -1,6 +1,7 @@
 package dev.nolij.zume.integration.implementation.embeddium;
 
 import com.google.common.collect.ImmutableList;
+import dev.nolij.zume.integration.embeddium.ZumeOptionsStorage;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
@@ -17,7 +18,7 @@ import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.nolij.zume.integration.embeddium.ZumeEmbeddiumConstants.*;
+import static dev.nolij.zume.integration.embeddium.ZumeOptionsStorage.*;
 
 public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<OptionGUIConstructionEvent> {
 	
