@@ -16,6 +16,7 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import proguard.Configuration
 import proguard.ConfigurationParser

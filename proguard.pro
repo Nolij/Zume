@@ -44,9 +44,10 @@
 	public <methods>;
 }
 
--keep,allowoptimization class io.github.prospector.modmenu.** { *; } # ugly classloader hack
-
 # Fabric entrypoints
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.FabricZumeBootstrapper
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }
+
+-keep @dev.nolij.zumegradle.proguard.ProGuardKeep class * { *; }
+-keepclassmembers class * { @dev.nolij.zumegradle.proguard.ProGuardKeep *; }
