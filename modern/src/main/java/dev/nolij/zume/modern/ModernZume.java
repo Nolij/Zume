@@ -62,15 +62,11 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 	@Override
 	public CameraPerspective getCameraPerspective() {
 		int ordinal;
-		try {
-			if (GET_PERSPECTIVE != null)
-				ordinal = ((Enum<?>) GET_PERSPECTIVE.invokeExact(Minecraft.getInstance().options)).ordinal();
-			else
-				//noinspection DataFlowIssue
-				ordinal = (int) PERSPECTIVE.invokeExact(Minecraft.getInstance().options);
-		} catch (Throwable e) {
-			throw new AssertionError(e);
-		}
+		if (GET_PERSPECTIVE != null)
+			ordinal = ((Enum<?>) GET_PERSPECTIVE.invokeExact(Minecraft.getInstance().options)).ordinal();
+		else
+			//noinspection DataFlowIssue
+			ordinal = (int) PERSPECTIVE.invokeExact(Minecraft.getInstance().options);
 		
 		return CameraPerspective.values()[ordinal];
 	}

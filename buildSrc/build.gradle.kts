@@ -18,8 +18,8 @@ repositories {
 	}
 }
 
-fun DependencyHandler.plugin(id: String, version: String) {
-	this.implementation(group = id, name = "$id.gradle.plugin", version = version)
+fun DependencyHandler.plugin(id: String, version: String): ExternalModuleDependency {
+	return this.implementation(group = id, name = "$id.gradle.plugin", version = version)
 }
 
 val properties = Properties().apply {

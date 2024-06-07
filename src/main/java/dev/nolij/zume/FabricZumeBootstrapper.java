@@ -36,14 +36,9 @@ public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEn
 			case ZumeVariant.MODERN -> "dev.nolij.zume.modern.ModernZume";
 			case ZumeVariant.LEGACY -> "dev.nolij.zume.legacy.LegacyZume";
 			case ZumeVariant.PRIMITIVE -> "dev.nolij.zume.primitive.PrimitiveZume";
-			default -> "[unknown variant]";
+			default -> null;
 		};
-		try {
-			((ClientModInitializer) Class.forName(className).getConstructor().newInstance()).onInitializeClient();
-		} catch (ReflectiveOperationException e) {
-			//noinspection DataFlowIssue
-			throw null; // Save some bytecode by not throwing a real exception
-		}
+		((ClientModInitializer)Class.forName(className).getConstructor().newInstance()).onInitializeClient();
 	}
 	
 }
