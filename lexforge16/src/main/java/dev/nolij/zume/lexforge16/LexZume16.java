@@ -17,7 +17,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -72,7 +71,7 @@ public class LexZume16 implements IZumeImplementation {
 		MethodHandleHelper.PUBLIC.getGetterOrNull(Options.class, "field_74320_O", int.class);
 	
 	@Override
-	public @NotNull CameraPerspective getCameraPerspective() {
+	public CameraPerspective getCameraPerspective() {
 		int ordinal;
 		try {
 			if (GET_CAMERA_TYPE != null)

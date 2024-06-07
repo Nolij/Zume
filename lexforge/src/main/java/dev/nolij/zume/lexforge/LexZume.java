@@ -16,7 +16,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 
@@ -63,7 +62,7 @@ public class LexZume implements IZumeImplementation {
 	}
 	
 	@Override
-	public @NotNull CameraPerspective getCameraPerspective() {
+	public CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[Minecraft.getInstance().options.getCameraType().ordinal()];
 	}
 	

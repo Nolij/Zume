@@ -9,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.SmoothUtil;
-import org.jetbrains.annotations.NotNull;
 
 public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
@@ -39,7 +38,7 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	}
 	
 	@Override
-	public @NotNull CameraPerspective getCameraPerspective() {
+	public CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[MinecraftClient.getInstance().options.perspective];
 	}
 	

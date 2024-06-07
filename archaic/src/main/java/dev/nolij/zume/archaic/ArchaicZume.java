@@ -17,7 +17,6 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.MouseFilter;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -67,7 +66,7 @@ public class ArchaicZume implements IZumeImplementation {
 	}
 	
 	@Override
-	public @NotNull CameraPerspective getCameraPerspective() {
+	public CameraPerspective getCameraPerspective() {
 		return CameraPerspective.values()[Minecraft.getMinecraft().gameSettings.thirdPersonView];
 	}
 	
