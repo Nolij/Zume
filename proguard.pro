@@ -14,7 +14,11 @@
 -keepclassmembers,allowoptimization class dev.nolij.zume.ZumeMixinPlugin {
     public *;
 }
--keep @org.spongepowered.asm.mixin.Mixin class * { *; } # dont touch mixins
+-keep @org.spongepowered.asm.mixin.Mixin class * {
+	@org.spongepowered.asm.mixin.Overwrite *;
+	@org.spongepowered.asm.mixin.Shadow *;
+}
+-keepclassmembers,allowobfuscation @org.spongepowered.asm.mixin.Mixin class * { *; }
 
 # Forge entrypoints
 -keep,allowobfuscation @*.*.fml.common.Mod class dev.nolij.zume.** {

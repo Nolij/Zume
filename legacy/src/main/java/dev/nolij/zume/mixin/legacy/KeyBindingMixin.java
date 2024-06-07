@@ -1,6 +1,7 @@
 package dev.nolij.zume.mixin.legacy;
 
 import dev.nolij.zume.impl.Zume;
+import dev.nolij.zumegradle.proguard.ProGuardKeep;
 import net.minecraft.client.option.KeyBinding;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +16,8 @@ import java.util.Set;
 @Mixin(KeyBinding.class)
 public class KeyBindingMixin {
 	
-	@SuppressWarnings({"MissingUnique", "unused", "MismatchedQueryAndUpdateOfCollection"})	
+	@SuppressWarnings({"MissingUnique", "unused", "MismatchedQueryAndUpdateOfCollection"})
+	@ProGuardKeep
 	private static Map<String, Integer> field_15867; // vintage intermediary
 	
 	@Shadow @Final private static Set<String> categories;
