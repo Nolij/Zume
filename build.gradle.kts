@@ -46,7 +46,8 @@ enum class ReleaseChannel(
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		json = JsonShrinkingType.PRETTY_PRINT),
+		json = JsonShrinkingType.PRETTY_PRINT
+	),
 	PRE_RELEASE("pre"),
 	RELEASE_CANDIDATE("rc"),
 	RELEASE(releaseType = ReleaseType.STABLE),

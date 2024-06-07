@@ -39,7 +39,9 @@
 }
 
 # Legacy Forge config providers
--keep,allowoptimization,allowobfuscation class dev.nolij.zume.** implements *.*.fml.client.IModGuiFactory
+-keep,allowoptimization,allowobfuscation class dev.nolij.zume.** implements *.*.client.gui.ForgeGuiFactory {
+	public <methods>;
+}
 -keepclassmembers,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig {
 	public <methods>;
 }
