@@ -130,11 +130,11 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 		classNode.sourceFile = null
 	}
 	
-	for(annotation in classNode.visibleAnnotations ?: emptyList()) {
-		if(annotation.desc.endsWith("fml/common/Mod;")) {
+	for (annotation in classNode.visibleAnnotations ?: emptyList()) {
+		if (annotation.desc.endsWith("fml/common/Mod;")) {
 			for (i in 0 until annotation.values.size step 2) {
 				if (annotation.values[i] == "guiFactory") {
-					var old = annotation.values[i + 1] as String
+					val old = annotation.values[i + 1] as String
 					annotation.values[i + 1] = mappings.obfuscate(old)
 					println("Remapped guiFactory: $old -> ${annotation.values[i + 1]}")
 				}
@@ -142,7 +142,7 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 		}
 	}
 
-	if (classNode.invisibleAnnotations?.map { it.desc }?.contains("Lorg/spongepowered/asm/mixin/Mixin;") == true) {
+	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
 		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN
 	}
 

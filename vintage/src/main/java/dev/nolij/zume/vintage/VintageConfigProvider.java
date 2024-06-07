@@ -20,9 +20,7 @@ public class VintageConfigProvider implements IModGuiFactory {
 	}
 	
 	@Override
-	public void initialize(Minecraft minecraftInstance) {
-		
-	}
+	public void initialize(Minecraft minecraftInstance) {}
 	
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
