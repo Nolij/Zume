@@ -4,23 +4,17 @@ import dev.nolij.zume.api.util.v1.EasingHelper;
 
 public class EasedDouble {
 	
-	public static final double PLACEHOLDER = Double.NaN;
-	
 	private short duration;
 	private double inverseDuration;
 	
 	private double exponent;
 	
-	private double fromValue = PLACEHOLDER;
+	private double fromValue;
 	private double targetValue;
 	
 	private long startTimestamp = 0L;
 	private long endTimestamp = 0L;
 	
-	
-	public EasedDouble() {
-		this(PLACEHOLDER);
-	}
 	
 	public EasedDouble(final double value) {
 		this.targetValue = value;
@@ -42,13 +36,6 @@ public class EasedDouble {
 		return targetValue;
 	}
 	
-	public void fillPlaceholder(double value) {
-		if (Double.isNaN(fromValue))
-			fromValue = value;
-		if (Double.isNaN(targetValue))
-			targetValue = value;
-	}
-	
 	public double getTarget() {
 		return targetValue;
 	}
@@ -56,7 +43,7 @@ public class EasedDouble {
 	public void setInstant(double target) {
 		this.startTimestamp = 0L;
 		this.endTimestamp = 0L;
-		this.fromValue = PLACEHOLDER;
+		this.fromValue = 0D;
 		this.targetValue = target;
 	}
 	
