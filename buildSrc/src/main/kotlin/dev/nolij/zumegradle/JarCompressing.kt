@@ -146,6 +146,8 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN
 	}
 
+	classNode.invisibleAnnotations?.removeIf { it.desc != "Lorg/spongepowered/asm/mixin/Mixin;" }
+
 	val writer = ClassWriter(0)
 	classNode.accept(writer)
 	return writer.toByteArray()
