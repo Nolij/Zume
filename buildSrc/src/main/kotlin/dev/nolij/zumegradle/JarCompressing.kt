@@ -141,6 +141,18 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 			}
 		}
 	}
+	
+	val isProGuardAnnotation = { annotationNode: AnnotationNode -> 
+		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
+	}
+	
+	classNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
+	classNode.fields.forEach { fieldNode ->
+		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
+	}
+	classNode.methods.forEach { fieldNode ->
+		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
+	}
 
 	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
 		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN

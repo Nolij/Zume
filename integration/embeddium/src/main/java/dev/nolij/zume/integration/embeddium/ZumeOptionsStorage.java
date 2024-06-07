@@ -6,7 +6,7 @@ import dev.nolij.zume.impl.ZumeConstants;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
 
-public final class ZumeEmbeddiumConstants {
+public final class ZumeOptionsStorage implements OptionStorage<ZumeConfig> {
 	
 	//region Pages
 	public static final OptionIdentifier<Void> GENERAL =
@@ -60,24 +60,20 @@ public final class ZumeEmbeddiumConstants {
 		OptionIdentifier.create(ZumeConstants.MOD_ID, "disable", boolean.class);
 	//endregion
 	
-	public static final class ZumeOptionsStorage implements OptionStorage<ZumeConfig> {
-		
-		private final ZumeConfig storage = ZumeConfigAPI.getSnapshot();
-		
-		@Override
-		public ZumeConfig getData() {
-			return storage;
+	private final ZumeConfig storage = ZumeConfigAPI.getSnapshot();
+	
+	@Override
+	public ZumeConfig getData() {
+		return storage;
+	}
+	
+	@Override
+	public void save() {
+		try {
+			ZumeConfigAPI.replaceConfig(storage);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
-		
-		@Override
-		public void save() {
-			try {
-				ZumeConfigAPI.replaceConfig(storage);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
 	}
 	
 }
