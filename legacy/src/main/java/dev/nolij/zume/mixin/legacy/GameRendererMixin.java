@@ -2,7 +2,7 @@ package dev.nolij.zume.mixin.legacy;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.render.GameRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,13 +20,13 @@ public class GameRendererMixin {
 		"method_9775(FJ)V" // vintage
 	}, at = @At("HEAD"))
 	public void zume$render$HEAD(CallbackInfo ci) {
-		ZumeAPI.renderHook();
+		Zume.renderHook();
 	}
 	
 	@ModifyReturnValue(method = "getFov", at = @At("TAIL"))
 	public float zume$getFOV$TAIL(float original) {
-		if (ZumeAPI.isFOVHookActive())
-			return (float) ZumeAPI.fovHook(original);
+		if (Zume.isFOVHookActive())
+			return (float) Zume.fovHook(original);
 		
 		return original;
 	}
@@ -37,7 +37,7 @@ public class GameRendererMixin {
 		"method_9775(FJ)V" // vintage
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;smoothCameraEnabled:Z"))
 	public boolean zume$smoothCameraEnabled(boolean original) {
-		return ZumeAPI.cinematicCameraEnabledHook(original);
+		return Zume.cinematicCameraEnabledHook(original);
 	}
 	
 	@Dynamic
@@ -46,12 +46,12 @@ public class GameRendererMixin {
 		"method_9775(FJ)V" // vintage
 	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;sensitivity:F"))
 	public float zume$mouseSensitivity(float original) {
-		return (float) ZumeAPI.mouseSensitivityHook(original);
+		return (float) Zume.mouseSensitivityHook(original);
 	}
 	
 	@ModifyVariable(method = "transformCamera", at = @At(value = "STORE", ordinal = 0), ordinal = 3)
 	public double zume$transformCamera$thirdPersonDistance(double original) {
-        return ZumeAPI.thirdPersonCameraHook(original);
+        return Zume.thirdPersonCameraHook(original);
 	}
 	
 }

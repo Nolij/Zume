@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge16;
 
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
@@ -23,7 +23,7 @@ final class LexZume16ConfigScreen {
 			super(new TextComponent(""));
 			this.parent = parent;
 			
-			ZumeAPI.openConfigFile();
+			Zume.openConfigFile();
 		}
 		
 		@Override

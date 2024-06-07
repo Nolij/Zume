@@ -1,9 +1,8 @@
 package dev.nolij.zume.legacy;
 
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.mixin.legacy.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -19,9 +18,9 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
 			return;
 		
-		ZumeAPI.getLogger().info("Loading Legacy Zume...");
+		Zume.LOGGER.info("Loading Legacy Zume...");
 		
-		ZumeAPI.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
+		Zume.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
 	}
 	
 	@Override
@@ -60,7 +59,7 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	@Override
 	public void onZoomActivate() {
 		if (USE_CINEMATIC_CAMERA_WORKAROUND && 
-			ZumeConfigAPI.isCinematicZoomEnabled() && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
+			Zume.config.enableCinematicZoom && !MinecraftClient.getInstance().options.smoothCameraEnabled) {
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftClient.getInstance().gameRenderer;
 			gameRenderer.setCursorXSmoother(new SmoothUtil());
 			gameRenderer.setCursorYSmoother(new SmoothUtil());

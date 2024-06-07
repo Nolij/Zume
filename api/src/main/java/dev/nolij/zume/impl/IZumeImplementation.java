@@ -8,6 +8,6 @@ public interface IZumeImplementation {
 	
 	CameraPerspective getCameraPerspective();
 	
-	void onZoomActivate();
+	default void onZoomActivate() {}
 	
 }

@@ -1,9 +1,8 @@
 package dev.nolij.zume.primitive;
 
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.mixin.primitive.GameRendererAccessor;
 import dev.nolij.zume.mixin.primitive.MinecraftAccessor;
 import net.fabricmc.api.ClientModInitializer;
@@ -19,9 +18,9 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT)
 			return;
 		
-		ZumeAPI.getLogger().info("Loading Primitive Zume...");
+		Zume.LOGGER.info("Loading Primitive Zume...");
 		
-		ZumeAPI.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
+		Zume.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
 	}
 	
 	@Override
@@ -49,7 +48,7 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	@Override
 	public void onZoomActivate() {
 		//noinspection ConstantValue
-		if (ZumeConfigAPI.isCinematicZoomEnabled() && !MinecraftAccessor.getInstance().options.cinematicMode) {
+		if (Zume.config.enableCinematicZoom && !MinecraftAccessor.getInstance().options.cinematicMode) {
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().field_2818;
 			gameRenderer.setCinematicYawSmoother(new SmoothUtil());
 			gameRenderer.setCinematicPitchSmoother(new SmoothUtil());

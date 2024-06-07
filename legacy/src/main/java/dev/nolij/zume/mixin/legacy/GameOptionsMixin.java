@@ -1,6 +1,6 @@
 package dev.nolij.zume.mixin.legacy;
 
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.legacy.ZumeKeyBind;
 import net.legacyfabric.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.GameOptions;
@@ -18,7 +18,7 @@ public class GameOptionsMixin {
 	
 	@Inject(method = "load", at = @At("HEAD"))
 	public void zume$load$HEAD(CallbackInfo ci) {
-		if (ZumeConfigAPI.isDisabled()) return;
+		if (Zume.config.disable) return;
 		
 		if (!keybindsRegistered) {
 			keybindsRegistered = true;

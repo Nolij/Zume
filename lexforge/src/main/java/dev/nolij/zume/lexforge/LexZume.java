@@ -1,10 +1,9 @@
 package dev.nolij.zume.lexforge;
 
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.integration.implementation.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
@@ -30,12 +29,12 @@ public class LexZume implements IZumeImplementation {
 		if (!FMLEnvironment.dist.isClient())
 			return;
 		
-		ZumeAPI.getLogger().info("Loading LexZume...");
+		Zume.LOGGER.info("Loading LexZume...");
 		
 		LexZumeConfigScreen.register();
 		
-		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
-		if (ZumeConfigAPI.isDisabled())
+		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
+		if (Zume.config.disable)
 			return;
 		
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);
@@ -76,13 +75,13 @@ public class LexZume implements IZumeImplementation {
 	
 	private void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			ZumeAPI.renderHook();
+			Zume.renderHook();
 		}
 	}
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
-		if (ZumeAPI.isFOVHookActive()) {
-			event.setFOV(ZumeAPI.fovHook(event.getFOV()));
+		if (Zume.isFOVHookActive()) {
+			event.setFOV(Zume.fovHook(event.getFOV()));
 		}
 	}
 	
@@ -100,7 +99,7 @@ public class LexZume implements IZumeImplementation {
         } catch (Throwable e) {
             throw new AssertionError(e);
         }
-        if (ZumeAPI.mouseScrollHook(scrollAmount)) {
+        if (Zume.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

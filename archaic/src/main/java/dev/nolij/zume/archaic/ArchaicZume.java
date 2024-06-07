@@ -4,11 +4,10 @@ import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.mixin.archaic.EntityRendererAccessor;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.Mod;
@@ -39,10 +38,10 @@ public class ArchaicZume implements IZumeImplementation {
 		if (!FMLLaunchHandler.side().isClient())
 			return;
 		
-		ZumeAPI.getLogger().info("Loading Archaic Zume...");
+		Zume.LOGGER.info("Loading Archaic Zume...");
 		
-		ZumeAPI.registerImplementation(this, Launch.minecraftHome.toPath().resolve("config"));
-		if (ZumeConfigAPI.isDisabled())
+		Zume.registerImplementation(this, Launch.minecraftHome.toPath().resolve("config"));
+		if (Zume.config.disable)
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -74,7 +73,7 @@ public class ArchaicZume implements IZumeImplementation {
 	
 	@Override
 	public void onZoomActivate() {
-		if (ZumeConfigAPI.isCinematicZoomEnabled() && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
+		if (Zume.config.enableCinematicZoom && !Minecraft.getMinecraft().gameSettings.smoothCamera) {
 			final EntityRendererAccessor entityRenderer = (EntityRendererAccessor) Minecraft.getMinecraft().entityRenderer;
 			entityRenderer.setMouseFilterXAxis(new MouseFilter());
 			entityRenderer.setMouseFilterYAxis(new MouseFilter());
@@ -95,7 +94,7 @@ public class ArchaicZume implements IZumeImplementation {
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) throws Throwable {
 		final int scrollAmount = mouseEvent.dwheel;
-		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
+		if (Zume.mouseScrollHook(scrollAmount)) {
 			//noinspection DataFlowIssue
 			SET_CANCELED.invokeExact(mouseEvent, true);
 		}

@@ -1,8 +1,8 @@
 package dev.nolij.zume.modern.integration.modmenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.impl.Zume;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -32,7 +32,7 @@ public class ZumeModMenuIntegration implements ModMenuApi {
 	            //noinspection DataFlowIssue
 	            return new ModernZumeConfigScreen((Component) LITERALTEXT_INIT.invokeExact(""), parent);
             } catch (Throwable e) {
-				ZumeAPI.getLogger().error("Error opening config screen: ", e);
+	            Zume.LOGGER.error("Error opening config screen: ", e);
 				return null;
             }
         };

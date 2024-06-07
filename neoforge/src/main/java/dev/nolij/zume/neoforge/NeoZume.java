@@ -1,10 +1,9 @@
 package dev.nolij.zume.neoforge;
 
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.integration.implementation.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -74,7 +73,7 @@ public class NeoZume implements IZumeImplementation {
 		if (!FMLEnvironment.dist.isClient())
 			return;
 		
-		ZumeAPI.getLogger().info("Loading NeoZume...");
+		Zume.LOGGER.info("Loading NeoZume...");
 		
 		if (REGISTER_EXT_POINT != null &&
 			CONFIG_SCREEN_EXT != null &&
@@ -105,8 +104,8 @@ public class NeoZume implements IZumeImplementation {
 			}
 		}
 		
-		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
-		if (ZumeConfigAPI.isDisabled())
+		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
+		if (Zume.config.disable)
 			return;
 		
 		modEventBus.addListener(this::registerKeyBindings);
@@ -159,14 +158,14 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void render(Object event) {
-		ZumeAPI.renderHook();
+		Zume.renderHook();
 	}
 	
 	private void renderLegacy(Object event) {
 		try {
 			//noinspection DataFlowIssue
 			if ((Enum<?>) RENDER_TICK_EVENT_PHASE_GETTER.invokeExact(event) == TICK_EVENT_PHASE_START) {
-				ZumeAPI.renderHook();
+				Zume.renderHook();
 			}
 		} catch (Throwable e) {
 			throw new AssertionError(e);
@@ -174,25 +173,25 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
-		if (ZumeAPI.isFOVHookActive()) {
-			event.setFOV(ZumeAPI.fovHook(event.getFOV()));
+		if (Zume.isFOVHookActive()) {
+			event.setFOV(Zume.fovHook(event.getFOV()));
 		}
 	}
 	
 	private void calculateTurnPlayerValues(CalculatePlayerTurnEvent event) {
-		event.setMouseSensitivity(ZumeAPI.mouseSensitivityHook(event.getMouseSensitivity()));
-		event.setCinematicCameraEnabled(ZumeAPI.cinematicCameraEnabledHook(event.getCinematicCameraEnabled()));
+		event.setMouseSensitivity(Zume.mouseSensitivityHook(event.getMouseSensitivity()));
+		event.setCinematicCameraEnabled(Zume.cinematicCameraEnabledHook(event.getCinematicCameraEnabled()));
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
 		final int scrollAmount = (int) event.getScrollDeltaY();
-		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
+		if (Zume.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-        event.setDistance(ZumeAPI.thirdPersonCameraHook(event.getDistance()));
+        event.setDistance(Zume.thirdPersonCameraHook(event.getDistance()));
 	}
 	
 }

@@ -1,6 +1,6 @@
 package dev.nolij.zume;
 
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.fabricmc.loader.impl.gui.FabricGuiEntry;
@@ -19,7 +19,7 @@ public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEn
 		if (ZumeMixinPlugin.ZUME_VARIANT != null)
 			return;
 		
-		ZumeAPI.getLogger().error(MISSING_DEPENDENCY_MESSAGE);
+		Zume.LOGGER.error(MISSING_DEPENDENCY_MESSAGE);
 		FabricGuiEntry.displayError("Incompatible mods found!", null, tree -> {
 			var tab = tree.addTab("Error");
 			tab.node.addMessage(MISSING_DEPENDENCY_MESSAGE, FabricStatusTree.FabricTreeWarningLevel.ERROR);

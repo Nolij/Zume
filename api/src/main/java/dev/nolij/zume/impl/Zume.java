@@ -53,7 +53,7 @@ public class Zume {
 	//endregion
 	
 	//region Initialization Methods
-	public static void init(final IZumeImplementation implementation, final Path instanceConfigPath) {
+	public static void registerImplementation(final IZumeImplementation implementation, final Path instanceConfigPath) {
 		if (Zume.implementation != null)
 			throw new AssertionError("Zume already initialized!");
 		
@@ -137,37 +137,37 @@ public class Zume {
 		}
 	}
 	
-	public static double transformFOV(final double original) {
+	public static double fovHook(final double original) {
 		return EasingHelper.out(config.minFOV, original, getZoom(), config.zoomEasingExponent);
 	}
 	
-	public static double transformThirdPersonDistance(final double original) {
+	public static double thirdPersonCameraHook(final double original) {
 		if (shouldUseFirstPersonZoom() || !shouldHook())
 			return original;
 		
 		return original * 0.25D * EasingHelper.out(config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, getZoom(), config.zoomEasingExponent);
 	}
 	
-	public static boolean transformCinematicCamera(final boolean original) {
-		if (Zume.config.enableCinematicZoom && isEnabled())
+	public static boolean cinematicCameraEnabledHook(final boolean original) {
+		if (Zume.config.enableCinematicZoom && isActive())
 			return true;
 		
 		return original;
 	}
 	
-	public static double transformMouseSensitivity(final double original) {
-		if (!isEnabled() || !shouldUseFirstPersonZoom())
+	public static double mouseSensitivityHook(final double original) {
+		if (!isActive() || !shouldUseFirstPersonZoom())
 			return original;
 		
 		return original * EasingHelper.out(config.mouseSensitivityFloor, 1D, getZoom(), 1);
 	}
 	
-	public static boolean shouldCancelScroll() {
-		return Zume.config.enableZoomScrolling && isEnabled();
+	public static boolean isMouseScrollHookActive() {
+		return Zume.config.enableZoomScrolling && isActive();
 	}
 	
-	public static boolean interceptScroll(final int scrollDelta) {
-        if (!shouldCancelScroll() || scrollDelta == 0)
+	public static boolean mouseScrollHook(final int scrollDelta) {
+        if (!isMouseScrollHookActive() || scrollDelta == 0)
             return false;
 		
         Zume.scrollDelta += MathHelper.sign(scrollDelta);
@@ -180,7 +180,7 @@ public class Zume {
 		       : config.thirdPersonToggleMode;
 	}
 	
-	public static boolean isEnabled() {
+	public static boolean isActive() {
 		if (disabled || implementation == null)
 			return false;
 		
@@ -191,7 +191,7 @@ public class Zume {
 		if (disabled || implementation == null)
 			return false;
 		
-		return isEnabled() || zoom.isEasing();
+		return isActive() || zoom.isEasing();
 	}
 	
 	private static boolean shouldUseFirstPersonZoom() {
@@ -199,11 +199,11 @@ public class Zume {
 			implementation.getCameraPerspective() == CameraPerspective.FIRST_PERSON;
 	}
 	
-	public static boolean shouldHookFOV() {
+	public static boolean isFOVHookActive() {
 		return shouldHook() && shouldUseFirstPersonZoom();
 	}
 	
-	public static void render() {
+	public static void renderHook() {
 		if (disabled || implementation == null)
 			return;
 		

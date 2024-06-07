@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge;
 
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -15,7 +15,7 @@ final class LexZumeConfigScreen {
 			() -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new Screen(Component.nullToEmpty(null)) {
 				@Override
 				public void tick() {
-					ZumeAPI.openConfigFile();
+					Zume.openConfigFile();
 					Minecraft.getInstance().setScreen(parent);
 				}
 			}));

@@ -1,11 +1,10 @@
 package dev.nolij.zume.lexforge16;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -32,12 +31,12 @@ public class LexZume16 implements IZumeImplementation {
 		if (!FMLEnvironment.dist.isClient())
 			return;
 		
-		ZumeAPI.getLogger().info("Loading LexZume16...");
+		Zume.LOGGER.info("Loading LexZume16...");
 		
 		LexZume16ConfigScreen.register();
 		
-		ZumeAPI.registerImplementation(this, FMLPaths.CONFIGDIR.get());
-		if (ZumeConfigAPI.isDisabled())
+		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
+		if (Zume.config.disable)
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -66,9 +65,9 @@ public class LexZume16 implements IZumeImplementation {
 	
 	private static final MethodHandle GET_CAMERA_TYPE = MethodHandleHelper.PUBLIC.getMethodOrNull(
 		Options.class,
-		ObfuscationReflectionHelper.remapName(
-			INameMappingService.Domain.METHOD, "func_243230_g"),
-		MethodType.methodType(Enum.class, Options.class));
+		ObfuscationReflectionHelper.remapName(INameMappingService.Domain.METHOD, "func_243230_g"),
+		MethodType.methodType(Enum.class, Options.class)
+	);
 	private static final MethodHandle THIRD_PERSON_VIEW =
 		MethodHandleHelper.PUBLIC.getGetterOrNull(Options.class, "field_74320_O", int.class);
 	
@@ -89,19 +88,19 @@ public class LexZume16 implements IZumeImplementation {
 	
 	private void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			ZumeAPI.renderHook();
+			Zume.renderHook();
 		}
 	}
 	
 	private void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (ZumeAPI.isFOVHookActive()) {
-			event.setFOV(ZumeAPI.fovHook(event.getFOV()));
+		if (Zume.isFOVHookActive()) {
+			event.setFOV(Zume.fovHook(event.getFOV()));
 		}
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollEvent event) {
 		final int scrollAmount = (int) event.getScrollDelta();
-		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
+		if (Zume.mouseScrollHook(scrollAmount)) {
 			event.setCanceled(true);
 		}
 	}

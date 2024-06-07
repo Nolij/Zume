@@ -1,7 +1,7 @@
 package dev.nolij.zume.archaic;
 
 import cpw.mods.fml.client.config.GuiConfig;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -14,7 +14,7 @@ public class ArchaicZumeConfigGUI extends GuiConfig {
 	public ArchaicZumeConfigGUI(GuiScreen parentScreen) {
 		super(parentScreen, Collections.emptyList(), MOD_ID, false, false, "config");
 		
-		ZumeAPI.openConfigFile();
+		Zume.openConfigFile();
 	}
 	
 	@Override

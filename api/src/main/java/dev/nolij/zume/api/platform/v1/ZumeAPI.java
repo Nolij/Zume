@@ -32,7 +32,7 @@ public final class ZumeAPI {
 	 */
 	public static void registerImplementation(@NotNull final IZumeImplementation implementation,
 	                                          @NotNull final Path instanceConfigPath) {
-		Zume.init(new dev.nolij.zume.impl.IZumeImplementation() {
+		Zume.registerImplementation(new dev.nolij.zume.impl.IZumeImplementation() {
 			@Override
 			public boolean isZoomPressed() {
 				return implementation.isZoomPressed();
@@ -66,7 +66,7 @@ public final class ZumeAPI {
 	 */
 	@Contract(pure = true)
 	public static boolean isActive() {
-		return Zume.isEnabled();
+		return Zume.isActive();
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public final class ZumeAPI {
 	 */
 	@Contract(pure = true)
 	public static boolean isFOVHookActive() {
-		return Zume.shouldHookFOV();
+		return Zume.isFOVHookActive();
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public final class ZumeAPI {
 	 */
 	@Contract(pure = true)
 	public static boolean isMouseScrollHookActive() {
-		return Zume.shouldCancelScroll();
+		return Zume.isMouseScrollHookActive();
 	}
 	//endregion
 	
@@ -92,7 +92,7 @@ public final class ZumeAPI {
 	 * It will handle Keybindings and Zoom Scrolling if the other hooks in this API are used correctly.
 	 */
 	public static void renderHook() {
-		Zume.render();
+		Zume.renderHook();
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public final class ZumeAPI {
 	 * {@return The new FOV transformed by Zume}
 	 */
 	public static double fovHook(double fov) {
-		return Zume.transformFOV(fov);
+		return Zume.fovHook(fov);
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public final class ZumeAPI {
 	 * @return The new third-person camera distance
 	 */
 	public static double thirdPersonCameraHook(double distance) {
-		return Zume.transformThirdPersonDistance(distance);
+		return Zume.thirdPersonCameraHook(distance);
 	}
 	
 	/**
@@ -125,7 +125,7 @@ public final class ZumeAPI {
 	 * {@return The new mouse sensitivity, transformed by Zume}
 	 */
 	public static double mouseSensitivityHook(double mouseSensitivity) {
-		return Zume.transformMouseSensitivity(mouseSensitivity);
+		return Zume.mouseSensitivityHook(mouseSensitivity);
 	}
 	
 	/**
@@ -135,7 +135,7 @@ public final class ZumeAPI {
 	 * {@return The new cinematic camera state, transformed by Zume}
 	 */
 	public static boolean cinematicCameraEnabledHook(boolean cinematicCameraEnabled) {
-		return Zume.transformCinematicCamera(cinematicCameraEnabled);
+		return Zume.cinematicCameraEnabledHook(cinematicCameraEnabled);
 	}
 	
 	/**
@@ -145,7 +145,7 @@ public final class ZumeAPI {
 	 * {@return `true` if the invoker should prevent further handling of this scroll event}
 	 */
 	public static boolean mouseScrollHook(int scrollDelta) {
-		return Zume.interceptScroll(scrollDelta);
+		return Zume.mouseScrollHook(scrollDelta);
 	}
 	//endregion
 	

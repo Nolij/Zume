@@ -1,6 +1,6 @@
 package dev.nolij.zume.mixin.lexforge;
 
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,7 +11,7 @@ public abstract class CameraMixin {
 	
 	@ModifyArg(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(D)D"))
 	public double zume$setup$getMaxZoom(double original) {
-        return ZumeAPI.thirdPersonCameraHook(original);
+        return Zume.thirdPersonCameraHook(original);
 	}
 	
 }

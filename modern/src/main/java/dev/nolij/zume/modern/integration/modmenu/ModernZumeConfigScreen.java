@@ -1,6 +1,6 @@
 package dev.nolij.zume.modern.integration.modmenu;
 
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -16,7 +16,7 @@ public class ModernZumeConfigScreen extends Screen {
 	
 	@Override
 	public void init() {
-		ZumeAPI.openConfigFile();
+		Zume.openConfigFile();
 		
 		Minecraft.getInstance().setScreen(parent);
 	}

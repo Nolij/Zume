@@ -1,10 +1,9 @@
 package dev.nolij.zume.vintage;
 
-import dev.nolij.zume.api.platform.v1.CameraPerspective;
-import dev.nolij.zume.api.platform.v1.IZumeImplementation;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.zume.impl.CameraPerspective;
+import dev.nolij.zume.impl.IZumeImplementation;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -37,10 +36,10 @@ public class VintageZume implements IZumeImplementation {
 		if (!FMLLaunchHandler.side().isClient())
 			return;
 		
-		ZumeAPI.getLogger().info("Loading Vintage Zume...");
+		Zume.LOGGER.info("Loading Vintage Zume...");
 		
-		ZumeAPI.registerImplementation(this, new File(Launch.minecraftHome, "config").toPath());
-		if (ZumeConfigAPI.isDisabled())
+		Zume.registerImplementation(this, new File(Launch.minecraftHome, "config").toPath());
+		if (Zume.config.disable)
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
@@ -73,14 +72,14 @@ public class VintageZume implements IZumeImplementation {
 	@SubscribeEvent
 	public void render(TickEvent.RenderTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
-			ZumeAPI.renderHook();
+			Zume.renderHook();
 		}
 	}
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
-		if (ZumeAPI.isFOVHookActive()) {
-			event.setFOV((float) ZumeAPI.fovHook(event.getFOV()));
+		if (Zume.isFOVHookActive()) {
+			event.setFOV((float) Zume.fovHook(event.getFOV()));
 		}
 	}
 	
@@ -93,7 +92,7 @@ public class VintageZume implements IZumeImplementation {
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) throws Throwable {
 		final int scrollAmount = mouseEvent.getDwheel();
-		if (ZumeAPI.mouseScrollHook(scrollAmount)) {
+		if (Zume.mouseScrollHook(scrollAmount)) {
 			//noinspection DataFlowIssue
 			SET_CANCELED.invokeExact(mouseEvent, true);
 		}

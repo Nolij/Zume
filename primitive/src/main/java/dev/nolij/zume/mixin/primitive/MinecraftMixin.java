@@ -1,7 +1,7 @@
 package dev.nolij.zume.mixin.primitive;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
-import dev.nolij.zume.api.platform.v1.ZumeAPI;
+import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +12,7 @@ public abstract class MinecraftMixin {
 	
 	@WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;method_692(I)V"))
 	public boolean onMouseScroll$scrollInHotbar(PlayerInventory instance, int scrollAmount) {
-		return !ZumeAPI.mouseScrollHook(scrollAmount);
+		return !Zume.mouseScrollHook(scrollAmount);
 	}
 	
 }
