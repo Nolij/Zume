@@ -39,8 +39,9 @@ public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEn
 			default -> "[unknown variant]";
 		};
 		try {
-			((ClientModInitializer)Class.forName(className).getConstructor().newInstance()).onInitializeClient();
-		} catch(ReflectiveOperationException e) {
+			((ClientModInitializer) Class.forName(className).getConstructor().newInstance()).onInitializeClient();
+		} catch (ReflectiveOperationException e) {
+			//noinspection DataFlowIssue
 			throw null; // Save some bytecode by not throwing a real exception
 		}
 	}

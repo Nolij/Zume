@@ -87,7 +87,8 @@ public class VintageZume implements IZumeImplementation {
 		Event.class,
 		"setCanceled",
 		MethodType.methodType(void.class, MouseEvent.class, boolean.class),
-		boolean.class);
+		boolean.class
+	);
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) throws Throwable {

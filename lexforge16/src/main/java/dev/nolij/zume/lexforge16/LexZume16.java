@@ -78,6 +78,7 @@ public class LexZume16 implements IZumeImplementation {
 			if (GET_CAMERA_TYPE != null)
 				ordinal = ((Enum<?>) GET_CAMERA_TYPE.invokeExact(Minecraft.getInstance().options)).ordinal();
 			else
+				//noinspection DataFlowIssue
 				ordinal = (int) THIRD_PERSON_VIEW.invokeExact(Minecraft.getInstance().options);
 		} catch (Throwable e) {
 			throw new AssertionError(e);

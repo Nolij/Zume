@@ -34,6 +34,7 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 			String forgeVersion = null;
 			
 			try {
+				//noinspection DataFlowIssue
 				forgeVersion = (String) MethodHandleHelper.PUBLIC.getMethodOrNull(
 					MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraftforge.versions.forge.ForgeVersion"),
 					"getVersion",

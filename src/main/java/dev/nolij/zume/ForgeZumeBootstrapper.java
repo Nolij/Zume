@@ -22,7 +22,7 @@ public class ForgeZumeBootstrapper {
 				8.9 - 12.2: MixinBooter >= 5.0
 				7.10 - 12.2: UniMixins >= 0.1.15""");
 		
-		String className = switch (ZumeMixinPlugin.ZUME_VARIANT) {
+		final String className = switch (ZumeMixinPlugin.ZUME_VARIANT) {
 			case ZumeVariant.LEXFORGE -> "dev.nolij.zume.lexforge.LexZume";
 			case ZumeVariant.LEXFORGE18 -> "dev.nolij.zume.lexforge18.LexZume18";
 			case ZumeVariant.LEXFORGE16 -> "dev.nolij.zume.lexforge16.LexZume16";
@@ -31,7 +31,8 @@ public class ForgeZumeBootstrapper {
 		};
 		try {
 			Class.forName(className).getConstructor().newInstance();
-		} catch(ReflectiveOperationException e) {
+		} catch (ReflectiveOperationException e) {
+			//noinspection DataFlowIssue
 			throw null;
 		}
 	}
