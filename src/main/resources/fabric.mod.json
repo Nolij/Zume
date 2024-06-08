@@ -26,7 +26,7 @@
 			"dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration"
 		],
 		"stationapi:event_bus_client": [
-			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
+			"dev.nolij.zume.primitive.PrimitiveZume"
 		]
 	},
 	"mixins": ["zume.mixins.json"],

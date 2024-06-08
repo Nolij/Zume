@@ -34,6 +34,8 @@ repositories {
 }
 
 dependencies {
+	compileOnly(project(":stubs"))
+	
 	"modImplementation"(fabricApi.stationModule(moduleName = "station-keybindings-v0", version = "station_api_version"())) {
 		exclude(module = "fabric-loader")
 		exclude(group = "org.ow2.asm")
