@@ -179,12 +179,12 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 		it.deleteOnExit()
 	}
 
-	val config = configDir.resolve("proguard.pro")
-	if (!config.exists()) {
-		error("proguard.pro not found")
+	val commonConfig = configDir.resolve("common.pro")
+	if (!commonConfig.exists()) {
+		error("common.pro not found")
 	}
 	val proguardCommand = mutableListOf(
-		"@${config.absolutePath}",
+		"@${commonConfig.absolutePath}",
 		"-printmapping", jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt").absolutePath,
 		"-injars", inputJar.absolutePath,
 		"-outjars", jar.absolutePath,
@@ -228,20 +228,25 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	proguardCommand.add("-libraryjars")
 	proguardCommand.add(libraries.joinToString(File.pathSeparator) { "\"$it\"" })
 
-	val configuration = Configuration()
-	ConfigurationParser(proguardCommand.toTypedArray(), System.getProperties())
-		.parse(configuration)
+	configDir.listFiles { _, name -> name != "common.pro" }?.forEach {
+		println("Running ProGuard pass ${it.nameWithoutExtension}")
+		val thisCommand = proguardCommand.toMutableList()
+		thisCommand.add(1, "@${it.absolutePath}")
+		
+		val configuration = Configuration()
+		ConfigurationParser(thisCommand.toTypedArray(), System.getProperties())
+			.parse(configuration)
 
-	try {
-		ProGuard(configuration).execute()
-	} catch (ex: Exception) {
-		throw IllegalStateException("ProGuard failed for $jar", ex)
-	} finally {
-		inputJar.delete()
+		try {
+			ProGuard(configuration).execute()
+		} catch (ex: Exception) {
+			throw IllegalStateException("ProGuard failed for $jar", ex)
+		} finally {
+			inputJar.delete()
+		}
 	}
 }
 
-@CacheableTask
 open class CompressJarTask : DefaultTask() {
 	@InputFile
 	lateinit var inputJar: File
@@ -253,7 +258,7 @@ open class CompressJarTask : DefaultTask() {
 	var jsonShrinkingType = JsonShrinkingType.NONE
 
 	@get:Input
-	val useProguard get() = !this.minecraftConfigs.isEmpty()
+	val useProguard get() = this.minecraftConfigs.isNotEmpty()
 
 	private var minecraftConfigs: List<MinecraftConfig> = emptyList()
 
@@ -287,7 +292,7 @@ open class CompressJarTask : DefaultTask() {
 	@TaskAction
 	fun compressJar() {
 		if (useProguard)
-			applyProguard(inputJar, minecraftConfigs, project.rootDir)
+			applyProguard(inputJar, minecraftConfigs, project.rootDir.resolve("proguard"))
 		squishJar(inputJar, jsonShrinkingType, mappingsFile)
 		deflate(outputJar, deflateAlgorithm)
 	}
