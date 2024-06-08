@@ -23,10 +23,10 @@ public class ForgeZumeBootstrapper {
 				7.10 - 12.2: UniMixins >= 0.1.15""");
 		
 		final String className = switch (ZumeMixinPlugin.ZUME_VARIANT) {
-			case ZumeVariant.LEXFORGE -> "dev.nolij.zume.lexforge.LexZume";
-			case ZumeVariant.LEXFORGE18 -> "dev.nolij.zume.lexforge18.LexZume18";
-			case ZumeVariant.LEXFORGE16 -> "dev.nolij.zume.lexforge16.LexZume16";
-			case ZumeVariant.VINTAGE_FORGE -> "dev.nolij.zume.vintage.VintageZume";
+			case ZumeMixinPlugin.LEXFORGE -> "dev.nolij.zume.lexforge.LexZume";
+			case ZumeMixinPlugin.LEXFORGE18 -> "dev.nolij.zume.lexforge18.LexZume18";
+			case ZumeMixinPlugin.LEXFORGE16 -> "dev.nolij.zume.lexforge16.LexZume16";
+			case ZumeMixinPlugin.VINTAGE_FORGE -> "dev.nolij.zume.vintage.VintageZume";
 			default -> "[unknown variant]";
 		};
 		try {

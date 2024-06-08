@@ -33,9 +33,9 @@ public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEn
 			return;
 		
 		String className = switch (ZumeMixinPlugin.ZUME_VARIANT) {
-			case ZumeVariant.MODERN -> "dev.nolij.zume.modern.ModernZume";
-			case ZumeVariant.LEGACY -> "dev.nolij.zume.legacy.LegacyZume";
-			case ZumeVariant.PRIMITIVE -> "dev.nolij.zume.primitive.PrimitiveZume";
+			case ZumeMixinPlugin.MODERN -> "dev.nolij.zume.modern.ModernZume";
+			case ZumeMixinPlugin.LEGACY -> "dev.nolij.zume.legacy.LegacyZume";
+			case ZumeMixinPlugin.PRIMITIVE -> "dev.nolij.zume.primitive.PrimitiveZume";
 			default -> "[unknown variant]";
 		};
 		try {
