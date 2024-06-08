@@ -55,3 +55,6 @@
 
 -keep @dev.nolij.zumegradle.proguard.ProGuardKeep class * { *; }
 -keepclassmembers class * { @dev.nolij.zumegradle.proguard.ProGuardKeep *; }
+
+-keep,allowobfuscation @dev.nolij.zumegradle.proguard.ProGuardKeep$WithObfuscation class * { *; }
+-keepclassmembers,allowobfuscation class * { @dev.nolij.zumegradle.proguard.ProGuardKeep$WithObfuscation *; }
