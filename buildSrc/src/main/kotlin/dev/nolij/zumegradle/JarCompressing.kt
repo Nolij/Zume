@@ -7,6 +7,7 @@ import net.fabricmc.mappingio.format.MappingFormat
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
 import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -34,29 +35,17 @@ enum class DeflateAlgorithm(val id: Int?) {
 	NONE(null),
 	LIBDEFLATE(2),
 	SEVENZIP(3),
-//	ZOPFLI(4), // too slow
+	ZOPFLI(4),
 	;
 
 	override fun toString() = name.lowercase().uppercaseFirstChar()
-}
-
-enum class ClassShrinkingType {
-	STRIP_NONE,
-	STRIP_LVTS,
-	STRIP_SOURCE_FILES,
-	STRIP_ALL,
-	;
-
-	fun shouldStripLVTs() = this == STRIP_LVTS || this == STRIP_ALL
-	fun shouldStripSourceFiles() = this == STRIP_SOURCE_FILES || this == STRIP_ALL
-	fun shouldRun() = this != STRIP_NONE
 }
 
 enum class JsonShrinkingType {
 	NONE, MINIFY, PRETTY_PRINT
 }
 
-fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType, mappingsFile: File?) {
+fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -94,7 +83,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 			}
 
 			if (name.endsWith(".class")) {
-				bytes = processClassFile(bytes, classProcessing, mappings!!)
+				bytes = processClassFile(bytes, mappings!!)
 			}
 
 			out.putNextEntry(JarEntry(name))
@@ -117,19 +106,9 @@ private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	return JsonOutput.toJson(json).toByteArray()
 }
 
-private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType, mappings: MemoryMappingTree): ByteArray {
+private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
-
-	if (classFileSettings.shouldStripLVTs()) {
-		classNode.methods.forEach { methodNode ->
-			methodNode.localVariables?.clear()
-			methodNode.parameters?.clear()
-		}
-	}
-	if (classFileSettings.shouldStripSourceFiles()) {
-		classNode.sourceFile = null
-	}
 	
 	for (annotation in classNode.visibleAnnotations ?: emptyList()) {
 		if (annotation.desc.endsWith("fml/common/Mod;")) {
@@ -262,13 +241,10 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	}
 }
 
+@CacheableTask
 open class CompressJarTask : DefaultTask() {
 	@InputFile
 	lateinit var inputJar: File
-
-	@Input
-	var classShrinkingType = ClassShrinkingType.STRIP_ALL
-		get() = if (useProguard) ClassShrinkingType.STRIP_NONE else field
 
 	@Input
 	var deflateAlgorithm = DeflateAlgorithm.LIBDEFLATE
@@ -291,11 +267,6 @@ open class CompressJarTask : DefaultTask() {
 			inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
 		else null
 
-	@Option(option = "class-file-compression", description = "How to process class files")
-	fun setClassShrinkingType(value: String) {
-		classShrinkingType = ClassShrinkingType.valueOf(value.uppercase())
-	}
-
 	@Option(option = "compression-type", description = "How to recompress the jar")
 	fun setDeflateAlgorithm(value: String) {
 		deflateAlgorithm = value.uppercase().let {
@@ -317,7 +288,7 @@ open class CompressJarTask : DefaultTask() {
 	fun compressJar() {
 		if (useProguard)
 			applyProguard(inputJar, minecraftConfigs, project.rootDir)
-		squishJar(inputJar, classShrinkingType, jsonShrinkingType, mappingsFile)
+		squishJar(inputJar, jsonShrinkingType, mappingsFile)
 		deflate(outputJar, deflateAlgorithm)
 	}
 }
