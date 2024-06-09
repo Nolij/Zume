@@ -1,6 +1,6 @@
-- added Embeddium config screen integration
+- added Embeddium config screen integration on LexForge 20.1, Fabric 20.1, and NeoForge 20.1 and 21+
 - applied more aggressive jar size reduction techniques (@rhysdh540)
-  - rewrote config file load/save functionality
-  - shrink names of more classes
+  - wrote much smaller custom config serializer from scratch to replace Jankson
+  - obfuscate/shrink more class and member names
   - reduced jar size impact of mixins
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience

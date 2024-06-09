@@ -1,24 +1,23 @@
-package dev.nolij.zume.integration.implementation.embeddium;
+package dev.nolij.zume.neoforge.integration.embeddium;
 
 import com.google.common.collect.ImmutableList;
-import dev.nolij.zume.integration.embeddium.ZumeOptionsStorage;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
-import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
-import me.jellysquid.mods.sodium.client.gui.options.OptionImpl;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.options.control.Control;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
-import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
-import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import net.minecraft.network.chat.Component;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
+import org.embeddedt.embeddium.api.options.control.Control;
+import org.embeddedt.embeddium.api.options.control.ControlValueFormatter;
+import org.embeddedt.embeddium.api.options.control.SliderControl;
+import org.embeddedt.embeddium.api.options.control.TickBoxControl;
+import org.embeddedt.embeddium.api.options.structure.Option;
+import org.embeddedt.embeddium.api.options.structure.OptionFlag;
+import org.embeddedt.embeddium.api.options.structure.OptionGroup;
+import org.embeddedt.embeddium.api.options.structure.OptionImpl;
+import org.embeddedt.embeddium.api.options.structure.OptionPage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.nolij.zume.integration.embeddium.ZumeOptionsStorage.*;
+import static dev.nolij.zume.neoforge.integration.embeddium.ZumeOptionsStorage.*;
 
 public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<OptionGUIConstructionEvent> {
 	

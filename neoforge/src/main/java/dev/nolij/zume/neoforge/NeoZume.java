@@ -4,7 +4,7 @@ import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
-import dev.nolij.zume.integration.implementation.embeddium.ZumeEmbeddiumConfigScreen;
+import dev.nolij.zume.neoforge.integration.embeddium.ZumeEmbeddiumConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.neoforged.api.distmarker.Dist;
@@ -80,14 +80,15 @@ public class NeoZume implements IZumeImplementation {
 				} else {
 					//noinspection ConstantValue,UnreachableCode
 					if (CONFIG_SCREEN_EXT_RECORD != null) {
-						return CONFIG_SCREEN_EXT_RECORD.getDeclaredConstructor(BiFunction.class)
-							.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
+						return CONFIG_SCREEN_EXT_RECORD
+							.getDeclaredConstructor(BiFunction.class)
+							.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) -> 
 								new NeoZumeConfigScreen(parent));
-					} else {
-						return null;
 					}
+					else return null;
 				}
 			});
+			
 		}
 		
 		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
@@ -112,7 +113,7 @@ public class NeoZume implements IZumeImplementation {
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateDetachedCameraDistance);
 		
-		if (METHOD_HANDLE_HELPER.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
+		if (METHOD_HANDLE_HELPER.getClassOrNull("org.embeddedt.embeddium.api.options.OptionIdentifier") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
 	}
@@ -172,8 +173,14 @@ public class NeoZume implements IZumeImplementation {
 		}
 	}
 	
+	@SuppressWarnings("DataFlowIssue")
+	private static final MethodHandle SET_DISTANCE = MethodHandleHelper.firstNonNull(
+		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", float.class),
+		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", double.class)
+	).asType(MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, float.class));
+	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-        event.setDistance(Zume.thirdPersonCameraHook(event.getDistance()));
+		SET_DISTANCE.invokeExact(event, (float) Zume.thirdPersonCameraHook(event.getDistance()));
 	}
 	
 }

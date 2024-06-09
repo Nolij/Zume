@@ -1,5 +1,6 @@
 package dev.nolij.zume.legacy;
 
+import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -42,18 +43,8 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		return CameraPerspective.values()[MinecraftClient.getInstance().options.perspective];
 	}
 	
-	private static final boolean USE_CINEMATIC_CAMERA_WORKAROUND;
-	
-	static {
-		var useWorkaround = true;
-		try {
-			//noinspection JavaReflectionMemberAccess
-			SmoothUtil.class.getMethod("method_10852");
-			useWorkaround = false;
-		} catch (NoSuchMethodException ignored) { }
-		
-		USE_CINEMATIC_CAMERA_WORKAROUND = useWorkaround;
-    }
+	private static final boolean USE_CINEMATIC_CAMERA_WORKAROUND = MethodHandleHelper.PUBLIC
+		.getMethodOrNull(SmoothUtil.class, "method_10852") == null;
 	
 	@Override
 	public void onZoomActivate() {

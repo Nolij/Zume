@@ -1,16 +1,30 @@
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
+val modCompileOnly: Configuration by configurations.creating {
+	configurations.compileClasspath.get().extendsFrom(this)
+}
 val modRuntimeOnly: Configuration by configurations.creating {
 	configurations.runtimeClasspath.get().extendsFrom(this)
 }
+val mod: Configuration by configurations.creating {
+	configurations.compileClasspath.get().extendsFrom(this)
+	configurations.runtimeClasspath.get().extendsFrom(this)
+}
+
+repositories {
+	maven("https://prmaven.neoforged.net/NeoForge/pr1076") {
+		content {
+			includeModule("net.neoforged", "testframework")
+			includeModule("net.neoforged", "neoforge")
+		}
+	}
+}
 
 unimined.minecraft {
-	combineWith(project(":integration:embeddium").sourceSets.main.get())
-	
 	version("neoforge_minecraft_version"())
-
+	
 	neoForged {
-		loader("neoforge_version"())
+		loader("net.neoforged:neoforge:21.0.${"neoforge_version"()}:universal")
 	}
 
 	source {
@@ -19,11 +33,13 @@ unimined.minecraft {
 
 	mappings {
 		mojmap()
-		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
+//		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
 	}
 
 	mods {
+		remap(modCompileOnly)
 		remap(modRuntimeOnly)
+		remap(mod)
 	}
 }
 
@@ -34,5 +50,6 @@ repositories {
 dependencies {
 	compileOnly(project(":stubs"))
 	
-	modRuntimeOnly("org.embeddedt:embeddium-1.20.6:${"embeddium_neoforge_version"()}")
+	modCompileOnly("org.embeddedt:embeddium-1.21-pre4:${"embeddium_neoforge_version"()}:api")
+	modRuntimeOnly("org.embeddedt:embeddium-1.21-pre4:${"embeddium_neoforge_version"()}")
 }
