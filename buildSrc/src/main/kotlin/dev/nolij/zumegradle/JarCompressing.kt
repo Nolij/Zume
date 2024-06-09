@@ -5,11 +5,9 @@ import groovy.json.JsonSlurper
 import net.fabricmc.mappingio.MappingReader
 import net.fabricmc.mappingio.MappingWriter
 import net.fabricmc.mappingio.format.MappingFormat
-import net.fabricmc.mappingio.tree.MappingTree
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
 import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -19,7 +17,6 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import proguard.Configuration
 import proguard.ConfigurationParser
@@ -62,7 +59,7 @@ fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?)
 	val json = JsonSlurper()
 
 	val isObfuscating = mappingsFile?.exists() == true
-	val mappings = if (isObfuscating) mappings(mappingsFile!!) else null
+	val mappings = if (isObfuscating) mappings(mappingsFile!!, MappingFormat.TINY_2) else null
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
@@ -124,23 +121,17 @@ private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 		}
 	}
 	
-	val isProGuardAnnotation = { annotationNode: AnnotationNode -> 
-		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
-	}
-	
-	classNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
-	classNode.fields.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
-	}
-	classNode.methods.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
-	}
-
 	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
 		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN
 	}
 
 	classNode.invisibleAnnotations?.removeIf { it.desc != "Lorg/spongepowered/asm/mixin/Mixin;" }
+	classNode.methods?.forEach { 
+		it.invisibleAnnotations?.clear()
+	}
+	classNode.fields?.forEach {
+		it.invisibleAnnotations?.clear()
+	}
 
 	val writer = ClassWriter(0)
 	classNode.accept(writer)
@@ -303,10 +294,15 @@ open class CompressJarTask : DefaultTask() {
 
 	@TaskAction
 	fun compressJar() {
+		val time = System.currentTimeMillis()
+		println("Compressing...\nOriginal size: ${inputJar.length()} bytes")
 		if (useProguard)
 			applyProguard(inputJar, minecraftConfigs, project.rootDir.resolve("proguard"))
 		squishJar(inputJar, jsonShrinkingType, mappingsFile)
 		deflate(outputJar, deflateAlgorithm)
+		
+		val timeDiff = System.currentTimeMillis() - time
+		println("Compressed size: ${outputJar.length()} bytes\nTool took ${timeDiff / 1000.0} seconds")
 	}
 }
 

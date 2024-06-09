@@ -82,10 +82,9 @@ public class NeoZume implements IZumeImplementation {
 					if (CONFIG_SCREEN_EXT_RECORD != null) {
 						return CONFIG_SCREEN_EXT_RECORD
 							.getDeclaredConstructor(BiFunction.class)
-							.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) -> 
+							.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
 								new NeoZumeConfigScreen(parent));
-					}
-					else return null;
+					} else return null;
 				}
 			});
 			

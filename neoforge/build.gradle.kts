@@ -12,6 +12,14 @@ val mod: Configuration by configurations.creating {
 }
 
 repositories {
+	if(System.getProperty("os.name").contains("mac", ignoreCase = true)) {
+		exclusiveContent {
+			forRepository { maven("https://libraries.minecraft.net") }
+			filter {
+				includeModule("org.lwjgl", "lwjgl-freetype")
+			}
+		}
+	}
 	maven("https://prmaven.neoforged.net/NeoForge/pr1076") {
 		content {
 			includeModule("net.neoforged", "testframework")
