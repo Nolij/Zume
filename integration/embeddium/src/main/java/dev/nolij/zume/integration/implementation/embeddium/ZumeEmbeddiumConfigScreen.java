@@ -131,9 +131,7 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 				.setId(MIN_THIRD_PERSON_ZOOM_BLOCKS)
 				.setControl(option ->
 					new SliderControl(option, 0, 10, 1,
-						v -> v > 0
-						     ? Component.translatable("zume.blocks", v)
-						     : Component.translatable("zume.blocks", 0.5)))
+						v -> Component.translatable("zume.blocks", v > 0 ? v : 0.5)))
 				.setBinding(
 					(config, value) -> config.minimumThirdPersonZoomBlocks = value > 0 ? value : 0.5,
 					config -> (int) config.minimumThirdPersonZoomBlocks)
