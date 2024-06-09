@@ -3,7 +3,9 @@ package dev.nolij.zumegradle
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.fabricmc.mappingio.MappingReader
+import net.fabricmc.mappingio.MappingWriter
 import net.fabricmc.mappingio.format.MappingFormat
+import net.fabricmc.mappingio.tree.MappingTree
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
 import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
@@ -183,9 +185,12 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	if (!commonConfig.exists()) {
 		error("common.pro not found")
 	}
+	
+	val mappingFile = jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt")
+	
 	val proguardCommand = mutableListOf(
 		"@${commonConfig.absolutePath}",
-		"-printmapping", jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt").absolutePath,
+		"-printmapping", mappingFile.absolutePath,
 		"-injars", inputJar.absolutePath,
 		"-outjars", jar.absolutePath,
 	)
@@ -228,6 +233,8 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	proguardCommand.add("-libraryjars")
 	proguardCommand.add(libraries.joinToString(File.pathSeparator) { "\"$it\"" })
 
+	val mappings = MemoryMappingTree()
+
 	configDir.listFiles { _, name -> name != "common.pro" }?.forEach {
 		println("Running ProGuard pass ${it.nameWithoutExtension}")
 		val thisCommand = proguardCommand.toMutableList()
@@ -239,11 +246,16 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 
 		try {
 			ProGuard(configuration).execute()
+			MappingReader.read(mappingFile.toPath(), MappingFormat.PROGUARD, mappings)
 		} catch (ex: Exception) {
 			throw IllegalStateException("ProGuard failed for $jar", ex)
 		} finally {
 			inputJar.delete()
 		}
+	}
+	
+	MappingWriter.create(mappingFile.toPath(), MappingFormat.TINY_2).use {
+		mappings.accept(it)
 	}
 }
 
