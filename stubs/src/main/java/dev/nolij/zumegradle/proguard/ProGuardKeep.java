@@ -8,4 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
 public @interface ProGuardKeep {
+	
+	@Retention(RetentionPolicy.CLASS)
+	@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
+	@interface WithObfuscation {}
+	
 }

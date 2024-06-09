@@ -5,10 +5,16 @@ import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.mixin.primitive.GameRendererAccessor;
 import dev.nolij.zume.mixin.primitive.MinecraftAccessor;
+import dev.nolij.zumegradle.proguard.ProGuardKeep;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.mine_diver.unsafeevents.listener.EventListener;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.SmoothUtil;
+import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
+
+import java.util.List;
 
 public class PrimitiveZume implements ClientModInitializer, IZumeImplementation {
 	
@@ -51,6 +57,16 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().field_2818;
 			gameRenderer.setCinematicYawSmoother(new SmoothUtil());
 			gameRenderer.setCinematicPitchSmoother(new SmoothUtil());
+		}
+	}
+	
+	@ProGuardKeep.WithObfuscation
+	@EventListener
+	public static void registerKeyBindings(KeyBindingRegisterEvent event) {
+		final List<KeyBinding> binds = event.keyBindings;
+		
+		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
+			binds.add(keyBind.value);
 		}
 	}
 	

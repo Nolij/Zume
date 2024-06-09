@@ -20,7 +20,7 @@
 			"dev.nolij.zume.primitive.PrimitiveZume"
 		],
 		"stationapi:event_bus_client": [
-			"dev.nolij.zume.primitive.event.KeyBindingRegistrar"
+			"dev.nolij.zume.primitive.PrimitiveZume"
 		]
 	},
 	"mixins": [
