@@ -191,7 +191,7 @@ public class NeoZume implements IZumeImplementation {
 	private static final MethodHandle SET_DISTANCE = MethodHandleHelper.firstNonNull(
 		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", float.class),
 		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", double.class)
-	).asType(MethodType.methodType(void.class, float.class));
+	).asType(MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, float.class));
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
 		try {
