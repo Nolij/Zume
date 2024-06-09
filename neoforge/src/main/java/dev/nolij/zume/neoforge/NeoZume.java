@@ -93,8 +93,7 @@ public class NeoZume implements IZumeImplementation {
 						} else {
 							return null;
 						}
-					} catch (InstantiationException | IllegalAccessException |
-					         InvocationTargetException | NoSuchMethodException e) {
+					} catch (ReflectiveOperationException e) {
 						throw new RuntimeException(e);
 					}
 				});

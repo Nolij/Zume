@@ -57,7 +57,7 @@ public class MethodHandleHelper {
 		
 		try {
 			return lookup.unreflect(clazz.getMethod(methodName, parameterTypes));
-		} catch (NoSuchMethodException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
@@ -72,7 +72,7 @@ public class MethodHandleHelper {
 		try {
 			return lookup.unreflect(clazz.getMethod(methodName, parameterTypes))
 				.asType(methodType);
-		} catch (NoSuchMethodException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
@@ -86,7 +86,7 @@ public class MethodHandleHelper {
 		try {
 			return lookup.unreflectConstructor(clazz.getConstructor(parameterTypes))
 				.asType(methodType);
-		} catch (NoSuchMethodException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
@@ -98,7 +98,7 @@ public class MethodHandleHelper {
 		
 		try {
 			return lookup.findGetter(clazz, fieldName, fieldType);
-		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
@@ -111,7 +111,7 @@ public class MethodHandleHelper {
 		try {
 			return lookup.findGetter(clazz, fieldName, fieldType)
 				.asType(methodType);
-		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
@@ -123,7 +123,7 @@ public class MethodHandleHelper {
 		
 		try {
 			return lookup.findSetter(clazz, fieldName, fieldType);
-		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
@@ -136,7 +136,7 @@ public class MethodHandleHelper {
 		try {
 			return lookup.findSetter(clazz, fieldName, fieldType)
 				.asType(methodType);
-		} catch (NoSuchFieldException | IllegalAccessException ignored) {
+		} catch (ReflectiveOperationException ignored) {
 			return null;
 		}
 	}
