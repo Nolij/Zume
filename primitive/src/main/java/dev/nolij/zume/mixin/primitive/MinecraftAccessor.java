@@ -9,7 +9,7 @@ public interface MinecraftAccessor {
 	
 	@Accessor("INSTANCE")
 	static Minecraft getInstance() {
-		throw new AssertionError();
+		return null;
 	}
 	
 }

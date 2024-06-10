@@ -90,14 +90,8 @@ public class LexZume implements IZumeImplementation {
 	);
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
-        final int scrollAmount;
-        try {
-	        //noinspection DataFlowIssue
-	        scrollAmount = (int) (double) GET_SCROLL_DELTA.invokeExact(event);
-        } catch (Throwable e) {
-            throw new AssertionError(e);
-        }
-        if (Zume.mouseScrollHook(scrollAmount)) {
+		//noinspection DataFlowIssue
+		if (Zume.mouseScrollHook((int) (double) GET_SCROLL_DELTA.invokeExact(event))) {
 			event.setCanceled(true);
 		}
 	}

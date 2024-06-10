@@ -1,6 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.nolij.zumegradle.ClassShrinkingType
 import dev.nolij.zumegradle.DeflateAlgorithm
 import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
@@ -40,16 +39,19 @@ enum class ReleaseChannel(
     val suffix: String? = null,
     val releaseType: ReleaseType? = null,
     val deflation: DeflateAlgorithm = DeflateAlgorithm.SEVENZIP,
-    val classes: ClassShrinkingType = ClassShrinkingType.STRIP_ALL,
     val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
     val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		json = JsonShrinkingType.PRETTY_PRINT),
+		json = JsonShrinkingType.PRETTY_PRINT
+	),
 	PRE_RELEASE("pre"),
 	RELEASE_CANDIDATE("rc"),
-	RELEASE(releaseType = ReleaseType.STABLE),
+	RELEASE(
+		releaseType = ReleaseType.STABLE,
+		deflation = DeflateAlgorithm.ZOPFLI,
+	),
 }
 
 //region Git Versioning
@@ -194,15 +196,16 @@ allprojects {
 			javaCompiler = javaToolchains.compilerFor {
 				languageVersion = JavaLanguageVersion.of(21)
 			}
+			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jabel"))
 		}
 	}
 	
 	dependencies {
 		compileOnly("org.jetbrains:annotations:${"jetbrains_annotations_version"()}")
-		"com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}".also {
-			annotationProcessor(it)
-			compileOnly(it)
-		}
+		annotationProcessor("com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}")
+
+		compileOnly("systems.manifold:manifold-rt:${"manifold_version"()}")
+		annotationProcessor("systems.manifold:manifold-exceptions:${"manifold_version"()}")
 	}
 
 	tasks.processResources {
@@ -431,7 +434,6 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	inputJar = shadowJar.archiveFile.get().asFile
 	
 	deflateAlgorithm = releaseChannel.deflation
-	classShrinkingType = releaseChannel.classes
 	jsonShrinkingType = releaseChannel.json
 	if (releaseChannel.proguard) {
 		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })

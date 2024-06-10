@@ -69,11 +69,7 @@ public final class ZumeOptionsStorage implements OptionStorage<ZumeConfig> {
 	
 	@Override
 	public void save() {
-		try {
-			ZumeConfigAPI.replaceConfig(storage);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+		ZumeConfigAPI.replaceConfig(storage);
 	}
 	
 }

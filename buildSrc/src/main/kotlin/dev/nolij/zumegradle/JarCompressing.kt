@@ -3,6 +3,7 @@ package dev.nolij.zumegradle
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.fabricmc.mappingio.MappingReader
+import net.fabricmc.mappingio.MappingWriter
 import net.fabricmc.mappingio.format.MappingFormat
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
 import net.fabricmc.mappingio.tree.MemoryMappingTree
@@ -16,7 +17,6 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import proguard.Configuration
 import proguard.ConfigurationParser
@@ -34,29 +34,17 @@ enum class DeflateAlgorithm(val id: Int?) {
 	NONE(null),
 	LIBDEFLATE(2),
 	SEVENZIP(3),
-//	ZOPFLI(4), // too slow
+	ZOPFLI(4),
 	;
 
 	override fun toString() = name.lowercase().uppercaseFirstChar()
-}
-
-enum class ClassShrinkingType {
-	STRIP_NONE,
-	STRIP_LVTS,
-	STRIP_SOURCE_FILES,
-	STRIP_ALL,
-	;
-
-	fun shouldStripLVTs() = this == STRIP_LVTS || this == STRIP_ALL
-	fun shouldStripSourceFiles() = this == STRIP_SOURCE_FILES || this == STRIP_ALL
-	fun shouldRun() = this != STRIP_NONE
 }
 
 enum class JsonShrinkingType {
 	NONE, MINIFY, PRETTY_PRINT
 }
 
-fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: JsonShrinkingType, mappingsFile: File?) {
+fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -71,7 +59,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 	val json = JsonSlurper()
 
 	val isObfuscating = mappingsFile?.exists() == true
-	val mappings = if (isObfuscating) mappings(mappingsFile!!) else null
+	val mappings = if (isObfuscating) mappings(mappingsFile!!, MappingFormat.TINY_2) else null
 
 	JarOutputStream(jar.outputStream()).use { out ->
 		out.setLevel(Deflater.BEST_COMPRESSION)
@@ -94,7 +82,7 @@ fun squishJar(jar: File, classProcessing: ClassShrinkingType, jsonProcessing: Js
 			}
 
 			if (name.endsWith(".class")) {
-				bytes = processClassFile(bytes, classProcessing, mappings!!)
+				bytes = processClassFile(bytes, mappings!!)
 			}
 
 			out.putNextEntry(JarEntry(name))
@@ -117,19 +105,9 @@ private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	return JsonOutput.toJson(json).toByteArray()
 }
 
-private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinkingType, mappings: MemoryMappingTree): ByteArray {
+private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
-
-	if (classFileSettings.shouldStripLVTs()) {
-		classNode.methods.forEach { methodNode ->
-			methodNode.localVariables?.clear()
-			methodNode.parameters?.clear()
-		}
-	}
-	if (classFileSettings.shouldStripSourceFiles()) {
-		classNode.sourceFile = null
-	}
 	
 	for (annotation in classNode.visibleAnnotations ?: emptyList()) {
 		if (annotation.desc.endsWith("fml/common/Mod;")) {
@@ -143,20 +121,16 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 		}
 	}
 	
-	val isProGuardAnnotation = { annotationNode: AnnotationNode -> 
-		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
-	}
-	
-	classNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
-	classNode.fields.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
-	}
-	classNode.methods.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
-	}
-
 	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
 		classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 } // ALOAD, super(), RETURN
+	}
+
+	classNode.invisibleAnnotations?.removeIf { it.desc != "Lorg/spongepowered/asm/mixin/Mixin;" }
+	classNode.methods?.forEach { 
+		it.invisibleAnnotations?.clear()
+	}
+	classNode.fields?.forEach {
+		it.invisibleAnnotations?.clear()
 	}
 
 	val writer = ClassWriter(0)
@@ -198,13 +172,16 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 		it.deleteOnExit()
 	}
 
-	val config = configDir.resolve("proguard.pro")
-	if (!config.exists()) {
-		error("proguard.pro not found")
+	val commonConfig = configDir.resolve("common.pro")
+	if (!commonConfig.exists()) {
+		error("common.pro not found")
 	}
+	
+	val mappingFile = jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt")
+	
 	val proguardCommand = mutableListOf(
-		"@${config.absolutePath}",
-		"-printmapping", jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt").absolutePath,
+		"@${commonConfig.absolutePath}",
+		"-printmapping", mappingFile.absolutePath,
 		"-injars", inputJar.absolutePath,
 		"-outjars", jar.absolutePath,
 	)
@@ -232,9 +209,10 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	}
 
 	val debug = Properties().apply {
-		val gradleproperties = configDir.resolve("gradle.properties")
-		if (gradleproperties.exists()) {
-			load(gradleproperties.inputStream())
+		configDir.resolve("gradle.properties").also {
+			if (it.exists()) {
+				load(it.inputStream())
+			}
 		}
 	}.getProperty("zumegradle.proguard.keepAttrs").toBoolean()
 
@@ -247,16 +225,29 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	proguardCommand.add("-libraryjars")
 	proguardCommand.add(libraries.joinToString(File.pathSeparator) { "\"$it\"" })
 
-	val configuration = Configuration()
-	ConfigurationParser(proguardCommand.toTypedArray(), System.getProperties())
-		.parse(configuration)
+	val mappings = MemoryMappingTree()
 
-	try {
-		ProGuard(configuration).execute()
-	} catch (ex: Exception) {
-		throw IllegalStateException("ProGuard failed for $jar", ex)
-	} finally {
-		inputJar.delete()
+	configDir.listFiles { _, name -> name != "common.pro" }?.forEach {
+		println("Running ProGuard pass ${it.nameWithoutExtension}")
+		val thisCommand = proguardCommand.toMutableList()
+		thisCommand.add(1, "@${it.absolutePath}")
+		
+		val configuration = Configuration()
+		ConfigurationParser(thisCommand.toTypedArray(), System.getProperties())
+			.parse(configuration)
+
+		try {
+			ProGuard(configuration).execute()
+			MappingReader.read(mappingFile.toPath(), MappingFormat.PROGUARD, mappings)
+		} catch (ex: Exception) {
+			throw IllegalStateException("ProGuard failed for $jar", ex)
+		} finally {
+			inputJar.delete()
+		}
+	}
+	
+	MappingWriter.create(mappingFile.toPath(), MappingFormat.TINY_2).use {
+		mappings.accept(it)
 	}
 }
 
@@ -265,17 +256,13 @@ open class CompressJarTask : DefaultTask() {
 	lateinit var inputJar: File
 
 	@Input
-	var classShrinkingType = ClassShrinkingType.STRIP_ALL
-		get() = if (useProguard) ClassShrinkingType.STRIP_NONE else field
-
-	@Input
 	var deflateAlgorithm = DeflateAlgorithm.LIBDEFLATE
 
 	@Input
 	var jsonShrinkingType = JsonShrinkingType.NONE
 
 	@get:Input
-	val useProguard get() = !this.minecraftConfigs.isEmpty()
+	val useProguard get() = this.minecraftConfigs.isNotEmpty()
 
 	private var minecraftConfigs: List<MinecraftConfig> = emptyList()
 
@@ -288,11 +275,6 @@ open class CompressJarTask : DefaultTask() {
 		get() = if (useProguard)
 			inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
 		else null
-
-	@Option(option = "class-file-compression", description = "How to process class files")
-	fun setClassShrinkingType(value: String) {
-		classShrinkingType = ClassShrinkingType.valueOf(value.uppercase())
-	}
 
 	@Option(option = "compression-type", description = "How to recompress the jar")
 	fun setDeflateAlgorithm(value: String) {
@@ -313,14 +295,19 @@ open class CompressJarTask : DefaultTask() {
 
 	@TaskAction
 	fun compressJar() {
+		val time = System.currentTimeMillis()
+		println("Compressing...\nOriginal size: ${inputJar.length()} bytes")
 		if (useProguard)
-			applyProguard(inputJar, minecraftConfigs, project.rootDir)
-		squishJar(inputJar, classShrinkingType, jsonShrinkingType, mappingsFile)
+			applyProguard(inputJar, minecraftConfigs, project.rootDir.resolve("proguard"))
+		squishJar(inputJar, jsonShrinkingType, mappingsFile)
 		deflate(outputJar, deflateAlgorithm)
+		
+		val timeDiff = System.currentTimeMillis() - time
+		println("Compressed size: ${outputJar.length()} bytes\nTool took ${timeDiff / 1000.0} seconds")
 	}
 }
 
-fun mappings(file: File, format: MappingFormat = MappingFormat.PROGUARD): MemoryMappingTree {
+fun mappings(file: File, format: MappingFormat? = null): MemoryMappingTree {
 	if (!file.exists()) {
 		error("Mappings file $file does not exist")
 	}
