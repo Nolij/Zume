@@ -306,7 +306,7 @@ open class CompressJarTask : DefaultTask() {
 	}
 }
 
-fun mappings(file: File, format: MappingFormat = MappingFormat.PROGUARD): MemoryMappingTree {
+fun mappings(file: File, format: MappingFormat? = null): MemoryMappingTree {
 	if (!file.exists()) {
 		error("Mappings file $file does not exist")
 	}
