@@ -209,9 +209,10 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	}
 
 	val debug = Properties().apply {
-		val gradleproperties = configDir.resolve("gradle.properties")
-		if (gradleproperties.exists()) {
-			load(gradleproperties.inputStream())
+		configDir.resolve("gradle.properties").also {
+			if (it.exists()) {
+				load(it.inputStream())
+			}
 		}
 	}.getProperty("zumegradle.proguard.keepAttrs").toBoolean()
 

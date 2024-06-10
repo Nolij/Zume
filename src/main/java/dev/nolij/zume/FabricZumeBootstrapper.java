@@ -1,11 +1,13 @@
 package dev.nolij.zume;
 
 import dev.nolij.zume.impl.Zume;
+import dev.nolij.zumegradle.proguard.ProGuardKeep;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.fabricmc.loader.impl.gui.FabricGuiEntry;
 import net.fabricmc.loader.impl.gui.FabricStatusTree;
 
+@ProGuardKeep.WithObfuscation
 public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEntrypoint {
 	
 	private static final String MISSING_DEPENDENCY_MESSAGE = """

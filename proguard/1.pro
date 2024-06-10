@@ -35,8 +35,3 @@
 -keepclassmembers,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig {
 	public <methods>;
 }
-
-# Fabric entrypoints
--keep,allowoptimization,allowobfuscation class dev.nolij.zume.FabricZumeBootstrapper
--keep,allowoptimization,allowobfuscation class dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration
--keep,allowoptimization,allowobfuscation class dev.nolij.zume.primitive.event.KeyBindingRegistrar { public *; }

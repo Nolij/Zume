@@ -3,6 +3,7 @@ package dev.nolij.zume.modern.integration.modmenu;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import dev.nolij.zume.api.util.v1.MethodHandleHelper;
 import dev.nolij.zume.impl.Zume;
+import dev.nolij.zumegradle.proguard.ProGuardKeep;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 
 import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 
+@ProGuardKeep.WithObfuscation
 public class ZumeModMenuIntegration implements ModMenuApi {
 	
 	private static final MethodHandle LITERALTEXT_INIT = MethodHandleHelper.PUBLIC.getConstructorOrNull(
