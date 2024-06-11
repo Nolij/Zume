@@ -187,10 +187,11 @@ public class NeoZume implements IZumeImplementation {
 		}
 	}
 	
-	@SuppressWarnings("DataFlowIssue")
-	private static final MethodHandle GET_DISTANCE = 
-		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "getDistance")
-			.asType(MethodType.methodType(double.class, CalculateDetachedCameraDistanceEvent.class));
+	private static final MethodHandle GET_DISTANCE = METHOD_HANDLE_HELPER.getMethodOrNull(
+		CalculateDetachedCameraDistanceEvent.class, 
+		"getDistance",
+		MethodType.methodType(double.class, CalculateDetachedCameraDistanceEvent.class)
+	);
 	
 	@SuppressWarnings("DataFlowIssue")
 	private static final MethodHandle SET_DISTANCE = MethodHandleHelper.firstNonNull(
@@ -200,6 +201,7 @@ public class NeoZume implements IZumeImplementation {
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
 		try {
+			//noinspection DataFlowIssue
 			SET_DISTANCE.invokeExact(event, (double) Zume.thirdPersonCameraHook((double) GET_DISTANCE.invokeExact(event)));
 		} catch (Throwable e) {
 			throw new AssertionError(e);
