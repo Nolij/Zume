@@ -194,10 +194,10 @@ public class NeoZume implements IZumeImplementation {
 	);
 	
 	@SuppressWarnings("DataFlowIssue")
-	private static final MethodHandle SET_DISTANCE = MethodHandleHelper.firstNonNull(
+	private static final MethodHandle SET_DISTANCE = MethodHandles.explicitCastArguments(MethodHandleHelper.firstNonNull(
 		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", float.class),
 		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", double.class)
-	).asType(MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, double.class));
+	), MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, double.class));
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
 		try {
