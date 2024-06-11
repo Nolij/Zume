@@ -188,14 +188,19 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	@SuppressWarnings("DataFlowIssue")
+	private static final MethodHandle GET_DISTANCE = 
+		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "getDistance")
+			.asType(MethodType.methodType(double.class, CalculateDetachedCameraDistanceEvent.class));
+	
+	@SuppressWarnings("DataFlowIssue")
 	private static final MethodHandle SET_DISTANCE = MethodHandleHelper.firstNonNull(
 		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", float.class),
 		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", double.class)
-	).asType(MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, float.class));
+	).asType(MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, double.class));
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
 		try {
-			SET_DISTANCE.invokeExact(event, (float) Zume.thirdPersonCameraHook(event.getDistance()));
+			SET_DISTANCE.invokeExact(event, (double) Zume.thirdPersonCameraHook((double) GET_DISTANCE.invokeExact(event)));
 		} catch (Throwable e) {
 			throw new AssertionError(e);
 		}
