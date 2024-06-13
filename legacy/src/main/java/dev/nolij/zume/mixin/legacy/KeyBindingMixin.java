@@ -24,7 +24,8 @@ public class KeyBindingMixin {
 	
 	@Inject(method = "<clinit>", at = @At("TAIL"))
 	private static void static$TAIL(CallbackInfo ci) {
-		if (Zume.config.disable) return;
+		if (Zume.disabled)
+			return;
 		
 		categories.add("zume");
 		if (field_15867 != null)

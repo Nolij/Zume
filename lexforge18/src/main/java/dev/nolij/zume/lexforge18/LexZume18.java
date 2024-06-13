@@ -48,7 +48,7 @@ public class LexZume18 implements IZumeImplementation {
 		LexZume18ConfigScreen.register();
 		
 		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
-		if (Zume.config.disable)
+		if (Zume.disabled)
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {

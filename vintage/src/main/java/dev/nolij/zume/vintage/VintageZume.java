@@ -38,7 +38,7 @@ public class VintageZume implements IZumeImplementation {
 		Zume.LOGGER.info("Loading Vintage Zume...");
 		
 		Zume.registerImplementation(this, new File(Launch.minecraftHome, "config").toPath());
-		if (Zume.config.disable)
+		if (Zume.disabled)
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {

@@ -33,7 +33,7 @@ public class LexZume implements IZumeImplementation {
 		LexZumeConfigScreen.register();
 		
 		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
-		if (Zume.config.disable)
+		if (Zume.disabled)
 			return;
 		
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);

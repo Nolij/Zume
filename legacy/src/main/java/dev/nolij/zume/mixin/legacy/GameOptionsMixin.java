@@ -18,7 +18,8 @@ public class GameOptionsMixin {
 	
 	@Inject(method = "load", at = @At("HEAD"))
 	public void zume$load$HEAD(CallbackInfo ci) {
-		if (Zume.config.disable) return;
+		if (Zume.disabled)
+			return;
 		
 		if (!keybindsRegistered) {
 			keybindsRegistered = true;

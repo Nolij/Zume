@@ -25,7 +25,8 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 		Zume.LOGGER.info("Loading Modern Zume...");
 		
 		Zume.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
-		if (Zume.config.disable) return;
+		if (Zume.disabled)
+			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);

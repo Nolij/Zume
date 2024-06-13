@@ -94,7 +94,7 @@ public class NeoZume implements IZumeImplementation {
 		}
 		
 		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
-		if (Zume.config.disable)
+		if (Zume.disabled)
 			return;
 		
 		modEventBus.addListener(this::registerKeyBindings);

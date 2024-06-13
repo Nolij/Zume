@@ -40,7 +40,7 @@ public class ArchaicZume implements IZumeImplementation {
 		Zume.LOGGER.info("Loading Archaic Zume...");
 		
 		Zume.registerImplementation(this, Launch.minecraftHome.toPath().resolve("config"));
-		if (Zume.config.disable)
+		if (Zume.disabled)
 			return;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
