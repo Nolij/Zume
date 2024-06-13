@@ -11,20 +11,11 @@ val mod: Configuration by configurations.creating {
 	configurations.runtimeClasspath.get().extendsFrom(this)
 }
 
-repositories {
-	maven("https://prmaven.neoforged.net/NeoForge/pr1076") {
-		content {
-			includeModule("net.neoforged", "testframework")
-			includeModule("net.neoforged", "neoforge")
-		}
-	}
-}
-
 unimined.minecraft {
 	version("neoforge_minecraft_version"())
-	
+		
 	neoForged {
-		loader("net.neoforged:neoforge:21.0.${"neoforge_version"()}:universal")
+		loader("neoforge_version"())
 	}
 
 	source {
