@@ -31,7 +31,7 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
 		}
 		
-		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
+		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.client.gui.options.OptionIdentifier") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
 	}
