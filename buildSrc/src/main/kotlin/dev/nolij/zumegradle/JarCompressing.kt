@@ -250,7 +250,7 @@ open class CompressJarTask : DefaultTask() {
 	var jsonShrinkingType = JsonShrinkingType.NONE
 
 	@get:Input
-	val useProguard get() = !this.minecraftConfigs.isEmpty()
+	val useProguard get() = this.minecraftConfigs.isNotEmpty()
 
 	private var minecraftConfigs: List<MinecraftConfig> = emptyList()
 
