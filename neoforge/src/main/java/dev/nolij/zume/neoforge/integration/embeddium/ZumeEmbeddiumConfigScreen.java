@@ -74,7 +74,7 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 				.setId(MOUSE_SENSITIVITY_FLOOR)
 				.setControl(this::percentageControl)
 				.setBinding(
-					(config, value) -> config.mouseSensitivityFloor = value * 0.01D,
+					(config, value) -> config.mouseSensitivityFloor = Math.max(value * 0.01D, 0.01D),
 					config -> (int) Math.round(config.mouseSensitivityFloor * 100D))
 				.build())
 			.add(OptionImpl.createBuilder(int.class, storage)
