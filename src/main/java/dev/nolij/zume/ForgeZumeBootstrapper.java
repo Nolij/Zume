@@ -27,14 +27,9 @@ public class ForgeZumeBootstrapper {
 			case ZumeMixinPlugin.LEXFORGE18 -> "dev.nolij.zume.lexforge18.LexZume18";
 			case ZumeMixinPlugin.LEXFORGE16 -> "dev.nolij.zume.lexforge16.LexZume16";
 			case ZumeMixinPlugin.VINTAGE_FORGE -> "dev.nolij.zume.vintage.VintageZume";
-			default -> "[unknown variant]";
+			default -> null;
 		};
-		try {
-			Class.forName(className).getConstructor().newInstance();
-		} catch (ReflectiveOperationException e) {
-			//noinspection DataFlowIssue
-			throw null;
-		}
+		Class.forName(className).getConstructor().newInstance();
 	}
 	
 }

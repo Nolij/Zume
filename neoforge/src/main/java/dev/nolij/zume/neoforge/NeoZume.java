@@ -76,29 +76,21 @@ public class NeoZume implements IZumeImplementation {
 		if (REGISTER_EXT_POINT != null &&
 			CONFIG_SCREEN_EXT != null &&
 			(CONFIG_SCREEN_EXT_RECORD != null || CONFIG_SCREEN_EXT_INTERFACE != null)) {
-			try {
-				REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
-					try {
-						if (CONFIG_SCREEN_EXT_INTERFACE != null) {
-							return NeoZumeConfigScreenFactory.class
-								.getDeclaredConstructor()
-								.newInstance();
-						} else //noinspection ConstantValue,UnreachableCode
-							if (CONFIG_SCREEN_EXT_RECORD != null) {
-							return CONFIG_SCREEN_EXT_RECORD
-								.getDeclaredConstructor(BiFunction.class)
-								.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
-									new NeoZumeConfigScreen(parent));
-						} else {
-							return null;
-						}
-					} catch (ReflectiveOperationException e) {
-						throw new RuntimeException(e);
-					}
-				});
-			} catch (Throwable e) {
-				throw new RuntimeException(e);
-			}
+			REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
+				if (CONFIG_SCREEN_EXT_INTERFACE != null) {
+					return NeoZumeConfigScreenFactory.class
+						.getDeclaredConstructor()
+						.newInstance();
+				} else //noinspection ConstantValue,UnreachableCode
+					if (CONFIG_SCREEN_EXT_RECORD != null) {
+					return CONFIG_SCREEN_EXT_RECORD
+						.getDeclaredConstructor(BiFunction.class)
+						.newInstance((BiFunction<Minecraft, Screen, Screen>) (minecraft, parent) ->
+							new NeoZumeConfigScreen(parent));
+				} else {
+					return null;
+				}
+			});
 		}
 		
 		Zume.registerImplementation(this, FMLPaths.CONFIGDIR.get());
@@ -159,13 +151,9 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void renderLegacy(Object event) {
-		try {
-			//noinspection DataFlowIssue
-			if ((Enum<?>) RENDER_TICK_EVENT_PHASE_GETTER.invokeExact(event) == TICK_EVENT_PHASE_START) {
-				Zume.renderHook();
-			}
-		} catch (Throwable e) {
-			throw new AssertionError(e);
+		//noinspection DataFlowIssue
+		if ((Enum<?>) RENDER_TICK_EVENT_PHASE_GETTER.invokeExact(event) == TICK_EVENT_PHASE_START) {
+			Zume.renderHook();
 		}
 	}
 	
@@ -200,12 +188,8 @@ public class NeoZume implements IZumeImplementation {
 	), MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, double.class));
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
-		try {
-			//noinspection DataFlowIssue
-			SET_DISTANCE.invokeExact(event, (double) Zume.thirdPersonCameraHook((double) GET_DISTANCE.invokeExact(event)));
-		} catch (Throwable e) {
-			throw new AssertionError(e);
-		}
+		//noinspection DataFlowIssue
+		SET_DISTANCE.invokeExact(event, (double) Zume.thirdPersonCameraHook((double) GET_DISTANCE.invokeExact(event)));
 	}
 	
 }

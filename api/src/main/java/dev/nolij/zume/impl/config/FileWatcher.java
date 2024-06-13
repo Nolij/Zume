@@ -100,12 +100,7 @@ public class FileWatcher implements IFileWatcher {
 	
 	public void stop() {
 		thread.interrupt();
-		try {
-			watchService.close();
-		} catch (IOException e) {
-			Zume.LOGGER.error("Error in config watcher: ", e);
-			throw new RuntimeException(e);
-		}
+		watchService.close();
 	}
 	
 }
