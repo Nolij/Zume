@@ -26,7 +26,7 @@
 }
 
 # Platform implementations
--keep,allowobfuscation class dev.nolij.zume.** implements dev.nolij.zume.api.platform.v*.IZumeImplementation {
+-keep,allowobfuscation class dev.nolij.zume.** {
 	# Forge Event Subscribers
 	@*.*.fml.common.Mod$EventHandler <methods>;
 	@*.*.fml.common.eventhandler.SubscribeEvent <methods>;

@@ -24,5 +24,7 @@ tasks.withType<RemapJarTask> {
 }
 
 dependencies {
+	compileOnly(project(":stubs"))
+	
 	"modImplementation"("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:${"unimixins_version"()}:dev")
 }
