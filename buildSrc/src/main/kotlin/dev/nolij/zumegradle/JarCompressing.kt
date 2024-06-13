@@ -34,7 +34,7 @@ enum class DeflateAlgorithm(val id: Int?) {
 	NONE(null),
 	LIBDEFLATE(2),
 	SEVENZIP(3),
-//	ZOPFLI(4), // too slow
+	ZOPFLI(4), // too slow
 	;
 
 	override fun toString() = name.lowercase().uppercaseFirstChar()

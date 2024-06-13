@@ -38,13 +38,15 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
     val suffix: String? = null,
     val releaseType: ReleaseType? = null,
-    val deflation: DeflateAlgorithm = DeflateAlgorithm.SEVENZIP,
+    val deflation: DeflateAlgorithm = DeflateAlgorithm.ZOPFLI,
     val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
     val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		json = JsonShrinkingType.PRETTY_PRINT),
+		deflation = DeflateAlgorithm.SEVENZIP,
+		json = JsonShrinkingType.PRETTY_PRINT
+	),
 	PRE_RELEASE("pre"),
 	RELEASE_CANDIDATE("rc"),
 	RELEASE(releaseType = ReleaseType.STABLE),
