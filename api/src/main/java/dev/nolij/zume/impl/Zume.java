@@ -117,21 +117,17 @@ public class Zume {
 	public static void openConfigFile() {
 		final File configFile = ZumeConfigImpl.getConfigFile();
 		try {
-			try {
-				Desktop.getDesktop().open(configFile);
-			} catch (HeadlessException ignored) {
-				final String CONFIG_PATH = configFile.getCanonicalPath();
-				
-				final ProcessBuilder builder = new ProcessBuilder().inheritIO();
-				
-				switch (HOST_PLATFORM) {
-					case LINUX, UNKNOWN -> builder.command("xdg-open", CONFIG_PATH);
-					case WINDOWS -> builder.command("rundll32", "url.dll,FileProtocolHandler", CONFIG_PATH);
-					case MAC_OS -> builder.command("open", "-t", CONFIG_PATH);
-				}
-				
-				builder.start();
+			final String CONFIG_PATH = configFile.getCanonicalPath();
+			
+			final ProcessBuilder builder = new ProcessBuilder().inheritIO();
+			
+			switch (HOST_PLATFORM) {
+				case LINUX, UNKNOWN -> builder.command("xdg-open", CONFIG_PATH);
+				case WINDOWS -> builder.command("rundll32", "url.dll,FileProtocolHandler", CONFIG_PATH);
+				case MAC_OS -> builder.command("open", "-t", CONFIG_PATH);
 			}
+			
+			builder.start();
 		} catch (IOException e) {
 			Zume.LOGGER.error("Error opening config file: ", e);
 		}
