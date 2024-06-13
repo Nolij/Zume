@@ -143,16 +143,17 @@ private fun processClassFile(bytes: ByteArray, classFileSettings: ClassShrinking
 		}
 	}
 	
-	val isProGuardAnnotation = { annotationNode: AnnotationNode -> 
-		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
+	val canStripAnnotation = { annotationNode: AnnotationNode -> 
+		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/") ||
+			annotationNode.desc == "Lorg/spongepowered/asm/mixin/Dynamic;"
 	}
 	
-	classNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
+	classNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 	classNode.fields.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
+		fieldNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 	}
 	classNode.methods.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(isProGuardAnnotation)
+		fieldNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 	}
 
 	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
