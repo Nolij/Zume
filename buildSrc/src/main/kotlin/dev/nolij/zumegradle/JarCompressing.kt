@@ -123,15 +123,19 @@ private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	
 	val canStripAnnotation = { annotationNode: AnnotationNode -> 
 		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/") ||
-			annotationNode.desc == "Lorg/spongepowered/asm/mixin/Dynamic;"
+		annotationNode.desc.startsWith("Lorg/jetbrains/annotations/") ||
+		annotationNode.desc == "Lorg/spongepowered/asm/mixin/Dynamic;"
 	}
 	
 	classNode.invisibleAnnotations?.removeIf(canStripAnnotation)
+	classNode.visibleAnnotations?.removeIf(canStripAnnotation)
 	classNode.fields.forEach { fieldNode ->
 		fieldNode.invisibleAnnotations?.removeIf(canStripAnnotation)
+		fieldNode.visibleAnnotations?.removeIf(canStripAnnotation)
 	}
-	classNode.methods.forEach { fieldNode ->
-		fieldNode.invisibleAnnotations?.removeIf(canStripAnnotation)
+	classNode.methods.forEach { methodNode ->
+		methodNode.invisibleAnnotations?.removeIf(canStripAnnotation)
+		methodNode.visibleAnnotations?.removeIf(canStripAnnotation)
 	}
 
 	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
