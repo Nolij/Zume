@@ -18,12 +18,8 @@ public enum ZumeKeyBind {
 		return value.isDown();
 	}
 	
-	ZumeKeyBind(String translationKey, InputConstants.Type type, int code, String category) {
-		this.value = new KeyMapping(translationKey, type, code, category);
-	}
-	
 	ZumeKeyBind(String translationKey, int code) {
-		this(translationKey, InputConstants.Type.KEYSYM, code, "zume");
+		this.value = new KeyMapping(translationKey, InputConstants.Type.KEYSYM, code, "zume");
 	}
 	
 }

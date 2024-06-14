@@ -17,12 +17,8 @@ public enum ZumeKeyBind {
 		return value.isPressed();
 	}
 	
-	ZumeKeyBind(String translationKey, int code, String category) {
-		this.value = new KeyBinding(translationKey, code, category);
-	}
-	
 	ZumeKeyBind(String translationKey, int code) {
-		this(translationKey, code, "zume");
+		this.value = new KeyBinding(translationKey, code, "zume");
 	}
 	
 }
