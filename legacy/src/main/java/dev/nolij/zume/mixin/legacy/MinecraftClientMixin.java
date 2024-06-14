@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(value = MinecraftClient.class, priority = 500)
-public class MinecraftClientMixin {
+public abstract class MinecraftClientMixin {
 	
 	@Dynamic
 	@WrapWithCondition(method = {

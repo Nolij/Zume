@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Mixin(KeyBinding.class)
-public class KeyBindingMixin {
+public abstract class KeyBindingMixin {
 	
 	@SuppressWarnings({"MissingUnique", "unused", "MismatchedQueryAndUpdateOfCollection"})
 	@ProGuardKeep

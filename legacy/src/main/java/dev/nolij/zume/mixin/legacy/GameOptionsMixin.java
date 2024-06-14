@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = GameOptions.class, priority = 0)
-public class GameOptionsMixin {
+public abstract class GameOptionsMixin {
 	
 	@Unique
 	private static boolean keybindsRegistered = false;
