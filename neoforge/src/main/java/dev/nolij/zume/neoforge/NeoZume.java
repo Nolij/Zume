@@ -78,9 +78,7 @@ public class NeoZume implements IZumeImplementation {
 			(CONFIG_SCREEN_EXT_RECORD != null || CONFIG_SCREEN_EXT_INTERFACE != null)) {
 			REGISTER_EXT_POINT.invokeExact(modContainer, CONFIG_SCREEN_EXT, (Supplier<?>) () -> {
 				if (CONFIG_SCREEN_EXT_INTERFACE != null) {
-					return NeoZumeConfigScreenFactory.class
-						.getDeclaredConstructor()
-						.newInstance();
+					return new NeoZumeConfigScreenFactory();
 				} else //noinspection ConstantValue,UnreachableCode
 					if (CONFIG_SCREEN_EXT_RECORD != null) {
 					return CONFIG_SCREEN_EXT_RECORD
