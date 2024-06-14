@@ -41,6 +41,6 @@ repositories {
 dependencies {
 	compileOnly(project(":stubs"))
 	
-	modCompileOnly("org.embeddedt:embeddium-1.21-pre4:${"embeddium_neoforge_version"()}:api")
-	modRuntimeOnly("org.embeddedt:embeddium-1.21-pre4:${"embeddium_neoforge_version"()}")
+	modCompileOnly("org.embeddedt:embeddium-1.21:${"embeddium_neoforge_version"()}:api")
+	modRuntimeOnly("org.embeddedt:embeddium-1.21:${"embeddium_neoforge_version"()}")
 }
