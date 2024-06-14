@@ -32,5 +32,7 @@ repositories {
 }
 
 dependencies {
+	compileOnly(project(":stubs"))
+	
 	"modImplementation"("zone.rong:mixinbooter:${"mixinbooter_version"()}")
 }
