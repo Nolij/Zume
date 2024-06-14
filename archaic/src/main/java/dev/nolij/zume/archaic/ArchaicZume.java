@@ -92,9 +92,8 @@ public class ArchaicZume implements IZumeImplementation {
 	);
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void mouseEvent(MouseEvent mouseEvent) throws Throwable {
-		final int scrollAmount = mouseEvent.dwheel;
-		if (Zume.mouseScrollHook(scrollAmount)) {
+	public void mouseEvent(MouseEvent mouseEvent) {
+		if (Zume.mouseScrollHook(mouseEvent.dwheel)) {
 			//noinspection DataFlowIssue
 			SET_CANCELED.invokeExact(mouseEvent, true);
 		}

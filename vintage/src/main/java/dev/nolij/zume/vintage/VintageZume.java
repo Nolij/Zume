@@ -90,9 +90,8 @@ public class VintageZume implements IZumeImplementation {
 	);
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void mouseEvent(MouseEvent mouseEvent) throws Throwable {
-		final int scrollAmount = mouseEvent.getDwheel();
-		if (Zume.mouseScrollHook(scrollAmount)) {
+	public void mouseEvent(MouseEvent mouseEvent) {
+		if (Zume.mouseScrollHook(mouseEvent.getDwheel())) {
 			//noinspection DataFlowIssue
 			SET_CANCELED.invokeExact(mouseEvent, true);
 		}

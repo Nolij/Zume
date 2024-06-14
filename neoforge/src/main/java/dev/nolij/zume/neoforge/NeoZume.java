@@ -169,8 +169,7 @@ public class NeoZume implements IZumeImplementation {
 	}
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {
-		final int scrollAmount = (int) event.getScrollDeltaY();
-		if (Zume.mouseScrollHook(scrollAmount)) {
+		if (Zume.mouseScrollHook((int) event.getScrollDeltaY())) {
 			event.setCanceled(true);
 		}
 	}
