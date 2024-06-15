@@ -123,6 +123,7 @@ private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	
 	val strippableAnnotations = setOf(
 		"Lorg/spongepowered/asm/mixin/Dynamic;",
+		"Lorg/spongepowered/asm/mixin/Final;",
 		"Ljava/lang/SafeVarargs;",
 	)
 	val canStripAnnotation = { annotationNode: AnnotationNode -> 
