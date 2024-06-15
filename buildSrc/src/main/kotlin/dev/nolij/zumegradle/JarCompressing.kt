@@ -121,21 +121,39 @@ private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 		}
 	}
 	
+	val strippableAnnotations = setOf(
+		"Lorg/spongepowered/asm/mixin/Dynamic;",
+		"Ljava/lang/SafeVarargs;",
+	)
 	val canStripAnnotation = { annotationNode: AnnotationNode -> 
 		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/") ||
 		annotationNode.desc.startsWith("Lorg/jetbrains/annotations/") ||
-		annotationNode.desc == "Lorg/spongepowered/asm/mixin/Dynamic;"
+		strippableAnnotations.contains(annotationNode.desc)
 	}
 	
 	classNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 	classNode.visibleAnnotations?.removeIf(canStripAnnotation)
+	classNode.invisibleTypeAnnotations?.removeIf(canStripAnnotation)
+	classNode.visibleTypeAnnotations?.removeIf(canStripAnnotation)
 	classNode.fields.forEach { fieldNode ->
 		fieldNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 		fieldNode.visibleAnnotations?.removeIf(canStripAnnotation)
+		fieldNode.invisibleTypeAnnotations?.removeIf(canStripAnnotation)
+		fieldNode.visibleTypeAnnotations?.removeIf(canStripAnnotation)
 	}
 	classNode.methods.forEach { methodNode ->
 		methodNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 		methodNode.visibleAnnotations?.removeIf(canStripAnnotation)
+		methodNode.invisibleTypeAnnotations?.removeIf(canStripAnnotation)
+		methodNode.visibleTypeAnnotations?.removeIf(canStripAnnotation)
+		methodNode.invisibleLocalVariableAnnotations?.removeIf(canStripAnnotation)
+		methodNode.visibleLocalVariableAnnotations?.removeIf(canStripAnnotation)
+		methodNode.invisibleParameterAnnotations?.forEach { parameterAnnotations ->
+			parameterAnnotations?.removeIf(canStripAnnotation)
+		}
+		methodNode.visibleParameterAnnotations?.forEach { parameterAnnotations ->
+			parameterAnnotations?.removeIf(canStripAnnotation)
+		}
 	}
 
 	if (classNode.invisibleAnnotations?.any { it.desc == "Lorg/spongepowered/asm/mixin/Mixin;" } == true) {
