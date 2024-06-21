@@ -10,8 +10,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.SmoothUtil;
+import net.minecraft.client.Keybind;
+import net.minecraft.util.SmoothFloat;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
 
 import java.util.List;
@@ -30,8 +30,8 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	
 	@Override
 	public boolean isZoomPressed() {
-		//noinspection UnreachableCode
-		return MinecraftAccessor.getInstance().currentScreen == null && ZumeKeyBind.ZOOM.isPressed();
+		//noinspection UnreachableCode,DataFlowIssue
+		return MinecraftAccessor.getInstance().screen == null && ZumeKeyBind.ZOOM.isPressed();
 	}
 	
 	@Override
@@ -46,24 +46,26 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
-		//noinspection UnreachableCode
-		return MinecraftAccessor.getInstance().options.thirdPerson ? CameraPerspective.THIRD_PERSON : CameraPerspective.FIRST_PERSON;
+		//noinspection UnreachableCode,DataFlowIssue
+		return MinecraftAccessor.getInstance().options.thirdPersonView 
+		       ? CameraPerspective.THIRD_PERSON 
+		       : CameraPerspective.FIRST_PERSON;
 	}
 	
 	@Override
 	public void onZoomActivate() {
-		//noinspection ConstantValue
-		if (Zume.config.enableCinematicZoom && !MinecraftAccessor.getInstance().options.cinematicMode) {
-			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().field_2818;
-			gameRenderer.setCinematicYawSmoother(new SmoothUtil());
-			gameRenderer.setCinematicPitchSmoother(new SmoothUtil());
+		//noinspection DataFlowIssue
+		if (Zume.config.enableCinematicZoom && !MinecraftAccessor.getInstance().options.smoothCamera) {
+			final GameRendererAccessor gameRenderer = (GameRendererAccessor) MinecraftAccessor.getInstance().gameRenderer;
+			gameRenderer.setSmoothTurnX(new SmoothFloat());
+			gameRenderer.setSmoothTurnY(new SmoothFloat());
 		}
 	}
 	
 	@ProGuardKeep.WithObfuscation
 	@EventListener
 	public static void registerKeyBindings(KeyBindingRegisterEvent event) {
-		final List<KeyBinding> binds = event.keyBindings;
+		final List<Keybind> binds = event.keyBindings;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			binds.add(keyBind.value);

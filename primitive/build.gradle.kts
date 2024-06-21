@@ -13,6 +13,10 @@ val mod: Configuration by configurations.creating {
 	configurations.runtimeClasspath.get().extendsFrom(this)
 }
 
+repositories {
+	maven("https://maven.wispforest.io")
+}
+
 unimined.minecraft {
 	side("client")
 
@@ -28,7 +32,13 @@ unimined.minecraft {
 
 	mappings {
 		babricIntermediary()
-		biny("primitive_mappings_version"())
+		@Suppress("UnstableApiUsage")
+		mapping("me.alphamode:nostalgia:${"primitive_mappings_version"()}:v2", "nostalgia") {
+			outputs("nostalgia", true) { listOf("intermediary") }
+			mapNamespace("named", "nostalgia")
+			sourceNamespace("intermediary")
+			renest()
+		}
 		devFallbackNamespace("intermediary")
 	}
 

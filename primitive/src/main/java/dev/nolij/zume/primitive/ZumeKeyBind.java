@@ -1,6 +1,6 @@
 package dev.nolij.zume.primitive;
 
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.Keybind;
 import org.lwjgl.input.Keyboard;
 
 public enum ZumeKeyBind {
@@ -11,14 +11,14 @@ public enum ZumeKeyBind {
 	
 	;
 	
-	public final KeyBinding value;
+	public final Keybind value;
 	
 	public boolean isPressed() {
-		return Keyboard.isKeyDown(value.code);
+		return Keyboard.isKeyDown(value.keyId);
 	}
 	
-	ZumeKeyBind(String translationKey, int code) {
-		this.value = new KeyBinding(translationKey, code);
+	ZumeKeyBind(String translationKey, int keyId) {
+		this.value = new Keybind(translationKey, keyId);
 	}
 	
 }
