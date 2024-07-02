@@ -9,7 +9,11 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.SmoothUtil;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 
 public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 	
@@ -59,6 +63,27 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 			gameRenderer.setSmoothedCursorDeltaY(0F);
 			gameRenderer.setLastTickDelta(0F);
 		}
+	}
+	
+	private static final MethodHandle KEYBINDING_INIT_CATEGORY = 
+		MethodHandleHelper.PUBLIC.getConstructorOrNull(
+			KeyBinding.class, 
+			MethodType.methodType(KeyBinding.class, String.class, int.class, String.class),
+			String.class, int.class, String.class
+		);
+	private static final MethodHandle KEYBINDING_INIT_NO_CATEGORY =
+		MethodHandleHelper.PUBLIC.getConstructorOrNull(
+			KeyBinding.class, 
+			MethodType.methodType(KeyBinding.class, String.class, int.class),
+			String.class, int.class
+		);
+	
+	public static KeyBinding newKeyBinding(String translationKey, int keyCode, String category) {
+		if (KEYBINDING_INIT_CATEGORY != null)
+			return (KeyBinding) KEYBINDING_INIT_CATEGORY.invokeExact(translationKey, keyCode, category);
+		else
+			//noinspection DataFlowIssue
+			return (KeyBinding) KEYBINDING_INIT_NO_CATEGORY.invokeExact(translationKey, keyCode);
 	}
 	
 }

@@ -18,7 +18,7 @@ public enum ZumeKeyBind {
 	}
 	
 	ZumeKeyBind(String translationKey, int code) {
-		this.value = new KeyBinding(translationKey, code, "zume");
+		this.value = LegacyZume.newKeyBinding(translationKey, code, "zume");
 	}
 	
 }

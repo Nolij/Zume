@@ -11,7 +11,7 @@ public class FabricZumeBootstrapper implements ClientModInitializer, PreLaunchEn
 	private static final String MISSING_DEPENDENCY_MESSAGE = """
 		Failed to detect which variant of Zume to load! Ensure all dependencies are installed:
 		    Fabric (14.4+): Fabric API (fabric-key-binding-api-v1)
-		    Legacy Fabric (7.10-12.2): Legacy Fabric API (legacy-fabric-keybinding-api-v1-common)
+		    Legacy Fabric (6.4-12.2): Legacy Fabric API (legacy-fabric-keybinding-api-v1-common)
 		    Babric (b7.3): Station API (station-keybindings-v0)""";
 	
 	@Override

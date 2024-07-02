@@ -500,7 +500,7 @@ afterEvaluate {
 				}
 
 				minecraftVersionRange {
-					start = "1.7.10"
+					start = "1.6.4"
 					end = "1.12.2"
 
 					includeSnapshots = true
@@ -521,7 +521,7 @@ afterEvaluate {
 				}
 
 				minecraftVersionRange {
-					start = "1.7.10"
+					start = "1.6.4"
 					end = "1.12.2"
 				}
 				
@@ -546,8 +546,6 @@ afterEvaluate {
 				} else {
 					snapshots = HashSet()
 				}
-				
-				snapshots.add("1.21-Snapshot")
 				
 				minecraftVersions.addAll(snapshots)
 			}
