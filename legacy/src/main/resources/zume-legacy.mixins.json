@@ -5,7 +5,6 @@
 	"compatibilityLevel": "JAVA_8",
 	"client": [
 		"legacy.MinecraftClientMixin",
-		"legacy.GameOptionsMixin",
 		"legacy.GameRendererAccessor",
 		"legacy.GameRendererMixin",
 		"legacy.KeyBindingMixin"

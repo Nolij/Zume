@@ -8,6 +8,7 @@ import dev.nolij.zume.mixin.legacy.GameRendererAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.legacyfabric.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.SmoothUtil;
@@ -25,6 +26,12 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		Zume.LOGGER.info("Loading Legacy Zume...");
 		
 		Zume.registerImplementation(this, FabricLoader.getInstance().getConfigDir());
+		if (Zume.disabled)
+			return;
+		
+		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
+			KeyBindingHelper.registerKeyBinding(keyBind.value);
+		}
 	}
 	
 	@Override
