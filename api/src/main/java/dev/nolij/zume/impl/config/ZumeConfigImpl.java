@@ -1,9 +1,7 @@
 package dev.nolij.zume.impl.config;
 
 import dev.nolij.zson.Zson;
-import dev.nolij.zson.ZsonParser;
-import dev.nolij.zson.ZsonWriter;
-import dev.nolij.zson.Comment;
+import dev.nolij.zson.ZsonField;
 import dev.nolij.zume.impl.Zume;
 
 import java.io.*;
@@ -14,82 +12,82 @@ import java.util.function.Consumer;
 
 public class ZumeConfigImpl {
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Enable Cinematic Camera while zooming.
 		If you disable this, you should also try setting `zoomSmoothnessMs` to `0`.
 		DEFAULT: `true`""")
 	public boolean enableCinematicZoom = true;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Mouse Sensitivity will not be reduced below this amount while zoomed in.
 		Set to `1.0` to prevent it from being changed at all (not recommended without `enableCinematicZoom`).
 		DEFAULT: `0.4`""")
 	public double mouseSensitivityFloor = 0.4D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Speed for Zoom In/Out key binds & zoom scrolling (if enabled).
 		DEFAULT: `20`""")
 	public short zoomSpeed = 20;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Allows you to zoom in and out by scrolling up and down on your mouse while zoom is active.
 		This will prevent you from scrolling through your hotbar while zooming if enabled.
 		DEFAULT: `true`""")
 	public boolean enableZoomScrolling = true;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		FOV changes will be spread out over this many milliseconds.
 		Set to `0` to disable animations.
 		DEFAULT: `150`""")
 	public short zoomSmoothnessMs = 150;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		The exponent used for easing animations.
 		You should probably leave this at the default if you don't understand what it does.
 		DEFAULT: `4.0`""")
 	public double animationEasingExponent = 4D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		The exponent used for making differences in FOV more uniform.
 		You should probably leave this at the default if you don't understand what it does.
 		DEFAULT: `2.0`""")
 	public double zoomEasingExponent = 2D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Default starting zoom percentage.
 		DEFAULT: `0.5`""")
 	public double defaultZoom = 0.5D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		If `true`, the Zoom keybind will act as a toggle in first-person.
 		If `false`, Zoom will only be active in first-person while the keybind is held.
 		DEFAULT: `false`""")
 	public boolean toggleMode = false;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		If `true`, the Zoom keybind will act as a toggle in third-person.
 		If `false`, Zoom will only be active in third-person while the keybind is held.
 		DEFAULT: `true`""")
 	public boolean thirdPersonToggleMode = true;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Minimum zoom FOV.
 		DEFAULT: `1.0`""")
 	public double minFOV = 1D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Maximum third-person zoom distance (in blocks).
 		Set to `0.0` to disable third-person zoom.
 		DEFAULT: `15.0`""")
 	public double maxThirdPersonZoomDistance = 15D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		Minimum third-person zoom distance (in blocks).
 		Set to `4.0` to mimic vanilla.
 		DEFAULT: `0.5`""")
 	public double minThirdPersonZoomDistance = 0.5D;
 	
-	@Comment("""
+	@ZsonField(comment = """
 		If `true`, the mod will be disabled (on some platforms, key binds will still show in game options; they won't do anything if this is set to `true`).
 		Requires re-launch to take effect.
 		DEFAULT: `false`""")
@@ -97,11 +95,11 @@ public class ZumeConfigImpl {
 	
 	private static final int EXPECTED_VERSION = 1;
 	
-	@Comment("Used internally. Don't modify this.")
+	@ZsonField(comment = "Used internally. Don't modify this.")
 	public int configVersion = EXPECTED_VERSION;
 	
 	private static final int MAX_RETRIES = 5;
-	private static final ZsonWriter ZSON = new ZsonWriter();
+	private static final Zson ZSON = new Zson();
 	
 	private static ZumeConfigImpl readFromFile(final File configFile) {
 		if (configFile == null || !configFile.exists())
@@ -111,7 +109,7 @@ public class ZumeConfigImpl {
 		while (true) {
 			try {
 				//noinspection DataFlowIssue
-				return Zson.map2Obj(ZsonParser.parse(new FileReader(configFile)), ZumeConfigImpl.class);
+				return Zson.map2Obj(Zson.parse(new FileReader(configFile)), ZumeConfigImpl.class);
             } catch (IllegalArgumentException e) {
 				if (++i < MAX_RETRIES) {
                     try {
