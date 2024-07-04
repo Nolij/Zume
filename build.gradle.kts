@@ -290,7 +290,7 @@ subprojects {
 		}
 	}
 	
-	if(implName in lexForgeImpls) {
+	if (implName in lexForgeImpls) {
 		tasks.withType<RemapJarTask> {
 			mixinRemap {
 				disableRefmap()
