@@ -158,6 +158,10 @@ val lexForgeImpls = arrayOfProjects(
 val neoForgeImpls = arrayOfProjects(
 	"neoforge",
 )
+val forgeImpls = arrayOf(
+	*lexForgeImpls,
+	*neoForgeImpls,
+)
 val uniminedImpls = arrayOf(
 	*fabricImpls,
 	*legacyForgeImpls,
@@ -239,10 +243,6 @@ subprojects {
 	tasks.withType<GenerateModuleMetadata> {
 		enabled = false
 	}
-	
-	dependencies {
-		implementation("dev.nolij:zson:${"zson_version"()}:downgraded-8")
-	}
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
@@ -290,15 +290,15 @@ subprojects {
 		}
 	}
 	
-	if (implName in lexForgeImpls) {
-		tasks.withType<RemapJarTask> {
-			mixinRemap {
-				disableRefmap()
-			}
-		}
+	if (implName in forgeImpls) {
+		val minecraftLibraries by configurations.getting
 		
 		dependencies {
-			"minecraftLibraries"("dev.nolij:zson:${"zson_version"()}:downgraded-8")
+			minecraftLibraries("dev.nolij:zson:${"zson_version"()}:downgraded-8")
+		}
+	} else {
+		dependencies {
+			implementation("dev.nolij:zson:${"zson_version"()}:downgraded-8")
 		}
 	}
 }
@@ -411,7 +411,7 @@ tasks.shadowJar {
 	}
 	
 	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
-	if(releaseChannel.proguard) {
+	if (releaseChannel.proguard) {
 		relocate("dev.nolij.zume.mixin", "zume.mixin")
 	}
 	
@@ -421,6 +421,7 @@ tasks.shadowJar {
 			"ForceLoadAsMod" to true,
 			"MixinConfigs" to "zume.mixins.json",
 			"TweakClass" to "org.spongepowered.asm.launch.MixinTweaker",
+			"Fabric-Loom-Mixin-Remap-Type" to "static",
 		)
 	}
 }

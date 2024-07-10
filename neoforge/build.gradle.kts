@@ -42,5 +42,7 @@ dependencies {
 	compileOnly(project(":stubs"))
 	
 	modCompileOnly("org.embeddedt:embeddium-1.21:${"embeddium_neoforge_version"()}:api")
-	modRuntimeOnly("org.embeddedt:embeddium-1.21:${"embeddium_neoforge_version"()}")
+	modRuntimeOnly("org.embeddedt:embeddium-1.21:${"embeddium_neoforge_version"()}") {
+		isTransitive = false
+	}
 }
