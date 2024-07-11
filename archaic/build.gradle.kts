@@ -16,13 +16,6 @@ unimined.minecraft {
 	}
 }
 
-tasks.withType<RemapJarTask> {
-	mixinRemap {
-		enableMixinExtra()
-		disableRefmap()
-	}
-}
-
 dependencies {
 	compileOnly(project(":stubs"))
 	

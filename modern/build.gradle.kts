@@ -35,13 +35,6 @@ unimined.minecraft {
 	}
 }
 
-tasks.withType<RemapJarTask> {
-	mixinRemap {
-		enableMixinExtra()
-		disableRefmap()
-	}
-}
-
 repositories {
 	maven("https://maven.terraformersmc.com/releases/")
 	maven("https://maven.blamejared.com")

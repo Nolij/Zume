@@ -288,6 +288,13 @@ subprojects {
 		tasks.assemble {
 			dependsOn(outputJar)
 		}
+		
+		tasks.withType<RemapJarTask> {
+			mixinRemap {
+				enableMixinExtra()
+				disableRefmap()
+			}
+		}
 	}
 	
 	if (implName in forgeImpls) {

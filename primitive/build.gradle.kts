@@ -49,13 +49,6 @@ unimined.minecraft {
 	}
 }
 
-tasks.withType<RemapJarTask> {
-	mixinRemap {
-		enableMixinExtra()
-		disableRefmap()
-	}
-}
-
 repositories {
 	maven("https://maven.glass-launcher.net/snapshots")
 }
