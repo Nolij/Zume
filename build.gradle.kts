@@ -519,6 +519,8 @@ afterEvaluate {
 				}
 
 				minecraftVersions.add("b1.7.3")
+				
+				optional("embeddium")
 			}
 
 			curseforge {
@@ -560,6 +562,8 @@ afterEvaluate {
 				}
 				
 				minecraftVersions.addAll(snapshots)
+
+				optional("embeddium")
 			}
 
 			discord {
