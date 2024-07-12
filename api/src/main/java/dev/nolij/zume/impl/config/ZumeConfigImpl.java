@@ -110,7 +110,7 @@ public class ZumeConfigImpl {
 			try {
 				//noinspection DataFlowIssue
 				return Zson.map2Obj(Zson.parse(new FileReader(configFile)), ZumeConfigImpl.class);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | AssertionError e) {
 				if (++i < MAX_RETRIES) {
                     try {
 	                    //noinspection BusyWait
