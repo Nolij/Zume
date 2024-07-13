@@ -253,11 +253,11 @@ subprojects {
 
 			if (implName != "primitive") {
 				runs.config("server") {
-					disabled = true
+					enabled = false
 				}
 				
 				runs.config("client") {
-					jvmArgs += "-Dzume.configPathOverride=${rootProject.file("zume.json5").absolutePath}"
+					jvmArguments.add("-Dzume.configPathOverride=${rootProject.file("zume.json5").absolutePath}")
 				}
 			}
 			

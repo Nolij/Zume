@@ -6,7 +6,7 @@ unimined.minecraft {
 	version("vintage_minecraft_version"())
 
 	runs.config("client") {
-		args.addAll(arrayOf("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker"))
+		jvmArguments.addAll("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
 	}
 
 	minecraftForge {
