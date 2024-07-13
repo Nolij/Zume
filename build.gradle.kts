@@ -617,7 +617,7 @@ afterEvaluate {
 					"Changes since last build: <${compareLink}>"
 				
 				if (buildChangeLog.isNotBlank())
-					content += " ```md\n${buildChangeLog}\n```"
+					content += " ```\n${buildChangeLog}\n```"
 				content += "\nChanges since last release: ```md\n${releaseChangeLog}\n```"
 
 				val webhook = DiscordAPI.Webhook(
