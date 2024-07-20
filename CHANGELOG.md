@@ -1,2 +1,2 @@
-- added support for Legacy Fabric 6.4 (requires Legacy Fabric API 1.10.2+) (huge thanks to @thecatcore for backporting Legacy Fabric API to 6.4)
+- fix NeoForge 21.0.112-beta support
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
