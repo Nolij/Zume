@@ -2,6 +2,8 @@ package dev.nolij.zume.mixin.modern;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.world.entity.player.Inventory;
@@ -48,9 +50,21 @@ public abstract class MouseHandlerMixin {
 		return original;
 	}
 	
-	@WrapWithCondition(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;swapPaint(D)V"))
+	@Group(name = "zume$onScroll", min = 1, max = 1)
+	@WrapWithCondition(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;swapPaint(D)V"), require = 0)
 	public boolean onMouseScroll$scrollInHotbar(Inventory instance, double scrollAmount) {
 		return !Zume.mouseScrollHook((int) scrollAmount);
+	}
+	
+	// 24w33a (21.2)+ compat
+	@Dynamic
+	@Group(name = "zume$onScroll", min = 1, max = 1)
+	@WrapOperation(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_9928;method_61972(DII)I"), require = 0)
+	public int zume$onScroll$getNextScrollWheelSelection(double scrollAmount, int current, int max, Operation<Integer> original) {
+		if (Zume.mouseScrollHook((int) scrollAmount))
+			return current;
+		
+		return original.call(scrollAmount, current, max);
 	}
 	
 }

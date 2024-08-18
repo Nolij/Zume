@@ -1,2 +1,2 @@
-- fix NeoForge 21.0.112-beta support
+- fix 24w33a
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
