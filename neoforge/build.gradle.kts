@@ -24,7 +24,7 @@ unimined.minecraft {
 
 	mappings {
 		mojmap()
-		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
+//		parchment(mcVersion = "neoforge_minecraft_version"(), version = "neoforge_parchment_version"())
 	}
 
 	mods {

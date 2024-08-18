@@ -9,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class NeoZumeConfigScreenFactory implements IConfigScreenFactory {
 	
-	@Override
+	@ProGuardKeep
 	public @NotNull Screen createScreen(@NotNull Minecraft minecraft, @NotNull Screen parent) {
 		return new NeoZumeConfigScreen(parent);
 	}
 	
-	@ProGuardKeep
+	@Override
 	public @NotNull Screen createScreen(@NotNull ModContainer modContainer, @NotNull Screen parent) {
 		return new NeoZumeConfigScreen(parent);
 	}
