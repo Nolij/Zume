@@ -117,7 +117,8 @@ if (releaseChannel.suffix != null) {
 		patchAndSuffix += "."
 		
 		val maxBuild = patchHistory
-			.mapNotNull { it.removePrefix(patchAndSuffix).toIntOrNull() }
+			.filter { it.startsWith(patchAndSuffix) }
+			.mapNotNull { it.substring(patchAndSuffix.length).toIntOrNull() }
 			.maxOrNull()
 		
 		val build = (maxBuild?.plus(releaseIncrement)) ?: 1
