@@ -249,7 +249,7 @@ subprojects {
 		apply(plugin = "xyz.wagyourtail.unimined")
 		apply(plugin = "com.github.johnrengelman.shadow")
 		
-//		unimined.footgunChecks = false
+		unimined.footgunChecks = false
 		
 		unimined.minecraft(sourceSets["main"], lateApply = true) {
 			combineWith(project(":api").sourceSets.main.get())
@@ -313,7 +313,7 @@ subprojects {
 	}
 }
 
-//unimined.footgunChecks = false
+unimined.footgunChecks = false
 
 unimined.minecraft {
 	version("modern_minecraft_version"())
