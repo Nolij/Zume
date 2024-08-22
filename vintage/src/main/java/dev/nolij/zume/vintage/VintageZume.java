@@ -88,10 +88,22 @@ public class VintageZume implements IZumeImplementation {
 		MethodType.methodType(void.class, MouseEvent.class, boolean.class),
 		boolean.class
 	);
+	private static final MethodHandle GET_DWHEEL = MethodHandleHelper.firstNonNull(
+		MethodHandleHelper.PUBLIC.getMethodOrNull(
+			MouseEvent.class,
+			"getDwheel"
+		),
+		MethodHandleHelper.PUBLIC.getGetterOrNull(
+			MouseEvent.class,
+			"dwheel",
+			int.class
+		)
+	);
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void mouseEvent(MouseEvent mouseEvent) {
-		if (Zume.mouseScrollHook(mouseEvent.getDwheel())) {
+		//noinspection DataFlowIssue
+		if (Zume.mouseScrollHook((int) GET_DWHEEL.invokeExact(mouseEvent))) {
 			//noinspection DataFlowIssue
 			SET_CANCELED.invokeExact(mouseEvent, true);
 		}

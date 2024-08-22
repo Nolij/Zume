@@ -1,2 +1,3 @@
 - fix 24w33a
+- fix Forge 8.9
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
