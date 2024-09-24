@@ -10,7 +10,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.minecraft.client.Keybind;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.util.SmoothFloat;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
 
@@ -65,7 +65,7 @@ public class PrimitiveZume implements ClientModInitializer, IZumeImplementation 
 	@ProGuardKeep.WithObfuscation
 	@EventListener
 	public static void registerKeyBindings(KeyBindingRegisterEvent event) {
-		final List<Keybind> binds = event.keyBindings;
+		final List<KeyMapping> binds = event.keyBindings;
 		
 		for (final ZumeKeyBind keyBind : ZumeKeyBind.values()) {
 			binds.add(keyBind.value);
