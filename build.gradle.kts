@@ -566,8 +566,6 @@ afterEvaluate {
 					snapshots = HashSet()
 				}
 				
-				snapshots.add("1.21.2-Snapshot")
-				
 				minecraftVersions.addAll(snapshots)
 
 				optional("embeddium")
