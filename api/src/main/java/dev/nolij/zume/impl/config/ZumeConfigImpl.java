@@ -140,6 +140,16 @@ public class ZumeConfigImpl {
 	
 	private void writeToFile(final File configFile) {
 		this.configVersion = EXPECTED_VERSION;
+		
+		final Path configFolder = configFile.toPath().getParent();
+		if (Files.notExists(configFolder)) {
+			try {
+				Files.createDirectories(configFolder);
+			} catch (IOException e) {
+				Zume.LOGGER.error("Failed to create config folder: ", e);
+			}
+		}
+		
 		try (final FileWriter configWriter = new FileWriter(configFile)) {
 			ZSON.write(Zson.obj2Map(this), configWriter);
 			configWriter.flush();
@@ -182,13 +192,6 @@ public class ZumeConfigImpl {
 		};
 		
 		GLOBAL_CONFIG_PATH = dotMinecraft.resolve("global");
-		if (Files.notExists(GLOBAL_CONFIG_PATH)) {
-            try {
-                Files.createDirectories(GLOBAL_CONFIG_PATH);
-            } catch (IOException e) {
-                Zume.LOGGER.error("Failed to create global config path: ", e);
-            }
-        }
 	}
 	
 	public static File getConfigFile() {
