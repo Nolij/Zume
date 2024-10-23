@@ -147,7 +147,6 @@ public class ZumeConfigImpl {
 				Files.createDirectories(configFolder);
 			} catch (IOException e) {
 				Zume.LOGGER.error("Failed to create config folder: ", e);
-				return;
 			}
 		}
 		
