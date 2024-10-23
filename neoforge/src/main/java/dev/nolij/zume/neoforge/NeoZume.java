@@ -155,9 +155,22 @@ public class NeoZume implements IZumeImplementation {
 		}
 	}
 	
+	private static final MethodHandle GET_FOV = METHOD_HANDLE_HELPER.getMethodOrNull(
+		ViewportEvent.ComputeFov.class,
+		"getFOV",
+		MethodType.methodType(double.class, ViewportEvent.ComputeFov.class)
+	);
+	
+	@SuppressWarnings("DataFlowIssue")
+	private static final MethodHandle SET_FOV = MethodHandles.explicitCastArguments(MethodHandleHelper.firstNonNull(
+		METHOD_HANDLE_HELPER.getMethodOrNull(ViewportEvent.ComputeFov.class, "setFOV", float.class),
+		METHOD_HANDLE_HELPER.getMethodOrNull(ViewportEvent.ComputeFov.class, "setFOV", double.class)
+	), MethodType.methodType(void.class, ViewportEvent.ComputeFov.class, double.class));
+	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
 		if (Zume.isFOVHookActive()) {
-			event.setFOV(Zume.fovHook(event.getFOV()));
+			//noinspection DataFlowIssue
+			SET_FOV.invokeExact(event, (double) Zume.fovHook((double) GET_FOV.invokeExact(event)));
 		}
 	}
 	
