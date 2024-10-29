@@ -147,6 +147,7 @@ public class ZumeConfigImpl {
 				Files.createDirectories(configFolder);
 			} catch (IOException e) {
 				Zume.LOGGER.error("Failed to create config folder: ", e);
+				return;
 			}
 		}
 		
@@ -154,29 +155,22 @@ public class ZumeConfigImpl {
 			ZSON.write(Zson.obj2Map(this), configWriter);
 			configWriter.flush();
 		} catch (IOException e) {
-			throw new RuntimeException("Failed to write config file", e);
+			Zume.LOGGER.error("Failed to write config file", e);
 		}
 	}
 	
 	private static Consumer<ZumeConfigImpl> consumer;
-	private static IFileWatcher instanceWatcher;
-	private static IFileWatcher globalWatcher;
+	private static IFileWatcher configWatcher;
 	private static File instanceFile = null;
 	private static File globalFile = null;
 	
 	public static void replace(final ZumeConfigImpl newConfig) throws InterruptedException {
 		try {
-			instanceWatcher.lock();
-			try {
-				globalWatcher.lock();
-				
-				newConfig.writeToFile(getConfigFile());
-				consumer.accept(newConfig);
-			} finally {
-				globalWatcher.unlock();
-			}
+			configWatcher.lock();
+			newConfig.writeToFile(getConfigFile());
+			consumer.accept(newConfig);
 		} finally {
-			instanceWatcher.unlock();
+			configWatcher.unlock();
 		}
 	}
 	
@@ -235,17 +229,12 @@ public class ZumeConfigImpl {
 			final IFileWatcher nullWatcher = new NullFileWatcher();
 			
 			if (config.disable) {
-				instanceWatcher = nullWatcher;
-				globalWatcher = nullWatcher;
-			} else if (CONFIG_PATH_OVERRIDE == null) {
-				instanceWatcher = FileWatcher.onFileChange(instanceFile.toPath(), ZumeConfigImpl::reloadConfig);
-				globalWatcher = FileWatcher.onFileChange(globalFile.toPath(), ZumeConfigImpl::reloadConfig);
+				configWatcher = nullWatcher;
 			} else {
-				instanceWatcher = nullWatcher;
-				globalWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfigImpl::reloadConfig);
+				configWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfigImpl::reloadConfig);
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("Failed to create file watcher", e);
+			Zume.LOGGER.error("Failed to create file watcher", e);
 		}
 	}
 }
