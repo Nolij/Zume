@@ -189,6 +189,7 @@ allprojects {
 			}
 		}
 		maven("https://maven.blamejared.com")
+		maven("https://maven.taumc.org/releases")
 	}
 	
 	tasks.withType<JavaCompile> {
@@ -305,10 +306,12 @@ subprojects {
 		
 		dependencies {
 			minecraftLibraries("dev.nolij:zson:${"zson_version"()}:downgraded-8")
+			minecraftLibraries("dev.nolij:libnolij:${"libnolij_version"()}:downgraded-8")
 		}
 	} else {
 		dependencies {
 			implementation("dev.nolij:zson:${"zson_version"()}:downgraded-8")
+			implementation("dev.nolij:libnolij:${"libnolij_version"()}:downgraded-8")
 		}
 	}
 }
@@ -338,6 +341,7 @@ val shade: Configuration by configurations.creating {
 
 dependencies {
 	shade("dev.nolij:zson:${"zson_version"()}:downgraded-8")
+	shade("dev.nolij:libnolij:${"libnolij_version"()}:downgraded-8")
 
 	compileOnly("org.apache.logging.log4j:log4j-core:${"log4j_version"()}")
 	
@@ -395,6 +399,7 @@ tasks.shadowJar {
 	
 	exclude("*.xcf")
 	exclude("LICENSE_zson")
+	exclude("LICENSE_libnolij")
 	
 	configurations = immutableListOf(shade)
 	archiveClassifier = null
@@ -430,6 +435,7 @@ tasks.shadowJar {
 	}
 	
 	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
+	relocate("dev.nolij.libnolij", "dev.nolij.zume.libnolij")
 	if (releaseChannel.proguard) {
 		relocate("dev.nolij.zume.mixin", "zume.mixin")
 	}
