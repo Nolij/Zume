@@ -1,6 +1,6 @@
 package dev.nolij.zume.vintage;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -82,18 +82,18 @@ public class VintageZume implements IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle SET_CANCELED = MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle SET_CANCELED = Refraction.safe().getMethodOrNull(
 		Event.class,
 		"setCanceled",
 		MethodType.methodType(void.class, MouseEvent.class, boolean.class),
 		boolean.class
 	);
-	private static final MethodHandle GET_DWHEEL = MethodHandleHelper.firstNonNull(
-		MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle GET_DWHEEL = Refraction.firstNonNull(
+		Refraction.safe().getMethodOrNull(
 			MouseEvent.class,
 			"getDwheel"
 		),
-		MethodHandleHelper.PUBLIC.getGetterOrNull(
+		Refraction.safe().getGetterOrNull(
 			MouseEvent.class,
 			"dwheel",
 			int.class

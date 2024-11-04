@@ -1,6 +1,6 @@
 package dev.nolij.zume.impl;
 
-import dev.nolij.zume.api.util.v1.EasingHelper;
+import dev.nolij.libnolij.util.EasingUtil;
 
 public class EasedDouble {
 	
@@ -30,7 +30,7 @@ public class EasedDouble {
 		if (isEasing()) {
 			final long delta = System.currentTimeMillis() - startTimestamp;
 			
-			return EasingHelper.in(fromValue, targetValue, delta * inverseDuration, exponent);
+			return EasingUtil.in(fromValue, targetValue, delta * inverseDuration, exponent);
 		}
 		
 		return targetValue;

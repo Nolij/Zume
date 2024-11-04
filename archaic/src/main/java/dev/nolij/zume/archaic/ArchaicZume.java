@@ -4,7 +4,7 @@ import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -84,7 +84,7 @@ public class ArchaicZume implements IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle SET_CANCELED = MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle SET_CANCELED = Refraction.safe().getMethodOrNull(
 		Event.class, 
 		"setCanceled", 
 		MethodType.methodType(void.class, MouseEvent.class, boolean.class), 

@@ -1,6 +1,6 @@
 package dev.nolij.zume.legacy;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -54,7 +54,7 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		return CameraPerspective.values()[MinecraftClient.getInstance().options.perspective];
 	}
 	
-	private static final boolean USE_CINEMATIC_CAMERA_WORKAROUND = MethodHandleHelper.PUBLIC
+	private static final boolean USE_CINEMATIC_CAMERA_WORKAROUND = Refraction.safe()
 		.getMethodOrNull(SmoothUtil.class, "method_10852") == null;
 	
 	@Override
@@ -72,14 +72,14 @@ public class LegacyZume implements ClientModInitializer, IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle KEYBINDING_INIT_CATEGORY = 
-		MethodHandleHelper.PUBLIC.getConstructorOrNull(
+	private static final MethodHandle KEYBINDING_INIT_CATEGORY =
+		Refraction.safe().getConstructorOrNull(
 			KeyBinding.class, 
 			MethodType.methodType(KeyBinding.class, String.class, int.class, String.class),
 			String.class, int.class, String.class
 		);
 	private static final MethodHandle KEYBINDING_INIT_NO_CATEGORY =
-		MethodHandleHelper.PUBLIC.getConstructorOrNull(
+		Refraction.safe().getConstructorOrNull(
 			KeyBinding.class, 
 			MethodType.methodType(KeyBinding.class, String.class, int.class),
 			String.class, int.class

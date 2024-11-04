@@ -1,8 +1,8 @@
 package dev.nolij.zume.impl;
 
-import dev.nolij.zume.api.util.v1.MathHelper;
+import dev.nolij.libnolij.util.EasingUtil;
+import dev.nolij.libnolij.util.MathUtil;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
-import dev.nolij.zume.api.util.v1.EasingHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -73,15 +73,15 @@ public class Zume {
 	}
 	
 	private static void setZoom(final double targetZoom) {
-		zoom.set(MathHelper.clamp(targetZoom, 0D, 1D));
+		zoom.set(MathUtil.clamp(targetZoom, 0D, 1D));
 	}
 	
 	private static void setZoom(final double fromZoom, final double targetZoom) {
-		zoom.set(MathHelper.clamp(fromZoom, 0D, 1D), MathHelper.clamp(targetZoom, 0D, 1D));
+		zoom.set(MathUtil.clamp(fromZoom, 0D, 1D), MathUtil.clamp(targetZoom, 0D, 1D));
 	}
 	
 	private static double getThirdPersonStartZoom() {
-		return EasingHelper.inverseOut(
+		return EasingUtil.inverseOut(
 			config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, 
 			4D, config.zoomEasingExponent);
 	}
@@ -96,9 +96,9 @@ public class Zume {
 			final double target;
 			
 			if (implementation.getCameraPerspective() == CameraPerspective.THIRD_PERSON)
-				target = EasingHelper.linear(1D, from, config.defaultZoom);
+				target = EasingUtil.linear(1D, from, config.defaultZoom);
 			else
-				target = EasingHelper.linear(from, 0D, config.defaultZoom);
+				target = EasingUtil.linear(from, 0D, config.defaultZoom);
 			
 			setZoom(from, target);
 		}
@@ -133,14 +133,14 @@ public class Zume {
 	}
 	
 	public static double fovHook(final double original) {
-		return EasingHelper.out(config.minFOV, original, getZoom(), config.zoomEasingExponent);
+		return EasingUtil.out(config.minFOV, original, getZoom(), config.zoomEasingExponent);
 	}
 	
 	public static double thirdPersonCameraHook(final double original) {
 		if (shouldUseFirstPersonZoom() || !shouldHook())
 			return original;
 		
-		return original * 0.25D * EasingHelper.out(config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, getZoom(), config.zoomEasingExponent);
+		return original * 0.25D * EasingUtil.out(config.minThirdPersonZoomDistance, config.maxThirdPersonZoomDistance, getZoom(), config.zoomEasingExponent);
 	}
 	
 	public static boolean cinematicCameraEnabledHook(final boolean original) {
@@ -154,7 +154,7 @@ public class Zume {
 		if (!isActive() || !shouldUseFirstPersonZoom())
 			return original;
 		
-		return original * EasingHelper.out(config.mouseSensitivityFloor, 1D, getZoom(), 1);
+		return original * EasingUtil.out(config.mouseSensitivityFloor, 1D, getZoom(), 1);
 	}
 	
 	public static boolean isMouseScrollHookActive() {
@@ -165,7 +165,7 @@ public class Zume {
         if (!isMouseScrollHookActive() || scrollDelta == 0)
             return false;
 		
-        Zume.scrollDelta += MathHelper.sign(scrollDelta);
+        Zume.scrollDelta += MathUtil.sign(scrollDelta);
         return true;
     }
 	
