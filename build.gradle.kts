@@ -3,7 +3,11 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.nolij.zumegradle.DeflateAlgorithm
 import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
-import dev.nolij.zumegradle.CompressJarTask
+import dev.nolij.zumegradle.entryprocessing.EntryProcessors
+import dev.nolij.zumegradle.task.AdvzipTask
+import dev.nolij.zumegradle.task.CopyJarTask
+import dev.nolij.zumegradle.task.JarEntryModificationTask
+import dev.nolij.zumegradle.task.ProguardTask
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PublishModTask
@@ -38,13 +42,13 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
     val suffix: String? = null,
     val releaseType: ReleaseType? = null,
-    val deflation: DeflateAlgorithm = DeflateAlgorithm.ZOPFLI,
-    val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
+    val deflation: DeflateAlgorithm = DeflateAlgorithm.INSANE,
+    val json: JsonShrinkingType? = JsonShrinkingType.MINIFY,
     val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		deflation = DeflateAlgorithm.SEVENZIP,
+		deflation = DeflateAlgorithm.EXTRA,
 		json = JsonShrinkingType.PRETTY_PRINT
 	),
 	PRE_RELEASE("pre"),
@@ -364,8 +368,8 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	}
 	
 	if (releaseChannel.proguard) {
-		dependsOn(compressJar)
-		from(compressJar.get().mappingsFile!!) {
+		dependsOn(proguardJar)
+		from(proguardJar.get().mappingsFile) {
 			rename { "mappings.txt" }
 		}
 	}
@@ -443,22 +447,77 @@ tasks.shadowJar {
 	}
 }
 
-val compressJar = tasks.register<CompressJarTask>("compressJar") {
+//region compressJar
+val cjTempDir = layout.buildDirectory.dir("compressJar")
+val proguardJar by tasks.registering(ProguardTask::class) {
 	dependsOn(tasks.shadowJar)
-	group = "build"
+	inputJar = tasks.shadowJar.get().archiveFile
+	destinationDirectory = cjTempDir
+	run = releaseChannel.proguard
 	
-	val shadowJar = tasks.shadowJar.get()
-	inputJar = shadowJar.archiveFile.get().asFile
-	outputJar = shadowJar.archiveFile.get().asFile.let { 
-		it.parentFile.resolve("${it.nameWithoutExtension.removeSuffix("-deobfuscated")}.jar")
+	config(file("proguard.pro"))
+	
+	mappingsFile = destinationDirectory.get().asFile
+		.resolve("${archiveFile.get().asFile.nameWithoutExtension}-mappings.txt")
+
+	jmod("java.base")
+	jmod("java.desktop")
+
+	classpath.addAll(
+		uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values }.flatMap { mc ->
+			val prodNamespace = mc.mcPatcher.prodNamespace
+
+			val minecrafts = listOf(
+				mc.sourceSet.compileClasspath.files,
+				mc.sourceSet.runtimeClasspath.files
+			)
+				.flatten()
+				.filter { !mc.isMinecraftJar(it.toPath()) }
+				.toHashSet()
+
+			mc.mods.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
+				.filter { it.extension == "jar" && !it.name.startsWith("zume") }
+				.plus(mc.getMinecraft(prodNamespace, prodNamespace).toFile())
+		}
+	)
+	
+	archiveClassifier = "proguard"
+}
+
+val minifyJar by tasks.registering(JarEntryModificationTask::class) {
+	dependsOn(proguardJar)
+	inputJar = proguardJar.get().archiveFile
+	destinationDirectory = cjTempDir
+
+	archiveClassifier = "minified"
+	json(releaseChannel.json) {
+		it.endsWith(".json") || it.endsWith(".mcmeta") || it == "mcmod.info"
 	}
-	
-	deflateAlgorithm = releaseChannel.deflation
-	jsonShrinkingType = releaseChannel.json
+
+	process(EntryProcessors.minifyClass { it.desc.startsWith("Ldev/nolij/zumegradle/proguard/") })
+
 	if (releaseChannel.proguard) {
-		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
+		process(EntryProcessors.obfuscationFixer(proguardJar.get().mappingsFile.get().asFile))
 	}
 }
+
+val advzip by tasks.registering(AdvzipTask::class) {
+	dependsOn(minifyJar)
+	inputJar = minifyJar.get().archiveFile
+	destinationDirectory = cjTempDir
+	
+	archiveClassifier = "advzip"
+	level = releaseChannel.deflation
+}
+
+val compressJar by tasks.registering(CopyJarTask::class) {
+	dependsOn(advzip)
+	group = "build"
+	inputJar = advzip.get().archiveFile
+	
+	archiveClassifier = null
+}
+//endregion
 
 tasks.assemble {
 	dependsOn(compressJar, sourcesJar)
@@ -473,7 +532,7 @@ afterEvaluate {
 		
 		publications {
 			create<MavenPublication>("mod_id"()) {
-				artifact(compressJar.get().outputJar)
+				artifact(compressJar.get().archiveFile)
 				artifact(sourcesJar)
 			}
 		}
@@ -488,7 +547,7 @@ afterEvaluate {
 	}
 	
 	publishMods {
-		file = compressJar.get().outputJar
+		file = compressJar.get().archiveFile
 		additionalFiles.from(sourcesJar.get().archiveFile)
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version
