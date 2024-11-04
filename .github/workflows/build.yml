@@ -17,7 +17,7 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: :build
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build --stacktrace --no-daemon
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
