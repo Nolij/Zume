@@ -101,15 +101,13 @@ val patchHistory = releaseTags
 	.map { name -> name.substring(minorTagPrefix.length) }
 
 val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
-val patch = maxPatch.let {
-	if (it != null) {
-		if (patchHistory.contains(it.toString())) {
-			it + releaseIncrement
-		} else {
-			it
-		}
-	} else 0
-}
+val patch =
+	maxPatch?.plus(
+		if (patchHistory.contains(maxPatch.toString()))
+			releaseIncrement
+		else
+			0
+	) ?: 0
 var patchAndSuffix = patch.toString()
 
 if (releaseChannel.suffix != null) {
