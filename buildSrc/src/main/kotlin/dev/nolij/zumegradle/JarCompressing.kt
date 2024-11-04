@@ -308,10 +308,6 @@ abstract class CompressJarTask : DefaultTask() {
 
 	@TaskAction
 	fun compressJar() {
-//		if (useProguard)
-//			applyProguard(inputJar, minecraftConfigs, project.rootDir)
-//		squishJar(inputJar, jsonShrinkingType, mappingsFile)
-//		deflate(outputJar, deflateAlgorithm)
 		val jar = inputJar.get().asFile
 		val temp = jar.copyTo(temporaryDir.resolve("temp.jar"), true)
 		if(useProguard) {
