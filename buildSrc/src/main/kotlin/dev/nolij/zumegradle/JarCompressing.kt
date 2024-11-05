@@ -41,7 +41,7 @@ enum class JsonShrinkingType {
 	NONE, MINIFY, PRETTY_PRINT
 }
 
-fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?) {
+fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?, isObfuscating: Boolean = false) {
 	val contents = linkedMapOf<String, ByteArray>()
 	JarFile(jar).use {
 		it.entries().asIterator().forEach { entry ->
@@ -55,7 +55,6 @@ fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?)
 
 	val json = JsonSlurper()
 
-	val isObfuscating = mappingsFile?.exists() == true
 	val mappings = if (isObfuscating) mappings(mappingsFile!!) else null
 
 	JarOutputStream(jar.outputStream()).use { out ->
@@ -105,7 +104,7 @@ private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree?): ByteArray {
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
-	
+
 	if(mappings != null) {
 		for (annotation in classNode.visibleAnnotations ?: emptyList()) {
 			if (annotation.desc.endsWith("fml/common/Mod;")) {
@@ -119,18 +118,18 @@ private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree?): By
 			}
 		}
 	}
-	
+
 	val strippableAnnotations = setOf(
 		"Lorg/spongepowered/asm/mixin/Dynamic;",
 		"Lorg/spongepowered/asm/mixin/Final;",
 		"Ljava/lang/SafeVarargs;",
 	)
-	val canStripAnnotation = { annotationNode: AnnotationNode -> 
+	val canStripAnnotation = { annotationNode: AnnotationNode ->
 		annotationNode.desc.startsWith("Ldev/nolij/zumegradle/proguard/") ||
-		annotationNode.desc.startsWith("Lorg/jetbrains/annotations/") ||
-		strippableAnnotations.contains(annotationNode.desc)
+			annotationNode.desc.startsWith("Lorg/jetbrains/annotations/") ||
+			strippableAnnotations.contains(annotationNode.desc)
 	}
-	
+
 	classNode.invisibleAnnotations?.removeIf(canStripAnnotation)
 	classNode.visibleAnnotations?.removeIf(canStripAnnotation)
 	classNode.invisibleTypeAnnotations?.removeIf(canStripAnnotation)
@@ -192,7 +191,7 @@ fun deflate(zip: File, type: DeflateAlgorithm) {
 val JAVA_HOME = System.getProperty("java.home")
 
 @Suppress("UnstableApiUsage")
-fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir: File) {
+fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir: File, mappingsFile: File? = null) {
 	val inputJar = jar.copyTo(
 		jar.parentFile.resolve(".${jar.nameWithoutExtension}_proguardRunning.jar"), true
 	).also {
@@ -205,10 +204,14 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	}
 	val proguardCommand = mutableListOf(
 		"@${config.absolutePath}",
-		"-printmapping", jar.parentFile.resolve("${jar.nameWithoutExtension}-mappings.txt").absolutePath,
 		"-injars", inputJar.absolutePath,
 		"-outjars", jar.absolutePath,
 	)
+	
+	if (mappingsFile != null) {
+		proguardCommand.add("-printmapping")
+		proguardCommand.add(mappingsFile.absolutePath)
+	}
 
 	val libraries = HashSet<String>()
 	libraries.add("${JAVA_HOME}/jmods/java.base.jmod")
@@ -285,7 +288,7 @@ abstract class CompressJarTask : DefaultTask() {
 	val mappingsFile
 		get() = if (useProguard)
 			inputJar.get().asFile.let {
-				it.parentFile.resolve("${it.nameWithoutExtension}-mappings.txt")	
+				it.parentFile.resolve("${it.nameWithoutExtension.removeSuffix("-deobfuscated")}-mappings.txt")
 			}
 		else null
 
@@ -311,9 +314,9 @@ abstract class CompressJarTask : DefaultTask() {
 		val jar = inputJar.get().asFile
 		val temp = jar.copyTo(temporaryDir.resolve("temp.jar"), true)
 		if(useProguard) {
-			applyProguard(temp, minecraftConfigs, project.rootDir)
+			applyProguard(temp, minecraftConfigs, project.rootDir, mappingsFile)
 		}
-		squishJar(temp, jsonShrinkingType, mappingsFile)
+		squishJar(temp, jsonShrinkingType, mappingsFile, useProguard)
 		deflate(temp, deflateAlgorithm)
 		temp.copyTo(outputJar.get().asFile, true)
 	}
