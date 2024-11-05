@@ -673,7 +673,9 @@ val smokeTest = tasks.register("smokeTest") {
 				process.destroy()
 			}
 			
-			if (!passed) {
+			if (passed) {
+				logger.info("Smoke test passed for config:\n${config}")
+			} else {
 				logger.error("Smoke test failed for config:\n${config}")
 				failures.add(config)
 			}
