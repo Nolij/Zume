@@ -26,7 +26,6 @@ import xyz.wagyourtail.unimined.api.unimined
 import java.io.FileOutputStream
 import java.net.URL
 import java.nio.file.Files
-import java.time.Duration
 import java.time.ZonedDateTime
 import kotlin.io.path.*
 import kotlin.io.path.Path
@@ -522,11 +521,11 @@ val smokeTestConfigs = arrayOf(
 		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
 	)),
 	SmokeTestConfig("fabric", "1.21.1", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.106.0%2B1.21.1/fabric-api-0.107.0+1.21.1.jar",
+		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.1/fabric-api-0.107.0+1.21.1.jar",
 		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
 	)),
 	SmokeTestConfig("fabric", "1.20.6", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.98.0%2B1.20.6/fabric-api-0.100.8+1.20.6.jar",
+		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.100.8%2B1.20.6/fabric-api-0.100.8+1.20.6.jar",
 		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v10.0.0/modmenu-10.0.0.jar",
 	)),
 	SmokeTestConfig("fabric", "1.20.1", dependencies = listOf(
@@ -639,28 +638,24 @@ val smokeTest = tasks.register("smokeTest") {
 			if (config.extraArgs != null)
 				extraArgs.addAll(config.extraArgs)
 			
-			exec {
-				commandLine(
-					"${project.rootDir}/.gradle/python/bin/portablemc",
-					"--main-dir", mainDir,
-					"--work-dir", workDir,
-					"start", config.versionString,
-					*extraArgs.toArray(),
-					"--jvm-args=-DzumeGradle.auditAndExit=true",
-					"--dry",
-				)
-			}
-			exec {
-				commandLine(
-					"${project.rootDir}/.gradle/python/bin/portablemc",
-					"--main-dir", mainDir,
-					"--work-dir", workDir,
-					"start", config.versionString,
-					*extraArgs.toArray(),
-					"--jvm-args=-DzumeGradle.auditAndExit=true",
-				)
-				timeout = Duration.ofSeconds(30)
-			}
+			val command = arrayOf(
+				"${project.rootDir}/.gradle/python/bin/portablemc",
+				"--main-dir", mainDir,
+				"--work-dir", workDir,
+				"start", config.versionString,
+				*extraArgs.toTypedArray(),
+				"--jvm-args=-DzumeGradle.auditAndExit=true",
+			)
+			
+			ProcessBuilder(*command, "--dry")
+				.inheritIO()
+				.start()
+				.waitFor()
+			
+			ProcessBuilder(*command)
+				.inheritIO()
+				.start()
+				.waitFor(15, TimeUnit.SECONDS)
 			
 			var passed = false
 			file(latestLog).also { logFile ->
