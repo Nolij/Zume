@@ -598,19 +598,19 @@ val smokeTest = tasks.register("smokeTest") {
 			
 			Path(workDir).also { workPath ->
 				if (!workPath.exists())
-					workPath.createDirectory()
+					workPath.createDirectories()
 			}
 			Path(modsDir).also { modsPath ->
 				if (modsPath.exists())
 					modsPath.deleteRecursively()
 				
-				modsPath.createDirectory()
+				modsPath.createDirectories()
 			}
 			Path(latestLog).also { logPath ->
 				logPath.deleteIfExists()
 				logPath.parent.also { logsPath ->
 					if (!logsPath.exists())
-						logsPath.createDirectory()
+						logsPath.createDirectories()
 				}
 			}
 			
