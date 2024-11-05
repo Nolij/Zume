@@ -1,11 +1,10 @@
 package dev.nolij.zume;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +29,8 @@ public final class ZumeMixinPlugin implements IMixinConfigPlugin {
 		
 		try {
 			//noinspection DataFlowIssue
-			forgeVersion = (String) MethodHandleHelper.PUBLIC.getMethodOrNull(
-				MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraftforge.versions.forge.ForgeVersion"),
+			forgeVersion = (String) Refraction.safe().getMethodOrNull(
+				Refraction.safe().getClassOrNull("net.minecraftforge.versions.forge.ForgeVersion"),
 				"getVersion"
 			).invokeExact();
 		} catch (Throwable ignored) { }

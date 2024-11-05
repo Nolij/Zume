@@ -19,6 +19,10 @@ jobs:
           cache-read-only: true
       - name: :build
         run: ./gradlew build --no-daemon
+      - name: :smokeTest
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./gradlew :smokeTest --no-daemon
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

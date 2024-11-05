@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -41,7 +41,7 @@ public class LexZume implements IZumeImplementation {
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 		
-		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
+		if (Refraction.safe().getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
 	}
@@ -84,9 +84,9 @@ public class LexZume implements IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle GET_SCROLL_DELTA = MethodHandleHelper.firstNonNull(
-		MethodHandleHelper.PUBLIC.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getScrollDelta"),
-		MethodHandleHelper.PUBLIC.getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getDeltaY")
+	private static final MethodHandle GET_SCROLL_DELTA = Refraction.firstNonNull(
+		Refraction.safe().getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getScrollDelta"),
+		Refraction.safe().getMethodOrNull(InputEvent.MouseScrollingEvent.class, "getDeltaY")
 	);
 	
 	private void onMouseScroll(InputEvent.MouseScrollingEvent event) {

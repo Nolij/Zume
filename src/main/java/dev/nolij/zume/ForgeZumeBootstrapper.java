@@ -1,5 +1,6 @@
 package dev.nolij.zume;
 
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.lexforge.LexZume;
 import dev.nolij.zume.lexforge16.LexZume16;
 import dev.nolij.zume.lexforge18.LexZume18;
@@ -32,6 +33,8 @@ public class ForgeZumeBootstrapper {
 			case ZumeMixinPlugin.LEXFORGE16 -> new LexZume16();
 			case ZumeMixinPlugin.VINTAGE_FORGE -> new VintageZume();
 		}
+		
+		Zume.postInit();
 	}
 	
 }

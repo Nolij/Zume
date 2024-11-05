@@ -1,6 +1,6 @@
 package dev.nolij.zume.modern;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -32,7 +32,7 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 			KeyBindingHelper.registerKeyBinding(keyBind.value);
 		}
 		
-		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.client.gui.options.OptionIdentifier") != null) {
+		if (Refraction.safe().getClassOrNull("org.embeddedt.embeddium.client.gui.options.OptionIdentifier") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
 	}
@@ -52,13 +52,13 @@ public class ModernZume implements ClientModInitializer, IZumeImplementation {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
 	}
 	
-	private static final MethodHandle GET_PERSPECTIVE = MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle GET_PERSPECTIVE = Refraction.safe().getMethodOrNull(
 		Options.class,
 		FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary",
 			"net.minecraft.class_315", "method_31044", "()Lnet/minecraft/class_5498;"),
 		MethodType.methodType(Enum.class, Options.class));
 	private static final MethodHandle PERSPECTIVE =
-		MethodHandleHelper.PUBLIC.getGetterOrNull(Options.class, "field_1850", int.class);
+		Refraction.safe().getGetterOrNull(Options.class, "field_1850", int.class);
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {

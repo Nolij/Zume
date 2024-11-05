@@ -31,6 +31,11 @@ jobs:
       - name: :build
         run: ./gradlew build --stacktrace --no-daemon
         
+      - name: :smokeTest
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./gradlew :smokeTest --no-daemon
+          
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

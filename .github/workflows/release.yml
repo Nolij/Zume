@@ -20,6 +20,12 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache-read-only: true
+      - name: :build
+        run: ./gradlew :build
+      - name: :smokeTest
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./gradlew :smokeTest
       - name: :publishMods
         run: ./gradlew publishMods -Prelease_channel=RELEASE --no-daemon
         env:

@@ -1,6 +1,6 @@
 package dev.nolij.zume.neoforge;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -13,6 +13,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
@@ -33,22 +34,21 @@ import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 @Mod(value = MOD_ID, dist = Dist.CLIENT)
 public class NeoZume implements IZumeImplementation {
 	
-	private static final MethodHandleHelper METHOD_HANDLE_HELPER =
-		new MethodHandleHelper(NeoZume.class.getClassLoader(), MethodHandles.lookup());
+	private static final Refraction REFRACTION = new Refraction(MethodHandles.lookup());
 	
-	private static final Class<?> CONFIG_SCREEN_EXT_INTERFACE = METHOD_HANDLE_HELPER.getClassOrNull(
+	private static final Class<?> CONFIG_SCREEN_EXT_INTERFACE = REFRACTION.getClassOrNull(
 		"net.neoforged.neoforge.client.gui.IConfigScreenFactory");
-	private static final Class<?> CONFIG_SCREEN_EXT_RECORD = METHOD_HANDLE_HELPER.getClassOrNull(
+	private static final Class<?> CONFIG_SCREEN_EXT_RECORD = REFRACTION.getClassOrNull(
 		"net.neoforged.neoforge.client.ConfigScreenHandler$ConfigScreenFactory");
-	private static final Class<?> CONFIG_SCREEN_EXT = MethodHandleHelper.firstNonNull(
+	private static final Class<?> CONFIG_SCREEN_EXT = Refraction.firstNonNull(
 		CONFIG_SCREEN_EXT_INTERFACE, CONFIG_SCREEN_EXT_RECORD);
-	private static final MethodHandle REGISTER_EXT_POINT = METHOD_HANDLE_HELPER.getMethodOrNull(
+	private static final MethodHandle REGISTER_EXT_POINT = REFRACTION.getMethodOrNull(
 		ModContainer.class, "registerExtensionPoint", Class.class, Supplier.class
 	);
 	
-	private static final Class<?> RENDER_TICK_EVENT = METHOD_HANDLE_HELPER.getClassOrNull(
+	private static final Class<?> RENDER_TICK_EVENT = REFRACTION.getClassOrNull(
 		"net.neoforged.neoforge.event.TickEvent$RenderTickEvent");
-	private static final Class<?> TICK_EVENT_PHASE = METHOD_HANDLE_HELPER.getClassOrNull(
+	private static final Class<?> TICK_EVENT_PHASE = REFRACTION.getClassOrNull(
 		"net.neoforged.neoforge.event.TickEvent$Phase");
 	private static final Enum<?> TICK_EVENT_PHASE_START;
 	static {
@@ -62,9 +62,9 @@ public class NeoZume implements IZumeImplementation {
 			}
 		}
 	}
-	private static final MethodHandle RENDER_TICK_EVENT_PHASE_GETTER = METHOD_HANDLE_HELPER.getGetterOrNull(
+	private static final MethodHandle RENDER_TICK_EVENT_PHASE_GETTER = REFRACTION.getGetterOrNull(
 		RENDER_TICK_EVENT, "phase", TICK_EVENT_PHASE, MethodType.methodType(Enum.class, Object.class));
-	private static final Class<?> RENDER_FRAME_EVENT = METHOD_HANDLE_HELPER.getClassOrNull(
+	private static final Class<?> RENDER_FRAME_EVENT = REFRACTION.getClassOrNull(
 		"net.neoforged.neoforge.client.event.RenderFrameEvent$Pre");
 	
 	public NeoZume(IEventBus modEventBus, ModContainer modContainer) {
@@ -113,9 +113,11 @@ public class NeoZume implements IZumeImplementation {
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateDetachedCameraDistance);
 		
-		if (METHOD_HANDLE_HELPER.getClassOrNull("org.embeddedt.embeddium.api.options.OptionIdentifier") != null) {
+		if (REFRACTION.getClassOrNull("org.embeddedt.embeddium.api.options.OptionIdentifier") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
+		
+		modEventBus.addListener(FMLLoadCompleteEvent.class, event -> Zume.postInit());
 	}
 	
 	@Override
@@ -155,16 +157,16 @@ public class NeoZume implements IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle GET_FOV = METHOD_HANDLE_HELPER.getMethodOrNull(
+	private static final MethodHandle GET_FOV = REFRACTION.getMethodOrNull(
 		ViewportEvent.ComputeFov.class,
 		"getFOV",
 		MethodType.methodType(double.class, ViewportEvent.ComputeFov.class)
 	);
 	
 	@SuppressWarnings("DataFlowIssue")
-	private static final MethodHandle SET_FOV = MethodHandles.explicitCastArguments(MethodHandleHelper.firstNonNull(
-		METHOD_HANDLE_HELPER.getMethodOrNull(ViewportEvent.ComputeFov.class, "setFOV", float.class),
-		METHOD_HANDLE_HELPER.getMethodOrNull(ViewportEvent.ComputeFov.class, "setFOV", double.class)
+	private static final MethodHandle SET_FOV = MethodHandles.explicitCastArguments(Refraction.firstNonNull(
+		REFRACTION.getMethodOrNull(ViewportEvent.ComputeFov.class, "setFOV", float.class),
+		REFRACTION.getMethodOrNull(ViewportEvent.ComputeFov.class, "setFOV", double.class)
 	), MethodType.methodType(void.class, ViewportEvent.ComputeFov.class, double.class));
 	
 	private void calculateFOV(ViewportEvent.ComputeFov event) {
@@ -185,16 +187,16 @@ public class NeoZume implements IZumeImplementation {
 		}
 	}
 	
-	private static final MethodHandle GET_DISTANCE = METHOD_HANDLE_HELPER.getMethodOrNull(
+	private static final MethodHandle GET_DISTANCE = REFRACTION.getMethodOrNull(
 		CalculateDetachedCameraDistanceEvent.class, 
 		"getDistance",
 		MethodType.methodType(double.class, CalculateDetachedCameraDistanceEvent.class)
 	);
 	
 	@SuppressWarnings("DataFlowIssue")
-	private static final MethodHandle SET_DISTANCE = MethodHandles.explicitCastArguments(MethodHandleHelper.firstNonNull(
-		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", float.class),
-		METHOD_HANDLE_HELPER.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", double.class)
+	private static final MethodHandle SET_DISTANCE = MethodHandles.explicitCastArguments(Refraction.firstNonNull(
+		REFRACTION.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", float.class),
+		REFRACTION.getMethodOrNull(CalculateDetachedCameraDistanceEvent.class, "setDistance", double.class)
 	), MethodType.methodType(void.class, CalculateDetachedCameraDistanceEvent.class, double.class));
 	
 	private void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {

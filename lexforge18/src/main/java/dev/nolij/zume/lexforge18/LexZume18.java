@@ -1,6 +1,6 @@
 package dev.nolij.zume.lexforge18;
 
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -23,16 +23,16 @@ import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 @Mod(MOD_ID)
 public class LexZume18 implements IZumeImplementation {
 	
-	private static final Class<?> FOV_EVENT_CLASS = MethodHandleHelper.PUBLIC.getClassOrNull(
+	private static final Class<?> FOV_EVENT_CLASS = Refraction.safe().getClassOrNull(
 		"net.minecraftforge.client.event.EntityViewRenderEvent$FieldOfView",
 		"net.minecraftforge.client.event.EntityViewRenderEvent$FOVModifier"
 	);
-	private static final MethodHandle GET_FOV = MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle GET_FOV = Refraction.safe().getMethodOrNull(
 		FOV_EVENT_CLASS,
 		"getFOV",
 		MethodType.methodType(double.class, EntityViewRenderEvent.class)
 	);
-	private static final MethodHandle SET_FOV = MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle SET_FOV = Refraction.safe().getMethodOrNull(
 		FOV_EVENT_CLASS,
 		"setFOV",
 		MethodType.methodType(void.class, EntityViewRenderEvent.class, double.class),

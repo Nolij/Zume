@@ -1,7 +1,7 @@
 package dev.nolij.zume.modern.integration.modmenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -14,8 +14,8 @@ import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
 
 public class ZumeModMenuIntegration implements ModMenuApi {
 	
-	private static final MethodHandle LITERALTEXT_INIT = MethodHandleHelper.PUBLIC.getConstructorOrNull(
-		MethodHandleHelper.PUBLIC.getClassOrNull("net.minecraft.class_2585"),
+	private static final MethodHandle LITERALTEXT_INIT = Refraction.safe().getConstructorOrNull(
+		Refraction.safe().getClassOrNull("net.minecraft.class_2585"),
 		MethodType.methodType(Component.class, String.class),
 		String.class);
 	

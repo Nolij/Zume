@@ -1,7 +1,7 @@
 package dev.nolij.zume.lexforge16;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import dev.nolij.zume.api.util.v1.MethodHandleHelper;
+import dev.nolij.libnolij.refraction.Refraction;
 import dev.nolij.zume.impl.CameraPerspective;
 import dev.nolij.zume.impl.IZumeImplementation;
 import dev.nolij.zume.impl.Zume;
@@ -62,13 +62,13 @@ public class LexZume16 implements IZumeImplementation {
 		return ZumeKeyBind.ZOOM_OUT.isPressed();
 	}
 	
-	private static final MethodHandle GET_CAMERA_TYPE = MethodHandleHelper.PUBLIC.getMethodOrNull(
+	private static final MethodHandle GET_CAMERA_TYPE = Refraction.safe().getMethodOrNull(
 		Options.class,
 		ObfuscationReflectionHelper.remapName(INameMappingService.Domain.METHOD, "func_243230_g"),
 		MethodType.methodType(Enum.class, Options.class)
 	);
 	private static final MethodHandle THIRD_PERSON_VIEW =
-		MethodHandleHelper.PUBLIC.getGetterOrNull(Options.class, "field_74320_O", int.class);
+		Refraction.safe().getGetterOrNull(Options.class, "field_74320_O", int.class);
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
