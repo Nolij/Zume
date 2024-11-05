@@ -30,17 +30,17 @@ public abstract class GameRendererMixin {
 		return Zume.cinematicCameraEnabledHook(original);
 	}
 	
-	@ModifyExpressionValue(method = "render(F)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;mouseSensitivity:F"))
+	@ModifyExpressionValue(method = "render(F)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;sensitivity:F"))
 	public float zume$updateMouse$mouseSensitivity(float original) {
 		return (float) Zume.mouseSensitivityHook(original);
 	}
 	
-	@ModifyExpressionValue(method = "method_1851", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;field_2359:F"))
+	@ModifyExpressionValue(method = "moveCameraToPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;zOff:F"))
 	public float zume$transformCamera$thirdPersonDistance(float original) {
         return (float) Zume.thirdPersonCameraHook(original);
 	}
 	
-	@ModifyExpressionValue(method = "method_1851", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;field_2360:F"))
+	@ModifyExpressionValue(method = "moveCameraToPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/GameRenderer;oldZOff:F"))
 	public float zume$transformCamera$lastThirdPersonDistance(float original) {
         return (float) Zume.thirdPersonCameraHook(original);
 	}
