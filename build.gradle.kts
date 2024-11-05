@@ -26,6 +26,7 @@ import xyz.wagyourtail.unimined.api.unimined
 import java.io.FileOutputStream
 import java.net.URL
 import java.nio.file.Files
+import java.time.Duration
 import java.time.ZonedDateTime
 import kotlin.io.path.*
 import kotlin.io.path.Path
@@ -647,6 +648,7 @@ val smokeTest = tasks.register("smokeTest") {
 					*extraArgs.toArray(),
 					"--jvm-args=-DzumeGradle.auditAndExit=true",
 				)
+				timeout = Duration.ofSeconds(30)
 			}
 			
 			var passed = false
