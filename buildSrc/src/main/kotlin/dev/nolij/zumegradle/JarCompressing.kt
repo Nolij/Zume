@@ -7,11 +7,8 @@ import net.fabricmc.mappingio.format.MappingFormat
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
 import net.fabricmc.mappingio.tree.MemoryMappingTree
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.objectweb.asm.ClassReader
@@ -82,7 +79,7 @@ fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?)
 			}
 
 			if (name.endsWith(".class")) {
-				bytes = processClassFile(bytes, mappings!!)
+				bytes = processClassFile(bytes, mappings)
 			}
 
 			out.putNextEntry(JarEntry(name))
@@ -97,7 +94,7 @@ fun squishJar(jar: File, jsonProcessing: JsonShrinkingType, mappingsFile: File?)
 private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
 	val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
 	val old = json["plugin"] as String
-	val obf = mappings.obfuscate(old)
+	val obf = mappings.map(old)
 	json["plugin"] = obf
 
 	json["package"] = "zume.mixin"
@@ -105,17 +102,19 @@ private fun remapMixinConfig(bytes: ByteArray, mappings: MemoryMappingTree): Byt
 	return JsonOutput.toJson(json).toByteArray()
 }
 
-private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree): ByteArray {
+private fun processClassFile(bytes: ByteArray, mappings: MemoryMappingTree?): ByteArray {
 	val classNode = ClassNode()
 	ClassReader(bytes).accept(classNode, 0)
 	
-	for (annotation in classNode.visibleAnnotations ?: emptyList()) {
-		if (annotation.desc.endsWith("fml/common/Mod;")) {
-			for (i in 0 until annotation.values.size step 2) {
-				if (annotation.values[i] == "guiFactory") {
-					val old = annotation.values[i + 1] as String
-					annotation.values[i + 1] = mappings.obfuscate(old)
-					println("Remapped guiFactory: $old -> ${annotation.values[i + 1]}")
+	if(mappings != null) {
+		for (annotation in classNode.visibleAnnotations ?: emptyList()) {
+			if (annotation.desc.endsWith("fml/common/Mod;")) {
+				for (i in 0 until annotation.values.size step 2) {
+					if (annotation.values[i] == "guiFactory") {
+						val old = annotation.values[i + 1] as String
+						annotation.values[i + 1] = mappings.map(old)
+						println("Remapped guiFactory: $old -> ${annotation.values[i + 1]}")
+					}
 				}
 			}
 		}
@@ -262,9 +261,10 @@ fun applyProguard(jar: File, minecraftConfigs: List<MinecraftConfig>, configDir:
 	}
 }
 
-open class CompressJarTask : DefaultTask() {
-	@InputFile
-	lateinit var inputJar: File
+abstract class CompressJarTask : DefaultTask() {
+	@get:InputFile
+	@get:PathSensitive(PathSensitivity.RELATIVE)
+	abstract val inputJar: RegularFileProperty
 
 	@Input
 	var deflateAlgorithm = DeflateAlgorithm.LIBDEFLATE
@@ -278,13 +278,15 @@ open class CompressJarTask : DefaultTask() {
 	private var minecraftConfigs: List<MinecraftConfig> = emptyList()
 
 	@get:OutputFile
-	val outputJar get() = inputJar // compressed jar will replace the input jar
+	abstract val outputJar: RegularFileProperty
 
 	@get:OutputFile
 	@get:Optional
 	val mappingsFile
 		get() = if (useProguard)
-			inputJar.parentFile.resolve("${inputJar.nameWithoutExtension}-mappings.txt")
+			inputJar.get().asFile.let {
+				it.parentFile.resolve("${it.nameWithoutExtension}-mappings.txt")	
+			}
 		else null
 
 	@Option(option = "compression-type", description = "How to recompress the jar")
@@ -306,10 +308,14 @@ open class CompressJarTask : DefaultTask() {
 
 	@TaskAction
 	fun compressJar() {
-		if (useProguard)
-			applyProguard(inputJar, minecraftConfigs, project.rootDir)
-		squishJar(inputJar, jsonShrinkingType, mappingsFile)
-		deflate(outputJar, deflateAlgorithm)
+		val jar = inputJar.get().asFile
+		val temp = jar.copyTo(temporaryDir.resolve("temp.jar"), true)
+		if(useProguard) {
+			applyProguard(temp, minecraftConfigs, project.rootDir)
+		}
+		squishJar(temp, jsonShrinkingType, mappingsFile)
+		deflate(temp, deflateAlgorithm)
+		temp.copyTo(outputJar.get().asFile, true)
 	}
 }
 
@@ -324,7 +330,7 @@ fun mappings(file: File, format: MappingFormat = MappingFormat.PROGUARD): Memory
 }
 
 @Suppress("INACCESSIBLE_TYPE", "NAME_SHADOWING")
-fun MemoryMappingTree.obfuscate(src: String): String {
+fun MemoryMappingTree.map(src: String): String {
 	val src = src.replace('.', '/')
 	val dstNamespaceIndex = getNamespaceId(dstNamespaces[0])
 	val classMapping: ClassMapping? = getClass(src)

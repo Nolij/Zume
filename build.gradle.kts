@@ -101,7 +101,7 @@ val patchHistory = releaseTags
 	.map { name -> name.substring(minorTagPrefix.length) }
 
 val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
-val patch = 
+val patch =
 	maxPatch?.plus(
 		if (patchHistory.contains(maxPatch.toString()))
 			releaseIncrement
@@ -175,11 +175,6 @@ allprojects {
 	apply(plugin = "maven-publish")
 
 	repositories {
-		mavenCentral {
-			content {
-				excludeGroup("ca.weblite")
-			}
-		}
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		exclusiveContent { 
@@ -201,6 +196,7 @@ allprojects {
 				languageVersion = JavaLanguageVersion.of(21)
 			}
 			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jabel"))
+			options.forkOptions.jvmArgs?.add("-XX:+EnableDynamicAgentLoading")
 		}
 	}
 	
@@ -402,7 +398,7 @@ tasks.shadowJar {
 	exclude("LICENSE_libnolij")
 	
 	configurations = immutableListOf(shade)
-	archiveClassifier = null
+	archiveClassifier = "deobfuscated"
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
 	
@@ -457,6 +453,9 @@ val compressJar = tasks.register<CompressJarTask>("compressJar") {
 	
 	val shadowJar = tasks.shadowJar.get()
 	inputJar = shadowJar.archiveFile.get().asFile
+	outputJar = shadowJar.archiveFile.get().asFile.let { 
+		it.parentFile.resolve("${it.nameWithoutExtension.removeSuffix("-deobfuscated")}.jar")
+	}
 	
 	deflateAlgorithm = releaseChannel.deflation
 	jsonShrinkingType = releaseChannel.json
