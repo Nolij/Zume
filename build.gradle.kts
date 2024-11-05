@@ -28,7 +28,7 @@ import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
 import java.io.FileOutputStream
-import java.net.URL
+import java.net.URI
 import java.nio.file.Files
 import java.time.ZonedDateTime
 import kotlin.io.path.*
@@ -277,7 +277,7 @@ subprojects {
 			defaultRemapJar = true
 		}
 		
-		val outputJar = tasks.register<ShadowJar>("outputJar") {
+		val outputJar by tasks.registering(ShadowJar::class) {
 			group = "build"
 			
 			val remapJarTasks = tasks.withType<RemapJarTask>()
@@ -367,7 +367,7 @@ tasks.jar {
 	enabled = false
 }
 
-val sourcesJar = tasks.register<Jar>("sourcesJar") {
+val sourcesJar by tasks.registering(Jar::class) {
 	group = "build"
 
 	archiveClassifier = "sources"
@@ -674,13 +674,13 @@ val smokeTest = tasks.register("smokeTest") {
 			}
 			
 			config.dependencies?.forEach { (name, urlString) -> 
-				URL(urlString).openStream().use { inputStream ->
+				URI(urlString).toURL().openStream().use { inputStream ->
 					FileOutputStream("${modsDir}/${name}.jar").use(inputStream::transferTo)
 				}
 			}
 			
 			copy {
-				from(compressJar.get().outputJar)
+				from(compressJar.get().archiveFile)
 				into(modsDir)
 			}
 			
