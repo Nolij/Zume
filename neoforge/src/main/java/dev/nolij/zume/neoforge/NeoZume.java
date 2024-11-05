@@ -13,6 +13,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
@@ -115,6 +116,8 @@ public class NeoZume implements IZumeImplementation {
 		if (REFRACTION.getClassOrNull("org.embeddedt.embeddium.api.options.OptionIdentifier") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
+		
+		modEventBus.addListener(FMLLoadCompleteEvent.class, event -> Zume.postInit());
 	}
 	
 	@Override

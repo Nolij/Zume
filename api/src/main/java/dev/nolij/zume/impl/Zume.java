@@ -2,6 +2,7 @@ package dev.nolij.zume.impl;
 
 import dev.nolij.libnolij.util.EasingUtil;
 import dev.nolij.libnolij.util.MathUtil;
+import dev.nolij.libnolij.util.MixinUtil;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,6 +65,20 @@ public class Zume {
 		});
 		
 		disabled = config.disable;
+	}
+	
+	public static void postInit() {
+		if (Boolean.getBoolean("zumeGradle.auditAndExit")) {
+			//noinspection finally
+			try {
+				MixinUtil.audit();
+				LOGGER.info("ZumeGradle audit passed");
+			} catch (Throwable t) {
+				LOGGER.error("ZumeGradle audit failed: ", t);
+			} finally {
+				System.exit(137);
+			}
+		}
 	}
 	//endregion
 	

@@ -48,6 +48,8 @@ public class ArchaicZume implements IZumeImplementation {
 		}
 		
 		MinecraftForge.EVENT_BUS.register(this);
+		
+		Zume.postInit();
 	}
 	
 	@Override
