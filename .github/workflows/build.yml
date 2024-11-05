@@ -41,5 +41,5 @@ jobs:
         with:
           name: zume
           path: |
-            **/zume-*.jar
-            **/*mappings.txt
+            **/build/libs/zume*.jar
+            build/libs/*mappings.txt
