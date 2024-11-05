@@ -647,6 +647,17 @@ val smokeTest = tasks.register("smokeTest") {
 					"start", config.versionString,
 					*extraArgs.toArray(),
 					"--jvm-args=-DzumeGradle.auditAndExit=true",
+					"--dry",
+				)
+			}
+			exec {
+				commandLine(
+					"${project.rootDir}/.gradle/python/bin/portablemc",
+					"--main-dir", mainDir,
+					"--work-dir", workDir,
+					"start", config.versionString,
+					*extraArgs.toArray(),
+					"--jvm-args=-DzumeGradle.auditAndExit=true",
 				)
 				timeout = Duration.ofSeconds(30)
 			}
