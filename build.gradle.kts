@@ -652,21 +652,25 @@ val smokeTest = tasks.register("smokeTest") {
 				.start()
 				.waitFor()
 			
-			ProcessBuilder(*command)
+			val process = ProcessBuilder(*command)
 				.inheritIO()
 				.start()
-				.waitFor(15, TimeUnit.SECONDS)
-			
+
 			var passed = false
-			file(latestLog).also { logFile ->
-				if (logFile.exists()) {
-					logFile.reader().use { reader ->
-						reader.forEachLine { line ->
-							if (line.endsWith("ZumeGradle audit passed"))
-								passed = true
+			
+			if (process.waitFor(30, TimeUnit.SECONDS)) {
+				file(latestLog).also { logFile ->
+					if (logFile.exists()) {
+						logFile.reader().use { reader ->
+							reader.forEachLine { line ->
+								if (line.endsWith("ZumeGradle audit passed"))
+									passed = true
+							}
 						}
 					}
 				}
+			} else {
+				process.destroy()
 			}
 			
 			if (!passed) {
