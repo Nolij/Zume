@@ -6,22 +6,31 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
+        
       - name: Install Packages
         run: sudo apt-get install -y advancecomp
+        
+        # cache local gradle files, global ones will be taken care of by the setup-gradle action
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/.gradle/
+            **/build/
+          key: ${{ runner.os }}-gradlelocal-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-          cache: 'gradle'
-          cache-dependency-path: |
-            **/.gradle/
-            **/build/
+          
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          
       - name: :build
         run: ./gradlew build --stacktrace --no-daemon
+        
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
