@@ -3,6 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.nolij.zumegradle.DeflateAlgorithm
 import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
+import dev.nolij.zumegradle.SmokeTest
 import dev.nolij.zumegradle.entryprocessing.EntryProcessors
 import dev.nolij.zumegradle.task.AdvzipTask
 import dev.nolij.zumegradle.task.CopyJarTask
@@ -26,8 +27,6 @@ import org.objectweb.asm.tree.ClassNode
 import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
-import java.io.FileOutputStream
-import java.net.URI
 import java.nio.file.Files
 import java.time.ZonedDateTime
 import kotlin.math.max
@@ -547,7 +546,7 @@ val smokeTest = tasks.register("smokeTest") {
 		SmokeTest(
 			logger,
 			"${project.rootDir}/.gradle/python/bin/portablemc",
-			compressJar.get().outputJar.asFile.get(),
+			compressJar.get().archiveFile.get().asFile,
 			"${project.rootDir}/.gradle/portablemc",
 			"${project.layout.buildDirectory.get()}/smoke_test",
 			max(2, Runtime.getRuntime().availableProcessors() / 5),
@@ -619,139 +618,6 @@ val smokeTest = tasks.register("smokeTest") {
 				SmokeTest.Config("forge", "1.7.10", dependencies = listOf(
 					"unimixins" to "https://github.com/LegacyModdingMC/UniMixins/releases/download/0.1.19/+unimixins-all-1.7.10-0.1.19.jar"
 				)),
-	override fun toString(): String {
-		val result = StringBuilder()
-		
-		result.appendLine("modLoader=${modLoader}")
-		result.appendLine("mcVersion=${mcVersion}")
-		result.appendLine("loaderVersion=${loaderVersion}")
-		result.appendLine("jvmVersion=${jvmVersion}")
-		result.appendLine("extraArgs=[${extraArgs?.joinToString(", ") ?: ""}]")
-		result.appendLine("mods=[${dependencies?.joinToString(", ") { (name, _) -> name } ?: ""}]")
-		
-		return result.toString()
-	}
-}
-
-val smokeTestConfigs = arrayOf(
-	SmokeTestConfig("fabric", "snapshot", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.4/fabric-api-0.107.0+1.21.4.jar",
-	)),
-	SmokeTestConfig("fabric", "release", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.3/fabric-api-0.107.0+1.21.3.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
-	)),
-	SmokeTestConfig("fabric", "1.21.1", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.1/fabric-api-0.107.0+1.21.1.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
-	)),
-	SmokeTestConfig("fabric", "1.20.6", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.100.8%2B1.20.6/fabric-api-0.100.8+1.20.6.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v10.0.0/modmenu-10.0.0.jar",
-	)),
-	SmokeTestConfig("fabric", "1.20.1", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.92.2%2B1.20.1/fabric-api-0.92.2+1.20.1.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v7.2.2/modmenu-7.2.2.jar",
-	)),
-	SmokeTestConfig("fabric", "1.18.2", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.77.0%2B1.18.2/fabric-api-0.77.0+1.18.2.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v3.2.5/modmenu-3.2.5.jar",
-	), extraArgs = listOf("--lwjgl=3.2.3")),
-	SmokeTestConfig("fabric", "1.16.5", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.42.0%2B1.16/fabric-api-0.42.0+1.16.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v1.16.23/modmenu-1.16.23.jar",
-	)),
-	SmokeTestConfig("fabric", "1.14.4", dependencies = listOf(
-		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.28.5%2B1.14/fabric-api-0.28.5+1.14.jar",
-		"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v1.7.11/modmenu-1.7.11+build.121.jar",
-	)),
-	SmokeTestConfig("legacyfabric", "1.12.2", dependencies = listOf(
-		"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-	)),
-	SmokeTestConfig("legacyfabric", "1.8.9", dependencies = listOf(
-		"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-	)),
-	SmokeTestConfig("legacyfabric", "1.7.10", dependencies = listOf(
-		"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-	)),
-//	SmokeTestConfig("legacyfabric", "1.6.4", dependencies = listOf(
-//		"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-//	)),
-	SmokeTestConfig("babric", "b1.7.3", jvmVersion = 17, dependencies = listOf(
-		"station-api" to "https://cdn.modrinth.com/data/472oW63Q/versions/W3QVtn6S/StationAPI-2.0-alpha.2.4.jar",
-	), extraArgs = listOf("--exclude-lib=asm-all")),
-	SmokeTestConfig("neoforge", "release"),
-	SmokeTestConfig("neoforge", "1.21.1"),
-	SmokeTestConfig("neoforge", "1.20.4"),
-	SmokeTestConfig("forge", "1.20.4"),
-	SmokeTestConfig("forge", "1.20.1"),
-	SmokeTestConfig("forge", "1.19.2"),
-	SmokeTestConfig("forge", "1.18.2", extraArgs = listOf("--lwjgl=3.2.3")),
-	SmokeTestConfig("forge", "1.16.5", extraArgs = listOf("--lwjgl=3.2.3")),
-	SmokeTestConfig("forge", "1.14.4", dependencies = listOf(
-		"mixinbootstrap" to "https://github.com/LXGaming/MixinBootstrap/releases/download/v1.1.0/_MixinBootstrap-1.1.0.jar"
-	), extraArgs = listOf("--lwjgl=3.2.3")),
-	SmokeTestConfig("forge", "1.12.2", dependencies = listOf(
-		"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
-	)),
-	SmokeTestConfig("forge", "1.8.9", dependencies = listOf(
-		"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
-	)),
-	SmokeTestConfig("forge", "1.7.10", dependencies = listOf(
-		"unimixins" to "https://github.com/LegacyModdingMC/UniMixins/releases/download/0.1.19/+unimixins-all-1.7.10-0.1.19.jar"
-	)),
-)
-
-@OptIn(ExperimentalPathApi::class)
-val smokeTest = tasks.register("smokeTest") {
-	group = "verification"
-	dependsOn(tasks.checkPython, tasks.pipInstall, compressJar)
-	
-	val mainDir = "${project.rootDir}/.gradle/portablemc"
-	
-	doFirst {
-		val failures = ArrayList<SmokeTestConfig>()
-		smokeTestConfigs.forEach { config ->
-			val name = config.hashCode().toHexString()
-			val workDir = "${project.layout.buildDirectory.get()}/smoke_test/${name}"
-			val modsDir = "${workDir}/mods"
-			val latestLog = "${workDir}/logs/latest.log"
-			
-			Path(workDir).also { workPath ->
-				if (!workPath.exists())
-					workPath.createDirectories()
-			}
-			Path(modsDir).also { modsPath ->
-				if (modsPath.exists())
-					modsPath.deleteRecursively()
-				
-				modsPath.createDirectories()
-			}
-			Path(latestLog).also { logPath ->
-				logPath.deleteIfExists()
-				logPath.parent.also { logsPath ->
-					if (!logsPath.exists())
-						logsPath.createDirectories()
-				}
-			}
-			
-			config.dependencies?.forEach { (name, urlString) -> 
-				URI(urlString).toURL().openStream().use { inputStream ->
-					FileOutputStream("${modsDir}/${name}.jar").use(inputStream::transferTo)
-				}
-			}
-			
-			copy {
-				from(compressJar.get().archiveFile)
-				into(modsDir)
-			}
-			
-			val extraArgs = arrayListOf<String>()
-			
-			val jvmVersionMap = mapOf(
-				17 to "java-runtime-gamma",
-				21 to "java-runtime-delta",
-				8 to "jre-legacy"
 			)
 		).test()
 	}
