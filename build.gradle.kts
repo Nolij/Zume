@@ -485,7 +485,7 @@ val smokeTest = tasks.register("smokeTest") {
 			"${project.rootDir}/.gradle/python/bin/portablemc",
 			compressJar.get().outputJar.asFile.get(),
 			"${project.rootDir}/.gradle/portablemc",
-			"${project.rootDir}/.gradle/smoke_test_instances",
+			"${project.layout.buildDirectory.get()}/smoke_test",
 			max(2, Runtime.getRuntime().availableProcessors() / 5),
 			TimeUnit.SECONDS.toNanos(60),
 			listOf(
