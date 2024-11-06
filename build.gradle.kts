@@ -486,8 +486,8 @@ val smokeTest = tasks.register("smokeTest") {
 			compressJar.get().outputJar.asFile.get(),
 			"${project.rootDir}/.gradle/portablemc",
 			"${project.layout.buildDirectory.get()}/smoke_test",
-			max(3, Runtime.getRuntime().availableProcessors() / 5),
-			TimeUnit.SECONDS.toNanos(30),
+			max(2, Runtime.getRuntime().availableProcessors() / 5),
+			TimeUnit.SECONDS.toNanos(60),
 			listOf(
 				SmokeTest.Config("fabric", "snapshot", dependencies = listOf(
 					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.4/fabric-api-0.107.0+1.21.4.jar",
