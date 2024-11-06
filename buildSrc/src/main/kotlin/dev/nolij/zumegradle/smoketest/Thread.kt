@@ -1,8 +1,6 @@
 package dev.nolij.zumegradle.smoketest
 
 import java.io.File
-import java.io.FileOutputStream
-import java.net.URL
 import java.nio.file.Files
 import kotlin.io.path.*
 
@@ -59,12 +57,24 @@ internal class Thread(
 					logsPath.createDirectories()
 			}
 		}
-
-		config.dependencies?.forEach { (name, urlString) ->
-			URL(urlString).openStream().use { inputStream ->
-				FileOutputStream("${modsDir}/${name}.jar").use(inputStream::transferTo)
+		
+//		config.dependencies?.forEach { (name, urlString) ->
+//			URL(urlString).openStream().use { inputStream ->
+//				FileOutputStream("${modsDir}/${name}.jar").use(inputStream::transferTo)
+//			}
+//		}
+		
+		if(config.dependencies != null) {
+			val files = smokeTest.project.configurations.detachedConfiguration(
+				*config.dependencies.map {
+					smokeTest.project.dependencies.create(it)
+				}.toTypedArray()
+			).resolve()
+			files.forEach { file ->
+				Files.copy(file.toPath(), Path("${modsDir}/${file.name}"))
 			}
 		}
+		
 
 		Files.copy(smokeTest.modFile.toPath(), Path("${modsDir}/${smokeTest.modFile.name}"))
 

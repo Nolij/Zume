@@ -3,20 +3,22 @@ package dev.nolij.zumegradle.smoketest
 import org.gradle.api.logging.Logger
 import java.io.File
 import java.util.*
-import kotlin.io.path.*
 
 import dev.nolij.zumegradle.smoketest.Thread.ThreadState
+import org.gradle.api.Project
 
 class SmokeTest(
-	internal val logger: Logger,
+	internal val project: Project,
 	internal val portableMCBinary: String,
 	internal val modFile: File,
 	internal val mainDir: String,
 	internal val workDir: String,
-	internal val maxThreads: Int,
+	private val maxThreads: Int,
 	internal val threadTimeout: Long,
-	internal val configs: List<Config>
+	private val configs: List<Config>
 ) {
+	
+	internal val logger: Logger = project.logger
 	
 	private val threads = ArrayList<Thread>()
 	

@@ -6,7 +6,7 @@ data class Config(
 	val loaderVersion: String? = null,
 	val jvmVersion: Int? = null,
 	val extraArgs: List<String>? = null,
-	val dependencies: List<Pair<String, String>>? = null,
+	val dependencies: List<String>? = null,
 ) {
 	val versionString: String get() =
 		if (loaderVersion != null)
@@ -22,7 +22,7 @@ data class Config(
 		result.appendLine("loaderVersion=${loaderVersion}")
 		result.appendLine("jvmVersion=${jvmVersion}")
 		result.appendLine("extraArgs=[${extraArgs?.joinToString(", ") ?: ""}]")
-		result.appendLine("mods=[${dependencies?.joinToString(", ") { (name, _) -> name } ?: ""}]")
+		result.appendLine("mods=[${dependencies?.joinToString(", ") { it.split(":")[1] } ?: ""}]")
 
 		return result.toString()
 	}

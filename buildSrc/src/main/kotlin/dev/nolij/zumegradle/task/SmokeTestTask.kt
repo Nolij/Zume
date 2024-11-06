@@ -23,11 +23,11 @@ abstract class SmokeTestTask : DefaultTask() {
 	@get:Input
 	abstract val inputTask: Property<Jar>
 	
-	@get:InputDirectory
-	abstract val mainDir: RegularFileProperty
+	@get:Input
+	abstract val mainDir: Property<String>
 	
-	@get:InputDirectory
-	abstract val workDir: RegularFileProperty
+	@get:Input
+	abstract val workDir: Property<String>
 	
 	@get:Input
 	abstract val maxThreads: Property<Int>
@@ -52,14 +52,14 @@ abstract class SmokeTestTask : DefaultTask() {
 	@TaskAction
 	fun runSmokeTest() {
 		SmokeTest(
-			logger = logger,
-			portableMCBinary = portableMCBinary.get(),
-			modFile = inputTask.get().archiveFile.get().asFile,
-			mainDir = mainDir.get().asFile.absolutePath,
-			workDir = workDir.get().asFile.absolutePath,
-			maxThreads = maxThreads.get(),
-			threadTimeout = threadTimeout.get(),
-			configs = configs.get()
+			project,
+			portableMCBinary.get(),
+			inputTask.get().archiveFile.get().asFile,
+			mainDir.get(),
+			workDir.get(),
+			maxThreads.get(),
+			threadTimeout.get(),
+			configs.get()
 		).test()
 	}
 }

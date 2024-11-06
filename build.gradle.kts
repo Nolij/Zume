@@ -5,7 +5,6 @@ import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
 import dev.nolij.zumegradle.entryprocessing.EntryProcessors
 import dev.nolij.zumegradle.smoketest.Config
-import dev.nolij.zumegradle.smoketest.SmokeTest
 import dev.nolij.zumegradle.task.*
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
@@ -536,64 +535,69 @@ python {
 	pip("portablemc:${"portablemc_version"()}")
 }
 
+repositories {
+	maven("https://maven.terraformersmc.com/releases")
+	maven("https://maven.legacyfabric.net")
+	maven("https://maven.cleanroommc.com/")
+}
+
 val smokeTest by tasks.registering(SmokeTestTask::class) {
 	dependsOn(tasks.checkPython, tasks.pipInstall, compressJar)
 	
 	inputTask = compressJar
 	portableMCBinary = "${python.envPath}/bin/portablemc"
-	mainDir = file("${project.rootDir}/.gradle/portablemc")
-	workDir = file("${project.layout.buildDirectory.get()}/smoke_test")
+	mainDir = "${project.rootDir}/.gradle/portablemc"
+	workDir = "${project.layout.buildDirectory.get()}/smoke_test"
 	maxThreads = max(2, Runtime.getRuntime().availableProcessors() / 5)
 	threadTimeout = TimeUnit.SECONDS.toNanos(60)
 
 	configs(
 		Config("fabric", "snapshot", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.4/fabric-api-0.107.0+1.21.4.jar",
-			)),
+			"net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.4",
+		)),
 		Config("fabric", "release", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.3/fabric-api-0.107.0+1.21.3.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
-			)),
+			"net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.3",
+			"com.terraformersmc:modmenu:11.0.3",
+		)),
 		Config("fabric", "1.21.1", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.1/fabric-api-0.107.0+1.21.1.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
-			)),
+			"net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.1",
+			"com.terraformersmc:modmenu:11.0.3",
+		)),
 		Config("fabric", "1.20.6", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.100.8%2B1.20.6/fabric-api-0.100.8+1.20.6.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v10.0.0/modmenu-10.0.0.jar",
-			)),
-		Config(
-			"fabric", "1.20.1", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.92.2%2B1.20.1/fabric-api-0.92.2+1.20.1.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v7.2.2/modmenu-7.2.2.jar",
-			)),
+			"net.fabricmc.fabric-api:fabric-api:0.100.8+1.20.6",
+			"com.terraformersmc:modmenu:10.0.0",
+		)),
+		Config("fabric", "1.20.1", dependencies = listOf(
+			"net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1",
+			"com.terraformersmc:modmenu:7.2.2",
+		)),
 		Config("fabric", "1.18.2", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.77.0%2B1.18.2/fabric-api-0.77.0+1.18.2.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v3.2.5/modmenu-3.2.5.jar",
-			), extraArgs = listOf("--lwjgl=3.2.3")),
+			"net.fabricmc.fabric-api:fabric-api:0.77.0+1.18.2",
+			"com.terraformersmc:modmenu:3.2.5",
+		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("fabric", "1.16.5", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.42.0%2B1.16/fabric-api-0.42.0+1.16.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v1.16.23/modmenu-1.16.23.jar",
-			)),
+			"net.fabricmc.fabric-api:fabric-api:0.42.0+1.16",
+			"com.terraformersmc:modmenu:1.16.23",
+		)),
 		Config("fabric", "1.14.4", dependencies = listOf(
-				"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.28.5%2B1.14/fabric-api-0.28.5+1.14.jar",
-				"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v1.7.11/modmenu-1.7.11+build.121.jar",
-			)),
+			"net.fabricmc.fabric-api:fabric-api:0.28.5+1.14",
+			"maven.modrinth:modmenu:1.7.17",
+		)),
 		Config("legacyfabric", "1.12.2", dependencies = listOf(
-				"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-			)),
+			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.12.2",
+		)),
 		Config("legacyfabric", "1.8.9", dependencies = listOf(
-				"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-			)),
+			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.8.9",
+		)),
 		Config("legacyfabric", "1.7.10", dependencies = listOf(
-				"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-			)),
+			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.7.10",
+		)),
 		Config("legacyfabric", "1.6.4", dependencies = listOf(
-				"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-			)),
+			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.6.4",
+		)),
 		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = listOf(
-				"station-api" to "https://cdn.modrinth.com/data/472oW63Q/versions/W3QVtn6S/StationAPI-2.0-alpha.2.4.jar",
-			), extraArgs = listOf("--exclude-lib=asm-all")),
+			"maven.modrinth:stationapi:2.0-alpha.2.4",
+		), extraArgs = listOf("--exclude-lib=asm-all")),
 		Config("neoforge", "release"),
 		Config("neoforge", "1.21.1"),
 		Config("neoforge", "1.20.4"),
@@ -603,17 +607,21 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 		Config("forge", "1.18.2", extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.16.5", extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.14.4", dependencies = listOf(
-				"mixinbootstrap" to "https://github.com/LXGaming/MixinBootstrap/releases/download/v1.1.0/_MixinBootstrap-1.1.0.jar"
-			), extraArgs = listOf("--lwjgl=3.2.3")),
+//				"mixinbootstrap" to "https://github.com/LXGaming/MixinBootstrap/releases/download/v1.1.0/_MixinBootstrap-1.1.0.jar"
+			"maven.modrinth:mixinbootstrap:1.1.0"
+		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.12.2", dependencies = listOf(
-				"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
-			)),
+//				"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
+			"zone.rong:mixinbooter:9.3"
+		)),
 		Config("forge", "1.8.9", dependencies = listOf(
-				"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
-			)),
+//				"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
+			"zone.rong:mixinbooter:9.3"
+		)),
 		Config("forge", "1.7.10", dependencies = listOf(
-				"unimixins" to "https://github.com/LegacyModdingMC/UniMixins/releases/download/0.1.19/+unimixins-all-1.7.10-0.1.19.jar"
-			)),
+//				"unimixins" to "https://github.com/LegacyModdingMC/UniMixins/releases/download/0.1.19/+unimixins-all-1.7.10-0.1.19.jar"
+			"com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:0.1.19"
+		)),
 	)
 }
 //endregion
