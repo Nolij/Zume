@@ -607,19 +607,15 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 		Config("forge", "1.18.2", extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.16.5", extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.14.4", dependencies = listOf(
-//				"mixinbootstrap" to "https://github.com/LXGaming/MixinBootstrap/releases/download/v1.1.0/_MixinBootstrap-1.1.0.jar"
 			"maven.modrinth:mixinbootstrap:1.1.0"
 		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.12.2", dependencies = listOf(
-//				"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
 			"zone.rong:mixinbooter:9.3"
 		)),
 		Config("forge", "1.8.9", dependencies = listOf(
-//				"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
 			"zone.rong:mixinbooter:9.3"
 		)),
 		Config("forge", "1.7.10", dependencies = listOf(
-//				"unimixins" to "https://github.com/LegacyModdingMC/UniMixins/releases/download/0.1.19/+unimixins-all-1.7.10-0.1.19.jar"
 			"com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:0.1.19"
 		)),
 	)

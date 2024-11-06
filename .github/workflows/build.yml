@@ -32,14 +32,23 @@ jobs:
         run: ./gradlew build --stacktrace --no-daemon
         
       - name: :smokeTest
+        id: smokeTest
         uses: coactions/setup-xvfb@v1
         with:
           run: ./gradlew :smokeTest --no-daemon
           
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zume
           path: |
             **/build/libs/zume*.jar
             build/libs/*mappings.txt
+            
+      - name: Upload test results
+        if: steps.smokeTest.conclusion == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: smokeTest
+          path: build/smokeTest/**/logs/**
