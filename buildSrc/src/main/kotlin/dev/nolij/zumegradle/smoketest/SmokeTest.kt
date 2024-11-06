@@ -1,8 +1,6 @@
 package dev.nolij.zumegradle.smoketest
 
-import org.gradle.api.logging.Logger
 import java.io.File
-import java.util.*
 
 import dev.nolij.zumegradle.smoketest.Thread.ThreadState
 import org.gradle.api.Project
@@ -18,9 +16,9 @@ class SmokeTest(
 	private val configs: List<Config>
 ) {
 	
-	internal val logger: Logger = project.logger
+	internal val logger = project.logger
 	
-	private val threads = ArrayList<Thread>()
+	private val threads = mutableListOf<Thread>()
 	
 	internal fun printThreads() {
 		println("""
@@ -51,7 +49,7 @@ class SmokeTest(
 			.map { thread -> thread.config }
 		
 		if (failedConfigs.isNotEmpty()) {
-			logger.error("[{\n${failedConfigs.joinToString("}, {\n")}}]")
+			logger.error("[{\n${failedConfigs.joinToString("}, {\n") { it.toString().indent(4) }}]")
 			error("One or more tests failed. See logs for more details.")
 		}
 
