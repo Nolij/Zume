@@ -27,6 +27,9 @@ import java.io.FileOutputStream
 import java.net.URL
 import java.nio.file.Files
 import java.time.ZonedDateTime
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 import kotlin.io.path.*
 import kotlin.io.path.Path
 import kotlin.io.path.deleteRecursively
@@ -512,6 +515,26 @@ data class SmokeTestConfig(
 	}
 }
 
+val smokeTestThreads = 4
+val smokeTestTimeout = TimeUnit.SECONDS.toNanos(60)
+
+data class SmokeTestThread(
+	val config: SmokeTestConfig,
+	val process: Process,
+	val startTimestamp: Long,
+	val logFile: File,
+	var finalized: Boolean = false
+) {
+	private val isTimedOut: Boolean get() = System.nanoTime() - startTimestamp > smokeTestTimeout
+	val isAlive: Boolean get() = process.isAlive
+	val isFinished: Boolean get() = isTimedOut || !isAlive
+	
+	fun kill() {
+		if (isAlive)
+			process.destroy()
+	}
+}
+
 val smokeTestConfigs = arrayOf(
 	SmokeTestConfig("fabric", "snapshot", dependencies = listOf(
 		"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.4/fabric-api-0.107.0+1.21.4.jar",
@@ -589,7 +612,38 @@ val smokeTest = tasks.register("smokeTest") {
 	val mainDir = "${project.rootDir}/.gradle/portablemc"
 	
 	doFirst {
-		val failures = ArrayList<SmokeTestConfig>()
+		val failedConfigs = Collections.synchronizedList(ArrayList<SmokeTestConfig>())
+		val threads = Collections.synchronizedList(ArrayList<SmokeTestThread>())
+		
+		fun finalizeThread(thread: SmokeTestThread) {
+			if (!thread.isFinished)
+				return
+			
+			var passed = false
+
+			if (thread.isAlive) {
+				thread.kill()
+			} else {
+				if (thread.logFile.exists()) {
+					thread.logFile.reader().use { reader ->
+						reader.forEachLine { line ->
+							if (line.endsWith("ZumeGradle audit passed"))
+								passed = true
+						}
+					}
+				}
+			}
+
+			if (passed) {
+				println("Smoke test passed for config:\n${thread.config}")
+			} else {
+				logger.error("Smoke test failed for config:\n${thread.config}")
+				failedConfigs.add(thread.config)
+			}
+			
+			thread.finalized = true
+		}
+		
 		smokeTestConfigs.forEach { config ->
 			val name = config.hashCode().toHexString()
 			val workDir = "${project.layout.buildDirectory.get()}/smoke_test/${name}"
@@ -655,38 +709,26 @@ val smokeTest = tasks.register("smokeTest") {
 			val process = ProcessBuilder(*command)
 				.inheritIO()
 				.start()
-
-			var passed = false
 			
-			if (process.waitFor(30, TimeUnit.SECONDS)) {
-				file(latestLog).also { logFile ->
-					if (logFile.exists()) {
-						logFile.reader().use { reader ->
-							reader.forEachLine { line ->
-								if (line.endsWith("ZumeGradle audit passed"))
-									passed = true
-							}
-						}
-					}
-				}
-			} else {
-				process.destroy()
-			}
+			threads.add(SmokeTestThread(config, process, System.nanoTime(), file(latestLog)))
 			
-			if (passed) {
-				logger.info("Smoke test passed for config:\n${config}")
-			} else {
-				logger.error("Smoke test failed for config:\n${config}")
-				failures.add(config)
+			while (threads.count { thread -> !thread.finalized } >= smokeTestThreads) {
+				threads.forEach { thread -> finalizeThread(thread) }
+				Thread.sleep(500L)
 			}
 		}
 		
-		if (failures.isNotEmpty()) {
-			logger.error("[{\n${failures.joinToString("}, {\n")}}]")
+		do {
+			Thread.sleep(500L)
+			threads.forEach { thread -> finalizeThread(thread) }
+		} while (threads.any { thread -> !thread.finalized })
+		
+		if (failedConfigs.isNotEmpty()) {
+			logger.error("[{\n${failedConfigs.joinToString("}, {\n")}}]")
 			error("One or more tests failed. See logs for more details.")
 		}
-		
-		logger.info("All tests passed.")
+
+		println("All tests passed.")
 	}
 }
 //endregion
