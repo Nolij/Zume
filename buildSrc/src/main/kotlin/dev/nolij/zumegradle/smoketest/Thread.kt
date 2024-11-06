@@ -58,12 +58,6 @@ internal class Thread(
 			}
 		}
 		
-//		config.dependencies?.forEach { (name, urlString) ->
-//			URL(urlString).openStream().use { inputStream ->
-//				FileOutputStream("${modsDir}/${name}.jar").use(inputStream::transferTo)
-//			}
-//		}
-		
 		if(config.dependencies != null) {
 			val files = smokeTest.project.configurations.detachedConfiguration(
 				*config.dependencies.map {

@@ -537,7 +537,7 @@ python {
 
 repositories {
 	maven("https://maven.terraformersmc.com/releases")
-	maven("https://maven.legacyfabric.net")
+//	maven("https://maven.legacyfabric.net")
 	maven("https://maven.cleanroommc.com/")
 }
 
@@ -584,16 +584,20 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 			"maven.modrinth:modmenu:1.7.17",
 		)),
 		Config("legacyfabric", "1.12.2", dependencies = listOf(
-			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.12.2",
+//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.12.2",
+			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("legacyfabric", "1.8.9", dependencies = listOf(
-			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.8.9",
+//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.8.9",
+			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("legacyfabric", "1.7.10", dependencies = listOf(
-			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.7.10",
+//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.7.10",
+			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("legacyfabric", "1.6.4", dependencies = listOf(
-			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.6.4",
+//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.6.4",
+			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = listOf(
 			"maven.modrinth:stationapi:2.0-alpha.2.4",
