@@ -47,7 +47,7 @@ jobs:
             build/libs/*mappings.txt
             
       - name: Upload test results
-        if: steps.smokeTest.conclusion == 'failure'
+        if: ${{ steps.smokeTest.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: smokeTest
