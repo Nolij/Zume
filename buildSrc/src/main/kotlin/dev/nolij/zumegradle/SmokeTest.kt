@@ -139,7 +139,7 @@ class SmokeTest(
 				"--work-dir", instancePath,
 				"start", config.versionString,
 				*extraArgs.toTypedArray(),
-				"--jvm-args=-DzumeGradle.auditAndExit=true",
+				"--jvm-args=-DzumeGradle.auditAndExit=true -Xmx1G",
 			)
 
 			if (ProcessBuilder(*command, "--dry")
