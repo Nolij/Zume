@@ -46,12 +46,8 @@ jobs:
         with:
           run: ./gradlew :smokeTest --no-daemon
             
-      - name: test
-        if: always()
-        run: echo ${{ steps.smokeTest.outcome }}
-            
       - name: Upload test results
-        if: steps.smokeTest.outcome != 'success'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: smokeTest
