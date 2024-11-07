@@ -3,9 +3,9 @@
 package dev.nolij.zumegradle.smoketest
 
 import org.gradle.api.Project
+import xyz.wagyourtail.unimined.util.cachingDownload
 import java.io.File
 import java.nio.file.Files
-import java.util.*
 import kotlin.io.path.*
 import kotlin.math.max
 
@@ -29,8 +29,8 @@ class SmokeTest(
 		val mcVersion: String,
 		val loaderVersion: String? = null,
 		val jvmVersion: Int? = null,
-		val extraArgs: List<String>? = null,
-		val dependencies: List<String>? = null,
+		val extraArgs: List<String> = emptyList(),
+		val dependencies: Set<String> = emptySet(),
 	) {
 		val name: String = hashCode().toUInt().toString(16)
 		
@@ -48,8 +48,8 @@ class SmokeTest(
 			result.appendLine("mcVersion=${mcVersion}")
 			result.appendLine("loaderVersion=${loaderVersion}")
 			result.appendLine("jvmVersion=${jvmVersion}")
-			result.appendLine("extraArgs=[${extraArgs?.joinToString(", ") ?: ""}]")
-			result.appendLine("mods=[${dependencies?.joinToString(", ") { it.split(":")[1] } ?: ""}]")
+			result.appendLine("extraArgs=[${extraArgs.joinToString(", ")}]")
+			result.appendLine("mods=[${dependencies.joinToString(", ") { it.split(":")[1] }}]")
 
 			return result.toString()
 		}
@@ -110,20 +110,21 @@ class SmokeTest(
 			if (gameLogFile.exists())
 				gameLogFile.delete()
 
-			if(config.dependencies != null) {
-				val files = project.configurations.detachedConfiguration(
-					*config.dependencies.map {
-						project.dependencies.create(it)
-					}.toTypedArray()
-				).resolve()
-				files.forEach { file ->
-					Files.copy(file.toPath(), Path("${modsPath}/${file.name}"))
-				}
+			val urlDeps = config.dependencies.filter { it.matches(Regex("https?://.*")) }.toSet()
+			val mavenDeps = (config.dependencies - urlDeps).toSet()
+
+			val files = project.configurations.detachedConfiguration(
+				*mavenDeps.map { project.dependencies.create(it) }
+					.toTypedArray()
+			).resolve() + urlDeps.map { project.cachingDownload(it).toFile() }
+
+			files.forEach { file ->
+				Files.copy(file.toPath(), Path("${modsPath}/${file.name}"))
 			}
 
 			Files.copy(modFile.toPath(), Path("${modsPath}/${modFile.name}"))
 
-			val extraArgs = arrayListOf<String>()
+			val extraArgs = mutableListOf<String>()
 
 			val jvmVersionMap = mapOf(
 				17 to "java-runtime-gamma",
@@ -133,8 +134,7 @@ class SmokeTest(
 			if (config.jvmVersion != null)
 				extraArgs.add("--jvm=${mainDir}/jvm/${jvmVersionMap[config.jvmVersion]!!}/bin/java")
 
-			if (config.extraArgs != null)
-				extraArgs.addAll(config.extraArgs)
+			extraArgs.addAll(config.extraArgs)
 
 			command = arrayOf(
 				portableMCBinary,
