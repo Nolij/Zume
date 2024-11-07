@@ -535,12 +535,6 @@ python {
 	pip("portablemc:${"portablemc_version"()}")
 }
 
-repositories {
-	maven("https://maven.terraformersmc.com/releases")
-//	maven("https://maven.legacyfabric.net")
-	maven("https://maven.cleanroommc.com/")
-}
-
 val smokeTest by tasks.registering(SmokeTestTask::class) {
 	dependsOn(tasks.checkPython, tasks.pipInstall, compressJar)
 	
@@ -553,50 +547,46 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 
 	configs(
 		Config("fabric", "snapshot", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.4",
+			"maven.modrinth:fabric-api:0.107.0+1.21.4",
 		)),
 		Config("fabric", "release", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.3",
-			"com.terraformersmc:modmenu:11.0.3",
+			"maven.modrinth:fabric-api:0.107.0+1.21.3",
+			"maven.modrinth:modmenu:11.0.3",
 		)),
 		Config("fabric", "1.21.1", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.107.0+1.21.1",
-			"com.terraformersmc:modmenu:11.0.3",
+			"maven.modrinth:fabric-api:0.107.0+1.21.1",
+			"maven.modrinth:modmenu:11.0.3",
 		)),
 		Config("fabric", "1.20.6", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.100.8+1.20.6",
-			"com.terraformersmc:modmenu:10.0.0",
+			"maven.modrinth:fabric-api:0.100.8+1.20.6",
+			"maven.modrinth:modmenu:10.0.0",
 		)),
 		Config("fabric", "1.20.1", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.92.2+1.20.1",
-			"com.terraformersmc:modmenu:7.2.2",
+			"maven.modrinth:fabric-api:0.92.2+1.20.1",
+			"maven.modrinth:modmenu:7.2.2",
 		)),
 		Config("fabric", "1.18.2", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.77.0+1.18.2",
-			"com.terraformersmc:modmenu:3.2.5",
+			"maven.modrinth:fabric-api:0.77.0+1.18.2",
+			"maven.modrinth:modmenu:3.2.5",
 		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("fabric", "1.16.5", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.42.0+1.16",
-			"com.terraformersmc:modmenu:1.16.23",
+			"maven.modrinth:fabric-api:0.42.0+1.16",
+			"maven.modrinth:modmenu:1.16.23",
 		)),
 		Config("fabric", "1.14.4", dependencies = listOf(
-			"net.fabricmc.fabric-api:fabric-api:0.28.5+1.14",
+			"maven.modrinth:fabric-api:0.28.5+1.14",
 			"maven.modrinth:modmenu:1.7.17",
 		)),
 		Config("legacyfabric", "1.12.2", dependencies = listOf(
-//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.12.2",
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("legacyfabric", "1.8.9", dependencies = listOf(
-//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.8.9",
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("legacyfabric", "1.7.10", dependencies = listOf(
-//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.7.10",
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("legacyfabric", "1.6.4", dependencies = listOf(
-//			"net.legacyfabric.legacy-fabric-api:legacy-fabric-api:1.10.2+1.6.4",
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
 		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = listOf(
@@ -614,13 +604,13 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 			"maven.modrinth:mixinbootstrap:1.1.0"
 		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.12.2", dependencies = listOf(
-			"zone.rong:mixinbooter:9.3"
+			"maven.modrinth:mixinbooter:9.3"
 		)),
 		Config("forge", "1.8.9", dependencies = listOf(
-			"zone.rong:mixinbooter:9.3"
+			"maven.modrinth:mixinbooter:9.3"
 		)),
 		Config("forge", "1.7.10", dependencies = listOf(
-			"com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:0.1.19"
+			"maven.modrinth:unimixins:1.7.10-0.1.19"
 		)),
 	)
 }
