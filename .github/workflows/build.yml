@@ -51,4 +51,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: smokeTest
-          path: build/smoke_test/**/logs/**
+          path: |
+            build/smoke_test/**/logs/**
+            build/smoke_test/**/setup.log
