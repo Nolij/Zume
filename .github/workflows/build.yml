@@ -16,7 +16,7 @@ jobs:
           path: |
             **/.gradle/
             **/build/
-          key: ${{ runner.os }}-gradlelocal-${{ hashFiles('gradle.properties', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradlelocal-${{ github.ref }}
         
       - uses: actions/setup-java@v4
         with:
