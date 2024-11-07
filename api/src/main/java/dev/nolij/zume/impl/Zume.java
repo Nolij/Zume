@@ -69,14 +69,13 @@ public class Zume {
 	
 	public static void postInit() {
 		if (Boolean.getBoolean("zumeGradle.auditAndExit")) {
-			//noinspection finally
 			try {
 				MixinUtil.audit();
 				LOGGER.info("ZumeGradle audit passed");
+				System.exit(0);
 			} catch (Throwable t) {
 				LOGGER.error("ZumeGradle audit failed: ", t);
-			} finally {
-				System.exit(137);
+				System.exit(1);
 			}
 		}
 	}
