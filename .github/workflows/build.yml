@@ -29,3 +29,4 @@ jobs:
           path: |
             **/zume-*.jar
             **/*mappings.txt
+            build/smoke_test/**/*.log
