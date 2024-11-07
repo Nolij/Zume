@@ -46,8 +46,11 @@ jobs:
             **/build/libs/zume*.jar
             build/libs/*mappings.txt
             
+      - name: test
+        run: echo ${{ steps.smokeTest.outcome }}
+            
       - name: Upload test results
-        if: ${{ steps.smokeTest.outcome == 'failure' }}
+        if: steps.smokeTest.outcome != 'success'
         uses: actions/upload-artifact@v4
         with:
           name: smokeTest
