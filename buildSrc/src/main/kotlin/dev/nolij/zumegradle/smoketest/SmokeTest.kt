@@ -1,12 +1,8 @@
-@file:OptIn(ExperimentalPathApi::class)
-
 package dev.nolij.zumegradle.smoketest
 
 import org.gradle.api.Project
 import xyz.wagyourtail.unimined.util.cachingDownload
 import java.io.File
-import java.nio.file.Files
-import kotlin.io.path.*
 import kotlin.math.max
 
 fun sleep(millis: Long) {
@@ -69,12 +65,12 @@ class SmokeTest(
 	}
 
 	private inner class Thread(val config: Config) {
-		val instancePath = "${workDir}/${config.name}"
-		val modsPath = "${instancePath}/mods"
+		val instancePath = File(workDir, config.name)
+		val modsPath = instancePath.resolve("mods")
 		val command: Array<String>
-		val setupLogFile = File("${instancePath}/setup.log")
-		val testLogFile = File("${instancePath}/test.log")
-		val gameLogFile = File("${instancePath}/logs/latest.log")
+		val setupLogFile = instancePath.resolve("setup.log")
+		val testLogFile = instancePath.resolve("test.log")
+		val gameLogFile = instancePath.resolve("logs/latest.log")
 
 		private var process: Process? = null
 		private var startTimestamp: Long? = null
@@ -96,16 +92,13 @@ class SmokeTest(
 		val done: Boolean get() = failed || stage == ThreadStage.COMPLETED
 
 		init {
-			Path(instancePath).also { path ->
-				if (!path.exists())
-					path.createDirectories()
+			if (!instancePath.exists()) {
+				instancePath.mkdirs()
 			}
 
-			Path(modsPath).also { modsPath ->
-				if (modsPath.exists())
-					modsPath.deleteRecursively()
-				modsPath.createDirectories()
-			}
+			if (modsPath.exists())
+				modsPath.deleteRecursively()
+			modsPath.mkdirs()
 			
 			if (gameLogFile.exists())
 				gameLogFile.delete()
@@ -119,10 +112,10 @@ class SmokeTest(
 			).resolve() + urlDeps.map { project.cachingDownload(it).toFile() }
 
 			files.forEach { file ->
-				Files.copy(file.toPath(), Path("${modsPath}/${file.name}"))
+				file.copyTo(modsPath.resolve(file.name), overwrite = true)
 			}
 
-			Files.copy(modFile.toPath(), Path("${modsPath}/${modFile.name}"))
+			modFile.copyTo(modsPath.resolve(modFile.name), overwrite = true)
 
 			val extraArgs = mutableListOf<String>()
 
@@ -131,15 +124,17 @@ class SmokeTest(
 				21 to "java-runtime-delta",
 				8 to "jre-legacy"
 			)
-			if (config.jvmVersion != null)
-				extraArgs.add("--jvm=${mainDir}/jvm/${jvmVersionMap[config.jvmVersion]!!}/bin/java")
+			if (config.jvmVersion != null) {
+				val vmName = jvmVersionMap[config.jvmVersion] ?: error("Invalid JVM version: ${config.jvmVersion}")
+				extraArgs.add("--jvm=${mainDir}/jvm/${vmName}/bin/java")
+			}
 
 			extraArgs.addAll(config.extraArgs)
 
 			command = arrayOf(
 				portableMCBinary,
 				"--main-dir", mainDir,
-				"--work-dir", instancePath,
+				"--work-dir", instancePath.absolutePath,
 				"start", config.versionString,
 				*extraArgs.toTypedArray(),
 				"--jvm-args=-DzumeGradle.auditAndExit=true -Xmx1G",
