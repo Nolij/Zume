@@ -4,7 +4,7 @@ import dev.nolij.zumegradle.DeflateAlgorithm
 import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
 import dev.nolij.zumegradle.entryprocessing.EntryProcessors
-import dev.nolij.zumegradle.smoketest.Config
+import dev.nolij.zumegradle.smoketest.SmokeTest.Config
 import dev.nolij.zumegradle.task.*
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils

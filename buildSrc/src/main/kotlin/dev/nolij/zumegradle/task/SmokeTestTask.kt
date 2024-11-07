@@ -1,16 +1,13 @@
 package dev.nolij.zumegradle.task
 
+import dev.nolij.zumegradle.smoketest.SmokeTest
+import dev.nolij.zumegradle.smoketest.SmokeTest.Config
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.jvm.tasks.Jar
 import org.gradle.api.tasks.TaskAction
-
-import dev.nolij.zumegradle.smoketest.Config
-import dev.nolij.zumegradle.smoketest.SmokeTest
 
 abstract class SmokeTestTask : DefaultTask() {
 	init {
