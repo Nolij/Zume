@@ -6,9 +6,6 @@ plugins {
 
 repositories {
 	mavenCentral()
-	maven("https://maven.fabricmc.net/")
-	maven("https://maven.glass-launcher.net/babric")
-	maven("https://repo.legacyfabric.net/repository/legacyfabric/")
 	maven("https://maven.wagyourtail.xyz/releases")
 	maven("https://maven.wagyourtail.xyz/snapshots")
 	gradlePluginPortal {
