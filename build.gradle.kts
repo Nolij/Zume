@@ -546,50 +546,50 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 	threadTimeout = TimeUnit.SECONDS.toNanos(60)
 
 	configs(
-		Config("fabric", "snapshot", dependencies = listOf(
+		Config("fabric", "snapshot", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.107.0+1.21.4",
 		)),
-		Config("fabric", "release", dependencies = listOf(
+		Config("fabric", "release", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.107.0+1.21.3",
 			"maven.modrinth:modmenu:11.0.3",
 		)),
-		Config("fabric", "1.21.1", dependencies = listOf(
+		Config("fabric", "1.21.1", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.107.0+1.21.1",
 			"maven.modrinth:modmenu:11.0.3",
 		)),
-		Config("fabric", "1.20.6", dependencies = listOf(
+		Config("fabric", "1.20.6", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.100.8+1.20.6",
 			"maven.modrinth:modmenu:10.0.0",
 		)),
-		Config("fabric", "1.20.1", dependencies = listOf(
+		Config("fabric", "1.20.1", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.92.2+1.20.1",
 			"maven.modrinth:modmenu:7.2.2",
 		)),
-		Config("fabric", "1.18.2", dependencies = listOf(
+		Config("fabric", "1.18.2", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.77.0+1.18.2",
 			"maven.modrinth:modmenu:3.2.5",
 		), extraArgs = listOf("--lwjgl=3.2.3")),
-		Config("fabric", "1.16.5", dependencies = listOf(
+		Config("fabric", "1.16.5", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.42.0+1.16",
 			"maven.modrinth:modmenu:1.16.23",
 		)),
-		Config("fabric", "1.14.4", dependencies = listOf(
+		Config("fabric", "1.14.4", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.28.5+1.14",
 			"maven.modrinth:modmenu:1.7.17",
 		)),
-		Config("legacyfabric", "1.12.2", dependencies = listOf(
+		Config("legacyfabric", "1.12.2", dependencies = setOf(
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
-		Config("legacyfabric", "1.8.9", dependencies = listOf(
+		Config("legacyfabric", "1.8.9", dependencies = setOf(
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
-		Config("legacyfabric", "1.7.10", dependencies = listOf(
+		Config("legacyfabric", "1.7.10", dependencies = setOf(
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
-		Config("legacyfabric", "1.6.4", dependencies = listOf(
+		Config("legacyfabric", "1.6.4", dependencies = setOf(
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
-		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = listOf(
+		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = setOf(
 			"maven.modrinth:stationapi:2.0-alpha.2.4",
 		), extraArgs = listOf("--exclude-lib=asm-all")),
 		Config("neoforge", "release"),
@@ -600,16 +600,16 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 		Config("forge", "1.19.2"),
 		Config("forge", "1.18.2", extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.16.5", extraArgs = listOf("--lwjgl=3.2.3")),
-		Config("forge", "1.14.4", dependencies = listOf(
+		Config("forge", "1.14.4", dependencies = setOf(
 			"maven.modrinth:mixinbootstrap:1.1.0"
 		), extraArgs = listOf("--lwjgl=3.2.3")),
-		Config("forge", "1.12.2", dependencies = listOf(
+		Config("forge", "1.12.2", dependencies = setOf(
 			"maven.modrinth:mixinbooter:9.3"
 		)),
-		Config("forge", "1.8.9", dependencies = listOf(
+		Config("forge", "1.8.9", dependencies = setOf(
 			"maven.modrinth:mixinbooter:9.3"
 		)),
-		Config("forge", "1.7.10", dependencies = listOf(
+		Config("forge", "1.7.10", dependencies = setOf(
 			"maven.modrinth:unimixins:1.7.10-0.1.19"
 		)),
 	)
