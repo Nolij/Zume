@@ -188,6 +188,12 @@ allprojects {
 				includeGroup("maven.modrinth")
 			}
 		}
+		exclusiveContent {
+			forRepository { maven("https://cursemaven.com") }
+			filter {
+				includeGroup("curse.maven")
+			}
+		}
 		maven("https://maven.blamejared.com")
 		maven("https://maven.taumc.org/releases")
 	}
@@ -568,14 +574,17 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 		Config("fabric", "1.18.2", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.77.0+1.18.2",
 			"maven.modrinth:modmenu:3.2.5",
+			"maven.modrinth:lazydfu:0.1.2",
 		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("fabric", "1.16.5", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.42.0+1.16",
 			"maven.modrinth:modmenu:1.16.23",
+			"maven.modrinth:lazydfu:0.1.2",
 		)),
 		Config("fabric", "1.14.4", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.28.5+1.14",
 			"maven.modrinth:modmenu:1.7.17",
+			"maven.modrinth:lazydfu:0.1.2",
 		)),
 		Config("legacyfabric", "1.12.2", dependencies = setOf(
 			"maven.modrinth:legacy-fabric-api:1.10.2",
@@ -597,9 +606,15 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 		Config("neoforge", "1.20.4"),
 		Config("forge", "1.20.4"),
 		Config("forge", "1.20.1"),
-		Config("forge", "1.19.2"),
-		Config("forge", "1.18.2", extraArgs = listOf("--lwjgl=3.2.3")),
-		Config("forge", "1.16.5", extraArgs = listOf("--lwjgl=3.2.3")),
+		Config("forge", "1.19.2", dependencies = setOf(
+			"curse.maven:lazydfu-460819:4327266"
+		)),
+		Config("forge", "1.18.2", dependencies = setOf(
+			"curse.maven:lazuyfu-460819:3544496"
+		), extraArgs = listOf("--lwjgl=3.2.3")),
+		Config("forge", "1.16.5", dependencies = setOf(
+			"curse.maven:lazydfu-460819:3249059"
+		), extraArgs = listOf("--lwjgl=3.2.3")),
 		Config("forge", "1.14.4", dependencies = setOf(
 			"maven.modrinth:mixinbootstrap:1.1.0"
 		), extraArgs = listOf("--lwjgl=3.2.3")),
