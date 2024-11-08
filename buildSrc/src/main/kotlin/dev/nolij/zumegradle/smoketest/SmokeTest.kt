@@ -45,7 +45,7 @@ class SmokeTest(
 			result.appendLine("loaderVersion=${loaderVersion}")
 			result.appendLine("jvmVersion=${jvmVersion}")
 			result.appendLine("extraArgs=[${extraArgs.joinToString(", ")}]")
-			result.appendLine("mods=[${dependencies.joinToString(", ") { it.split(":")[1] }}]")
+			result.append("mods=[${dependencies.joinToString(", ") { it.split(":")[1] }}]")
 
 			return result.toString()
 		}
@@ -235,14 +235,16 @@ class SmokeTest(
 		
 		if (failedThreads.isNotEmpty()) {
 			failedThreads.forEach { thread ->
-				project.logger.error(
-					"Config ${thread.config.name} failed!\n" + 
-					"> STAGE: ${thread.stage}\n" + 
-					"> CONFIG: {\n${thread.config}}\n" +
-					"> COMMAND: [${thread.command.joinToString(", ")}]\n" +
-					"> FAILURE REASON: ${thread.failureReason}\n" + 		
-					"> INSTANCE PATH: ${thread.instancePath}\n"
-				)
+				project.logger.error(listOf(
+					"Config ${thread.config.name} failed!", 
+					"> STAGE: ${thread.stage}", 
+					"> CONFIG: {",
+						thread.config.toString().prependIndent("\t"),
+					"}",
+					"> COMMAND: [${thread.command.joinToString(", ")}]",
+					"> FAILURE REASON: ${thread.failureReason}",	
+					"> INSTANCE PATH: ${thread.instancePath}"
+				).joinToString("\n"))
 			}
 			error("${failedThreads.size} smoke test config(s) failed. See logs for more details.")
 		}
