@@ -6,27 +6,51 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
+        
       - name: Install Packages
         run: sudo apt-get install -y advancecomp
+        
+        # cache local gradle files, global ones will be taken care of by the setup-gradle action
+      - uses: actions/cache@v4
+        with:
+          path: |
+            **/.gradle/
+            **/build/
+          key: ${{ runner.os }}-gradlelocal-${{ github.ref }}
+        
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
+          
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          
       - name: :build
-        run: ./gradlew build --stacktrace
-      - name: :smokeTest
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: ./gradlew :smokeTest
+        run: ./gradlew build --stacktrace --no-daemon
+        
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: zume
           path: |
-            **/zume-*.jar
-            **/*mappings.txt
-            build/smoke_test/**/*.log
+            **/build/libs/zume*.jar
+            build/libs/*mappings.txt
+        
+      - name: :smokeTest
+        id: smokeTest
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./gradlew :smokeTest --no-daemon
+            
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smokeTest
+          path: |
+            build/smoke_test/**/logs/**
+            build/smoke_test/**/setup.log

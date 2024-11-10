@@ -18,13 +18,13 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY_PR }}
           cache-read-only: true
       - name: :build
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon
       - name: :smokeTest
         uses: coactions/setup-xvfb@v1
         with:
-          run: ./gradlew :smokeTest
+          run: ./gradlew :smokeTest --no-daemon
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zume
           path: |

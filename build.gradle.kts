@@ -1,6 +1,11 @@
 @file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.nolij.zumegradle.*
+import dev.nolij.zumegradle.DeflateAlgorithm
+import dev.nolij.zumegradle.JsonShrinkingType
+import dev.nolij.zumegradle.MixinConfigMergingTransformer
+import dev.nolij.zumegradle.entryprocessing.EntryProcessors
+import dev.nolij.zumegradle.smoketest.SmokeTest.Config
+import dev.nolij.zumegradle.task.*
 import kotlinx.serialization.encodeToString
 import me.modmuss50.mpp.HttpUtils
 import me.modmuss50.mpp.PublishModTask
@@ -38,13 +43,13 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 enum class ReleaseChannel(
     val suffix: String? = null,
     val releaseType: ReleaseType? = null,
-    val deflation: DeflateAlgorithm = DeflateAlgorithm.ZOPFLI,
+    val deflation: DeflateAlgorithm = DeflateAlgorithm.INSANE,
     val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
     val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
 		suffix = "dev",
-		deflation = DeflateAlgorithm.SEVENZIP,
+		deflation = DeflateAlgorithm.EXTRA,
 		json = JsonShrinkingType.PRETTY_PRINT
 	),
 	PRE_RELEASE("pre"),
@@ -183,6 +188,12 @@ allprojects {
 				includeGroup("maven.modrinth")
 			}
 		}
+		exclusiveContent {
+			forRepository { maven("https://cursemaven.com") }
+			filter {
+				includeGroup("curse.maven")
+			}
+		}
 		maven("https://maven.blamejared.com")
 		maven("https://maven.taumc.org/releases")
 	}
@@ -264,7 +275,7 @@ subprojects {
 			defaultRemapJar = true
 		}
 		
-		val outputJar = tasks.register<ShadowJar>("outputJar") {
+		val outputJar by tasks.registering(ShadowJar::class) {
 			group = "build"
 			
 			val remapJarTasks = tasks.withType<RemapJarTask>()
@@ -354,7 +365,7 @@ tasks.jar {
 	enabled = false
 }
 
-val sourcesJar = tasks.register<Jar>("sourcesJar") {
+val sourcesJar by tasks.registering(Jar::class) {
 	group = "build"
 
 	archiveClassifier = "sources"
@@ -366,8 +377,8 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	}
 	
 	if (releaseChannel.proguard) {
-		dependsOn(compressJar)
-		from(compressJar.get().mappingsFile!!) {
+		dependsOn(proguardJar)
+		from(proguardJar.get().mappingsFile) {
 			rename { "mappings.txt" }
 		}
 	}
@@ -447,22 +458,77 @@ tasks.shadowJar {
 	}
 }
 
-val compressJar = tasks.register<CompressJarTask>("compressJar") {
+//region compressJar
+val cjTempDir = layout.buildDirectory.dir("compressJar")
+val proguardJar by tasks.registering(ProguardTask::class) {
 	dependsOn(tasks.shadowJar)
-	group = "build"
+	inputJar = tasks.shadowJar.get().archiveFile
+	destinationDirectory = cjTempDir
+	run = releaseChannel.proguard
 	
-	val shadowJar = tasks.shadowJar.get()
-	inputJar = shadowJar.archiveFile.get().asFile
-	outputJar = shadowJar.archiveFile.get().asFile.let { 
-		it.parentFile.resolve("${it.nameWithoutExtension.removeSuffix("-deobfuscated")}.jar")
+	config(file("proguard.pro"))
+	
+	mappingsFile = destinationDirectory.get().asFile
+		.resolve("${archiveFile.get().asFile.nameWithoutExtension}-mappings.txt")
+
+	jmod("java.base")
+	jmod("java.desktop")
+
+	classpath.addAll(
+		uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values }.flatMap { mc ->
+			val prodNamespace = mc.mcPatcher.prodNamespace
+
+			val minecrafts = listOf(
+				mc.sourceSet.compileClasspath.files,
+				mc.sourceSet.runtimeClasspath.files
+			)
+				.flatten()
+				.filter { !mc.isMinecraftJar(it.toPath()) }
+				.toHashSet()
+
+			mc.mods.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
+				.filter { it.extension == "jar" && !it.name.startsWith("zume") }
+				.plus(mc.getMinecraft(prodNamespace, prodNamespace).toFile())
+		}
+	)
+	
+	archiveClassifier = "proguard"
+}
+
+val minifyJar by tasks.registering(JarEntryModificationTask::class) {
+	dependsOn(proguardJar)
+	inputJar = proguardJar.get().archiveFile
+	destinationDirectory = cjTempDir
+
+	archiveClassifier = "minified"
+	json(releaseChannel.json) {
+		it.endsWith(".json") || it.endsWith(".mcmeta") || it == "mcmod.info"
 	}
-	
-	deflateAlgorithm = releaseChannel.deflation
-	jsonShrinkingType = releaseChannel.json
+
+	process(EntryProcessors.minifyClass { it.desc.startsWith("Ldev/nolij/zumegradle/proguard/") })
+
 	if (releaseChannel.proguard) {
-		useProguard(uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values })
+		process(EntryProcessors.obfuscationFixer(proguardJar.get().mappingsFile.get().asFile))
 	}
 }
+
+val advzip by tasks.registering(AdvzipTask::class) {
+	dependsOn(minifyJar)
+	inputJar = minifyJar.get().archiveFile
+	destinationDirectory = cjTempDir
+	
+	archiveClassifier = "advzip"
+	level = releaseChannel.deflation
+}
+
+val compressJar by tasks.registering(CopyJarTask::class) {
+	dependsOn(advzip)
+	group = "build"
+	inputJar = advzip.get().archiveFile
+	
+	archiveClassifier = null
+}
+//endregion
 
 tasks.assemble {
 	dependsOn(compressJar, sourcesJar)
@@ -475,89 +541,93 @@ python {
 	pip("portablemc:${"portablemc_version"()}")
 }
 
-val smokeTest = tasks.register("smokeTest") {
-	group = "verification"
+val smokeTest by tasks.registering(SmokeTestTask::class) {
 	dependsOn(tasks.checkPython, tasks.pipInstall, compressJar)
 	
-	doFirst {
-		SmokeTest(
-			logger,
-			"${project.rootDir}/.gradle/python/bin/portablemc",
-			compressJar.get().outputJar.asFile.get(),
-			"${project.rootDir}/.gradle/portablemc",
-			"${project.layout.buildDirectory.get()}/smoke_test",
-			max(2, Runtime.getRuntime().availableProcessors() / 5),
-			TimeUnit.SECONDS.toNanos(60),
-			listOf(
-				SmokeTest.Config("fabric", "snapshot", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.4/fabric-api-0.107.0+1.21.4.jar",
-				)),
-				SmokeTest.Config("fabric", "release", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.3/fabric-api-0.107.0+1.21.3.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
-				)),
-				SmokeTest.Config("fabric", "1.21.1", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.107.0%2B1.21.1/fabric-api-0.107.0+1.21.1.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v11.0.3/modmenu-11.0.3.jar",
-				)),
-				SmokeTest.Config("fabric", "1.20.6", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.100.8%2B1.20.6/fabric-api-0.100.8+1.20.6.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v10.0.0/modmenu-10.0.0.jar",
-				)),
-				SmokeTest.Config("fabric", "1.20.1", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.92.2%2B1.20.1/fabric-api-0.92.2+1.20.1.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v7.2.2/modmenu-7.2.2.jar",
-				)),
-				SmokeTest.Config("fabric", "1.18.2", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.77.0%2B1.18.2/fabric-api-0.77.0+1.18.2.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v3.2.5/modmenu-3.2.5.jar",
-				), extraArgs = listOf("--lwjgl=3.2.3")),
-				SmokeTest.Config("fabric", "1.16.5", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.42.0%2B1.16/fabric-api-0.42.0+1.16.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v1.16.23/modmenu-1.16.23.jar",
-				)),
-				SmokeTest.Config("fabric", "1.14.4", dependencies = listOf(
-					"fabric-api" to "https://github.com/FabricMC/fabric/releases/download/0.28.5%2B1.14/fabric-api-0.28.5+1.14.jar",
-					"modmenu" to "https://github.com/TerraformersMC/ModMenu/releases/download/v1.7.11/modmenu-1.7.11+build.121.jar",
-				)),
-				SmokeTest.Config("legacyfabric", "1.12.2", dependencies = listOf(
-					"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-				)),
-				SmokeTest.Config("legacyfabric", "1.8.9", dependencies = listOf(
-					"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-				)),
-				SmokeTest.Config("legacyfabric", "1.7.10", dependencies = listOf(
-					"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-				)),
-//				SmokeTest.Config("legacyfabric", "1.6.4", dependencies = listOf(
-//					"legacy-fabric-api" to "https://github.com/Legacy-Fabric/fabric/releases/download/1.10.2/legacy-fabric-api-1.10.2.jar",
-//				)),
-				SmokeTest.Config("babric", "b1.7.3", jvmVersion = 17, dependencies = listOf(
-					"station-api" to "https://cdn.modrinth.com/data/472oW63Q/versions/W3QVtn6S/StationAPI-2.0-alpha.2.4.jar",
-				), extraArgs = listOf("--exclude-lib=asm-all")),
-				SmokeTest.Config("neoforge", "release"),
-				SmokeTest.Config("neoforge", "1.21.1"),
-				SmokeTest.Config("neoforge", "1.20.4"),
-				SmokeTest.Config("forge", "1.20.4"),
-				SmokeTest.Config("forge", "1.20.1"),
-				SmokeTest.Config("forge", "1.19.2"),
-				SmokeTest.Config("forge", "1.18.2", extraArgs = listOf("--lwjgl=3.2.3")),
-				SmokeTest.Config("forge", "1.16.5", extraArgs = listOf("--lwjgl=3.2.3")),
-				SmokeTest.Config("forge", "1.14.4", dependencies = listOf(
-					"mixinbootstrap" to "https://github.com/LXGaming/MixinBootstrap/releases/download/v1.1.0/_MixinBootstrap-1.1.0.jar"
-				), extraArgs = listOf("--lwjgl=3.2.3")),
-				SmokeTest.Config("forge", "1.12.2", dependencies = listOf(
-					"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
-				)),
-				SmokeTest.Config("forge", "1.8.9", dependencies = listOf(
-					"mixinbooter" to "https://github.com/CleanroomMC/MixinBooter/releases/download/9.3/mixinbooter-9.3.jar"
-				)),
-				SmokeTest.Config("forge", "1.7.10", dependencies = listOf(
-					"unimixins" to "https://github.com/LegacyModdingMC/UniMixins/releases/download/0.1.19/+unimixins-all-1.7.10-0.1.19.jar"
-				)),
-			)
-		).test()
-	}
+	inputTask = compressJar
+	portableMCBinary = "${python.envPath}/bin/portablemc"
+	mainDir = "${project.rootDir}/.gradle/portablemc"
+	workDir = "${project.layout.buildDirectory.get()}/smoke_test"
+	maxThreads = max(2, Runtime.getRuntime().availableProcessors() / 5)
+	threadTimeout = TimeUnit.SECONDS.toNanos(60)
+
+	configs(
+		Config("fabric", "snapshot", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.107.2+1.21.4",
+		)),
+		Config("fabric", "release", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.107.0+1.21.3",
+			"maven.modrinth:modmenu:11.0.3",
+		)),
+		Config("fabric", "1.21.1", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.107.0+1.21.1",
+			"maven.modrinth:modmenu:11.0.3",
+		)),
+		Config("fabric", "1.20.6", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.100.8+1.20.6",
+			"maven.modrinth:modmenu:10.0.0",
+		)),
+		Config("fabric", "1.20.1", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.92.2+1.20.1",
+			"maven.modrinth:modmenu:7.2.2",
+		)),
+		Config("fabric", "1.18.2", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.77.0+1.18.2",
+			"maven.modrinth:modmenu:3.2.5",
+			"maven.modrinth:lazydfu:0.1.2",
+		), extraArgs = listOf("--lwjgl=3.2.3")),
+		Config("fabric", "1.16.5", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.42.0+1.16",
+			"maven.modrinth:modmenu:1.16.23",
+			"maven.modrinth:lazydfu:0.1.2",
+		)),
+		Config("fabric", "1.14.4", dependencies = setOf(
+			"maven.modrinth:fabric-api:0.28.5+1.14",
+			"maven.modrinth:modmenu:1.7.17",
+			"maven.modrinth:lazydfu:0.1.2",
+		)),
+		Config("legacyfabric", "1.12.2", dependencies = setOf(
+			"maven.modrinth:legacy-fabric-api:1.10.2",
+		)),
+		Config("legacyfabric", "1.8.9", dependencies = setOf(
+			"maven.modrinth:legacy-fabric-api:1.10.2",
+		)),
+		Config("legacyfabric", "1.7.10", dependencies = setOf(
+			"maven.modrinth:legacy-fabric-api:1.10.2",
+		)),
+//		Config("legacyfabric", "1.6.4", dependencies = setOf(
+//			"maven.modrinth:legacy-fabric-api:1.10.2",
+//		)),
+		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = setOf(
+			"maven.modrinth:stationapi:2.0-alpha.2.4",
+		), extraArgs = listOf("--exclude-lib=asm-all")),
+		Config("neoforge", "release"),
+		Config("neoforge", "1.21.1"),
+		Config("neoforge", "1.20.4"),
+		Config("forge", "1.20.4"),
+		Config("forge", "1.20.1"),
+		Config("forge", "1.19.2", dependencies = setOf(
+			"curse.maven:lazydfu-460819:4327266"
+		)),
+		Config("forge", "1.18.2", dependencies = setOf(
+			"curse.maven:lazuyfu-460819:3544496"
+		), extraArgs = listOf("--lwjgl=3.2.3")),
+		Config("forge", "1.16.5", dependencies = setOf(
+			"curse.maven:lazydfu-460819:3249059"
+		), extraArgs = listOf("--lwjgl=3.2.3")),
+		Config("forge", "1.14.4", dependencies = setOf(
+			"maven.modrinth:mixinbootstrap:1.1.0"
+		), extraArgs = listOf("--lwjgl=3.2.3")),
+		Config("forge", "1.12.2", dependencies = setOf(
+			"maven.modrinth:mixinbooter:9.3"
+		)),
+		Config("forge", "1.8.9", dependencies = setOf(
+			"maven.modrinth:mixinbooter:9.3"
+		)),
+		Config("forge", "1.7.10", dependencies = setOf(
+			"maven.modrinth:unimixins:1.7.10-0.1.19"
+		)),
+	)
 }
 //endregion
 
@@ -570,7 +640,7 @@ afterEvaluate {
 		
 		publications {
 			create<MavenPublication>("mod_id"()) {
-				artifact(compressJar.get().outputJar)
+				artifact(compressJar.get().archiveFile)
 				artifact(sourcesJar)
 			}
 		}
@@ -585,7 +655,7 @@ afterEvaluate {
 	}
 	
 	publishMods {
-		file = compressJar.get().outputJar
+		file = compressJar.get().archiveFile
 		additionalFiles.from(sourcesJar.get().archiveFile)
 		type = releaseChannel.releaseType ?: ALPHA
 		displayName = Zume.version

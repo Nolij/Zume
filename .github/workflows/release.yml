@@ -27,7 +27,7 @@ jobs:
         with:
           run: ./gradlew :smokeTest
       - name: :publishMods
-        run: ./gradlew publishMods -Prelease_channel=RELEASE
+        run: ./gradlew publishMods -Prelease_channel=RELEASE --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}

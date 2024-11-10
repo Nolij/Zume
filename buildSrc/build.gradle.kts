@@ -15,6 +15,12 @@ repositories {
 	}
 }
 
+kotlin {
+	jvmToolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
 fun DependencyHandler.plugin(id: String, version: String) {
 	this.implementation(group = id, name = "$id.gradle.plugin", version = version)
 }
