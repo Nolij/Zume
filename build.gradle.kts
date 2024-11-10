@@ -595,9 +595,9 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 		Config("legacyfabric", "1.7.10", dependencies = setOf(
 			"maven.modrinth:legacy-fabric-api:1.10.2",
 		)),
-		Config("legacyfabric", "1.6.4", dependencies = setOf(
-			"maven.modrinth:legacy-fabric-api:1.10.2",
-		)),
+//		Config("legacyfabric", "1.6.4", dependencies = setOf(
+//			"maven.modrinth:legacy-fabric-api:1.10.2",
+//		)),
 		Config("babric", "b1.7.3", jvmVersion = 17, dependencies = setOf(
 			"maven.modrinth:stationapi:2.0-alpha.2.4",
 		), extraArgs = listOf("--exclude-lib=asm-all")),

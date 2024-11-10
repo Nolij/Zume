@@ -242,7 +242,7 @@ class SmokeTest(
 						thread.config.toString().prependIndent("\t"),
 					"}",
 					"> COMMAND: [${thread.command.joinToString(", ")}]",
-					"> FAILURE REASON: ${thread.failureReason}",	
+					"> FAILURE REASON: ${thread.failureReason}", 
 					"> INSTANCE PATH: ${thread.instancePath}"
 				).joinToString("\n"))
 			}
