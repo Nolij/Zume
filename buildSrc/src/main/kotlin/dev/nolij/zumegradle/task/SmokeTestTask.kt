@@ -48,6 +48,9 @@ abstract class SmokeTestTask : DefaultTask() {
 	
 	@TaskAction
 	fun runSmokeTest() {
+		if (!Zume.auditAndExitEnabled)
+			error("Smoke testing requires `auditAndExit` support!")
+		
 		SmokeTest(
 			project,
 			portableMCBinary.get(),

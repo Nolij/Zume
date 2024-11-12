@@ -21,11 +21,11 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache-read-only: true
       - name: :build
-        run: ./gradlew :build
+        run: ./gradlew :build -PwithAuditAndExit=true
       - name: :smokeTest
         uses: coactions/setup-xvfb@v1
         with:
-          run: ./gradlew :smokeTest
+          run: ./gradlew :smokeTest -PwithAuditAndExit=true
       - name: :publishMods
         run: ./gradlew publishMods -Prelease_channel=RELEASE --no-daemon
         env:

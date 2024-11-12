@@ -40,6 +40,8 @@ plugins {
 
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
+Zume.auditAndExitEnabled = (rootProject.properties["withAuditAndExit"] as String?).toBoolean()
+
 enum class ReleaseChannel(
     val suffix: String? = null,
     val releaseType: ReleaseType? = null,

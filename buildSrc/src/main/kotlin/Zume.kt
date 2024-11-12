@@ -8,4 +8,6 @@ object Zume {
 			if (value.isNotEmpty())
 				_version = value
 		}
+	
+	var auditAndExitEnabled = false
 }

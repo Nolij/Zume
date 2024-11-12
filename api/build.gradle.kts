@@ -16,6 +16,7 @@ buildConfig {
 	buildConfigField("MOD_NAME", "mod_name"())
 	buildConfigField("ARCHAIC_VERSION_RANGE", "archaic_minecraft_range"())
 	buildConfigField("VINTAGE_VERSION_RANGE", "vintage_minecraft_range"())
+	buildConfigField("AUDIT_AND_EXIT_ENABLED", Zume.auditAndExitEnabled)
 }
 
 dependencies {

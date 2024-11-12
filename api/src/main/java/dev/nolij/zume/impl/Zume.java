@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static dev.nolij.zume.impl.ZumeConstants.MOD_ID;
+import static dev.nolij.zume.impl.ZumeConstants.*;
 
 public class Zume {
 	
@@ -68,7 +68,7 @@ public class Zume {
 	}
 	
 	public static void postInit() {
-		if (Boolean.getBoolean("zumeGradle.auditAndExit")) {
+		if (AUDIT_AND_EXIT_ENABLED && Boolean.getBoolean("zumeGradle.auditAndExit")) {
 			try {
 				MixinUtil.audit();
 				LOGGER.info("ZumeGradle audit passed");
