@@ -228,6 +228,12 @@ allprojects {
 			expand(props)
 		}
 	}
+
+	tasks.withType<AbstractArchiveTask>().configureEach {
+		isPreserveFileTimestamps = false
+		isReproducibleFileOrder = true
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	}
 }
 
 subprojects {
@@ -282,8 +288,6 @@ subprojects {
 
 			configurations = emptyList()
 			archiveClassifier = "output"
-			isPreserveFileTimestamps = false
-			isReproducibleFileOrder = true
 			
 			relocate("dev.nolij.zume.integration.implementation", "dev.nolij.zume.${implName}.integration")
 		}
@@ -358,8 +362,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 	group = "build"
 
 	archiveClassifier = "sources"
-	isPreserveFileTimestamps = false
-	isReproducibleFileOrder = true
 	
 	from("LICENSE") {
 		rename { "${it}_${"mod_id"()}" }
@@ -397,7 +399,8 @@ tasks.shadowJar {
 	exclude("LICENSE_zson")
 	
 	configurations = immutableListOf(shade)
-	archiveClassifier = null
+
+	archiveClassifier = "deobfuscated"
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
 	
