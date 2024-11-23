@@ -26,7 +26,8 @@ import static dev.nolij.zume.impl.ZumeConstants.*;
 @Mod(
 	modid = MOD_ID,
 	name = MOD_NAME,
-	version = MOD_VERSION, 
+	version = MOD_VERSION,
+	clientSideOnly = true,
 	acceptedMinecraftVersions = VINTAGE_VERSION_RANGE,
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeImplementation {
