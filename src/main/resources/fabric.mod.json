@@ -31,6 +31,6 @@
 	},
 	"mixins": ["zume.mixins.json"],
 	"depends": {
-		"fabricloader": [">=${fabric_version}", "${babric_version}"]
+		"fabricloader": [">=${minimum_fabric_version}"]
 	}
 }

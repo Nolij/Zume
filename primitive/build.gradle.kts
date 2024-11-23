@@ -1,5 +1,3 @@
-import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
-
 operator fun String.invoke(): String = rootProject.properties[this] as? String ?: error("Property $this not found")
 
 val modCompileOnly: Configuration by configurations.creating {
@@ -26,7 +24,7 @@ unimined.minecraft {
 		javaVersion = JavaVersion.VERSION_17
 	}
 
-	babric {
+	fabric {
 		loader("babric_version"())
 	}
 
