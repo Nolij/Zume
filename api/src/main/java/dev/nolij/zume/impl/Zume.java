@@ -3,6 +3,7 @@ package dev.nolij.zume.impl;
 import dev.nolij.libnolij.util.EasingUtil;
 import dev.nolij.libnolij.util.MathUtil;
 import dev.nolij.libnolij.util.MixinUtil;
+import dev.nolij.libnolij.util.UnsafeUtil;
 import dev.nolij.zume.impl.config.ZumeConfigImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,11 +73,12 @@ public class Zume {
 			try {
 				MixinUtil.audit();
 				LOGGER.info("ZumeGradle audit passed");
-				System.exit(0);
 			} catch (Throwable t) {
-				LOGGER.error("ZumeGradle audit failed: ", t);
-				System.exit(1);
+				LOGGER.error("ZumeGradle audit failed:", t);
+				UnsafeUtil.exit(1);
+				return;
 			}
+			UnsafeUtil.exit(0);
 		}
 	}
 	//endregion

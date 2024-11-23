@@ -61,7 +61,8 @@ class SmokeTest(
 		SETUP_NONZERO_EXIT_CODE,
 		TIMED_OUT,
 		TESTING_NONZERO_EXIT_CODE,
-		SUCCESS_LOG_MISSING,
+		AUDIT_FAILED,
+		NO_AUDIT_LOG,
 	}
 
 	private inner class Thread(val config: Config) {
@@ -163,8 +164,6 @@ class SmokeTest(
 		}
 
 		fun step() {
-			var passed = false
-
 			if (stage == ThreadStage.SETUP && ready && anyAvailableThreads) {
 				return start()
 			} else if (stage == ThreadStage.TESTING && isTimedOut) {
@@ -172,16 +171,23 @@ class SmokeTest(
 				process!!.destroyForcibly()
 			} else if (stage == ThreadStage.TESTING && !alive) {
 				if (process!!.exitValue() == 0) {
+					var passed = false
+					
 					(if (gameLogFile.exists()) gameLogFile else testLogFile).reader().use { reader ->
 						reader.forEachLine { line ->
+							if (failed)
+								return@forEachLine
+							
 							if (line.endsWith("ZumeGradle audit passed")) {
 								passed = true
+							} else if (line.endsWith("ZumeGradle audit failed:")) {
+								failureReason = FailureReason.AUDIT_FAILED
 							}
 						}
 					}
 					
-					if (!passed) {
-						failureReason = FailureReason.SUCCESS_LOG_MISSING
+					if (!failed && !passed) {
+						failureReason = FailureReason.NO_AUDIT_LOG
 					}
 				} else {
 					failureReason = FailureReason.TESTING_NONZERO_EXIT_CODE
@@ -192,10 +198,10 @@ class SmokeTest(
 			
 			stage = ThreadStage.COMPLETED
 
-			if (passed) {
-				println("Smoke test passed for config:\n${config}")
-			} else {
+			if (failed) {
 				project.logger.error("Smoke test failed for config:\n${config}")
+			} else {
+				println("Smoke test passed for config:\n${config}")
 			}
 			
 			printThreads()
