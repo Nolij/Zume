@@ -16,6 +16,7 @@ public @interface Mod {
 	String modid() default "";
 	String name() default "";
 	String version() default "";
+	boolean clientSideOnly() default false;
 	String acceptedMinecraftVersions() default "";
 	String guiFactory() default "";
 	
