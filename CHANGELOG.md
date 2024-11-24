@@ -1,2 +1,6 @@
-- added LibNolij (should shrink the JAR a bit)
+- many internal improvements (thanks @rhysdh540)
+- fixed Babric
+- fixed Vintage Forge issue when Zume is installed on the server and not the client
+- added automated smoke testing (this will significantly reduce the development burden of supporting so many platforms)
+- added LibNolij (this should shrink the JAR a bit)
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
