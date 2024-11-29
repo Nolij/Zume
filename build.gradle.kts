@@ -290,7 +290,7 @@ subprojects {
 			dependsOn(remapJarTasks)
 			mustRunAfter(remapJarTasks)
 			remapJarTasks.forEach { remapJar ->
-				remapJar.asJar.archiveFile.also { archiveFile ->
+				remapJar.archiveFile.also { archiveFile ->
 					from(zipTree(archiveFile))
 					inputs.file(archiveFile)
 				}
@@ -307,7 +307,7 @@ subprojects {
 		}
 		
 		tasks.withType<RemapJarTask> {
-			asJar.mixinRemap {
+			mixinRemap {
 				enableMixinExtra()
 				disableRefmap()
 			}
