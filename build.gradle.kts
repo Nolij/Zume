@@ -477,20 +477,20 @@ val proguardJar by tasks.registering(ProguardTask::class) {
 	jmod("java.desktop")
 
 	classpath.addAll(
-		uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values }.flatMap { mc ->
-			val prodNamespace = mc.mcPatcher.prodNamespace
+		uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values }.flatMap { minecraftConfig ->
+			val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
 
 			val minecrafts = listOf(
-				mc.sourceSet.compileClasspath.files,
-				mc.sourceSet.runtimeClasspath.files
+				minecraftConfig.sourceSet.compileClasspath.files,
+				minecraftConfig.sourceSet.runtimeClasspath.files
 			)
 				.flatten()
-				.filter { !mc.isMinecraftJar(it.toPath()) }
+				.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
 				.toHashSet()
 
-			mc.mods.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
+			return@flatMap minecraftConfig.mods.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
 				.filter { it.extension == "jar" && !it.name.startsWith("zume") }
-				.plus(mc.getMinecraft(prodNamespace, prodNamespace).toFile())
+				.plus(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile())
 		}
 	)
 	

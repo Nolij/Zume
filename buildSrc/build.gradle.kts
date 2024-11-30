@@ -25,11 +25,11 @@ fun DependencyHandler.plugin(id: String, version: String) {
 	this.implementation(group = id, name = "$id.gradle.plugin", version = version)
 }
 
-val properties = Properties().apply {
+val gradleProperties = Properties().apply {
 	load(rootDir.parentFile.resolve("gradle.properties").inputStream())
 }
 
-operator fun String.invoke(): String = properties.getProperty(this) ?: error("Property $this not found")
+operator fun String.invoke(): String = gradleProperties.getProperty(this) ?: error("Property $this not found")
 
 dependencies {
 	implementation("org.ow2.asm:asm-tree:${"asm_version"()}")

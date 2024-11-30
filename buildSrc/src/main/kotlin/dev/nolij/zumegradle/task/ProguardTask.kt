@@ -19,6 +19,9 @@ abstract class ProguardTask : ProcessJarTask() {
 	@get:Classpath
 	abstract val classpath: ListProperty<File>
 	
+	@get:InputFiles
+	abstract val configs: ListProperty<File>
+	
 	@get:Input
 	abstract val options: ListProperty<String>
 	
@@ -30,7 +33,7 @@ abstract class ProguardTask : ProcessJarTask() {
 	abstract val mappingsFile: RegularFileProperty
 	
 	fun config(config: File) {
-		options.add("@${config.relativeTo(project.rootDir)}")
+		configs.add(config)
 	}
 	
 	fun jmod(jmod: String) {
@@ -44,6 +47,8 @@ abstract class ProguardTask : ProcessJarTask() {
 		}
 		
 		val cmd = this.options.get().toMutableSet()
+		
+		cmd.addAll(configs.get().map { "@${it.absolutePath}" })
 		
 		cmd.addAll(arrayOf(
 			"-injars", inputJar.get().asFile.absolutePath,
