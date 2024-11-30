@@ -56,7 +56,10 @@ abstract class ProguardTask : ProcessJarTask() {
 		}
 		
 		cmd.addAll(arrayOf(
-			"-libraryjars", classpath.get().toSet().joinToString(File.pathSeparator) { "\"$it\"" }
+			"-libraryjars", classpath.get()
+				.toSet()
+				.sortedBy { it.name }
+				.joinToString(File.pathSeparator) { "\"${it.absolutePath}\"" }
 		))
 
 		val debug = Properties().apply {

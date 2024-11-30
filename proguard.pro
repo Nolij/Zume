@@ -25,10 +25,12 @@
 }
 
 # Platform implementations
+# Forge Event Subscribers
 -keepclasseswithmembers,allowobfuscation class dev.nolij.zume.** {
-	# Forge Event Subscribers
-	@*.*.fml.common.Mod$EventHandler <methods>;
 	@*.*.fml.common.eventhandler.SubscribeEvent <methods>;
+}
+-keepclasseswithmembers,allowobfuscation class dev.nolij.zume.** {
+	@*.*.fml.common.Mod$EventHandler <methods>;
 }
 
 -adaptclassstrings
@@ -38,12 +40,13 @@
 -keepclassmembers class dev.nolij.zume.** extends net.minecraft.class_437,
 												  net.minecraft.client.gui.screens.Screen,
 												  net.minecraft.client.gui.screen.Screen {
-	public *;
+	!private <methods>;
 }
 
 # Legacy Forge config providers
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.** extends *.*.client.gui.ForgeGuiFactory
--keepclassmembers,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig {
+-keepclassmembers,allowoptimization class dev.nolij.zume.** extends *.*.fml.client.config.GuiConfig,
+                                                                    *.*.client.gui.ForgeGuiFactory {
 	public <methods>;
 }
 
