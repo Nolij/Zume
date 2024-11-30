@@ -10,6 +10,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 final class LexZumeConfigScreen {
 	
 	static void register() {
+		//noinspection removal
 		ModLoadingContext.get().registerExtensionPoint(
 			ConfigScreenHandler.ConfigScreenFactory.class,
 			() -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new Screen(Component.nullToEmpty(null)) {

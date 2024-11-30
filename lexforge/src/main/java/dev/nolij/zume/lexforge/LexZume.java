@@ -36,6 +36,7 @@ public class LexZume implements IZumeImplementation {
 		if (Zume.disabled)
 			return;
 		
+		//noinspection removal
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeyBindings);
 		MinecraftForge.EVENT_BUS.addListener(this::render);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
