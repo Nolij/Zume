@@ -555,10 +555,10 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 
 	configs(
 		Config("fabric", "snapshot", dependencies = setOf(
-			"maven.modrinth:fabric-api:0.110.3+1.21.4",
+			"maven.modrinth:fabric-api:0.111.0+1.21.4",
 		)),
 		Config("fabric", "release", dependencies = setOf(
-			"maven.modrinth:fabric-api:0.107.0+1.21.3",
+			"maven.modrinth:fabric-api:0.111.0+1.21.4",
 			"maven.modrinth:modmenu:11.0.3",
 		)),
 		Config("fabric", "1.21.1", dependencies = setOf(
