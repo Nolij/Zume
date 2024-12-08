@@ -290,7 +290,7 @@ subprojects {
 			dependsOn(remapJarTasks)
 			mustRunAfter(remapJarTasks)
 			remapJarTasks.forEach { remapJar ->
-				remapJar.archiveFile.also { archiveFile ->
+				remapJar.asJar.archiveFile.also { archiveFile ->
 					from(zipTree(archiveFile))
 					inputs.file(archiveFile)
 				}
