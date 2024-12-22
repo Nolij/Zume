@@ -41,7 +41,8 @@ public class LexZume implements IZumeImplementation {
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::calculateFOV);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onMouseScroll);
 		
-		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null) {
+		if (MethodHandleHelper.PUBLIC.getClassOrNull("org.embeddedt.embeddium.api.OptionGUIConstructionEvent") != null &&
+		    MethodHandleHelper.PUBLIC.getClassOrNull("me.jellysquid.mods.sodium.client.gui.options.OptionPage") != null) {
 			new ZumeEmbeddiumConfigScreen();
 		}
 	}
