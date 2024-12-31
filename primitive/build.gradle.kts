@@ -13,6 +13,7 @@ val mod: Configuration by configurations.creating {
 
 repositories {
 	maven("https://maven.wispforest.io")
+	maven("https://maven.minecraftforge.net")
 }
 
 unimined.minecraft {

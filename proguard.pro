@@ -51,7 +51,10 @@
 }
 
 # Fabric entrypoints
--keep,allowoptimization,allowobfuscation class dev.nolij.zume.FabricZumeBootstrapper
+-keep,allowoptimization,allowobfuscation class dev.nolij.zume.ZumeBootstrapper
+-keepclassmembers,allowoptimization class dev.nolij.zume.ZumeBootstrapper {
+	public *;
+}
 -keep,allowoptimization,allowobfuscation class dev.nolij.zume.modern.integration.modmenu.ZumeModMenuIntegration
 
 -keep @dev.nolij.zumegradle.proguard.ProGuardKeep class * { *; }

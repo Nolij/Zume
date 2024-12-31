@@ -20,6 +20,7 @@ import okhttp3.internal.immutableListOf
 import org.ajoberstar.grgit.Tag
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
@@ -31,7 +32,7 @@ import kotlin.math.max
 plugins {
     id("java")
 	id("maven-publish")
-	id("com.github.johnrengelman.shadow")
+	id("com.gradleup.shadow")
 	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
 	id("org.ajoberstar.grgit")
@@ -182,6 +183,8 @@ allprojects {
 	apply(plugin = "maven-publish")
 
 	repositories {
+		maven("https://maven.wagyourtail.xyz/snapshots")
+		maven("https://maven.wagyourtail.xyz/releases")
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		exclusiveContent { 
@@ -203,20 +206,29 @@ allprojects {
 	tasks.withType<JavaCompile> {
 		if (name !in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) {
 			options.encoding = "UTF-8"
-			sourceCompatibility = "21"
-			options.release = 8
 			javaCompiler = javaToolchains.compilerFor {
 				languageVersion = JavaLanguageVersion.of(21)
 			}
-			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jabel"))
-			options.forkOptions.jvmArgs?.add("-XX:+EnableDynamicAgentLoading")
+			
+			// 16 least significant bits are the major version
+			fun Int.major() = this and 0xFFFF
+			
+			val jvmdgOptions = listOf(
+				"debug",
+				// skip all stubs
+				*(Opcodes.V1_1.major()..Opcodes.V21.major())
+					.flatMap { listOf("--skipStubs", "$it") }.toTypedArray(),
+				"downgrade",
+				"--classVersion ${Opcodes.V1_8}", // downgrade to Java 8
+			)
+			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jvmdg ${jvmdgOptions.joinToString(" ")}"))
 		}
 	}
 	
 	dependencies {
 		compileOnly("org.jetbrains:annotations:${"jetbrains_annotations_version"()}")
 		
-		annotationProcessor("com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}")
+		annotationProcessor("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:${"jvmdg_version"()}:all")
 
 		compileOnly("systems.manifold:manifold-rt:${"manifold_version"()}")
 		annotationProcessor("systems.manifold:manifold-exceptions:${"manifold_version"()}")
@@ -263,7 +275,7 @@ subprojects {
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
-		apply(plugin = "com.github.johnrengelman.shadow")
+		apply(plugin = "com.gradleup.shadow")
 		
 		unimined.footgunChecks = false
 		
@@ -507,7 +519,9 @@ val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 		it.endsWith(".json") || it.endsWith(".mcmeta") || it == "mcmod.info"
 	}
 
-	process(EntryProcessors.minifyClass { it.desc.startsWith("Ldev/nolij/zumegradle/proguard/") })
+	process(EntryProcessors.minifyClass {
+		it.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
+	})
 
 	if (releaseChannel.proguard) {
 		process(EntryProcessors.obfuscationFixer(proguardJar.get().mappingsFile.get().asFile))
