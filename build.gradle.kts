@@ -518,8 +518,38 @@ val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 	json(releaseChannel.json) {
 		it.endsWith(".json") || it.endsWith(".mcmeta") || it == "mcmod.info"
 	}
+	
+	process(EntryProcessors.modifyClass { 
+		// look for references to xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException or java/lang/MatchException
+		// and replace with java/lang/IllegalStateException
+		val matchExceptions = setOf(
+			"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException",
+			"java/lang/MatchException"
+		)
+		
+		it.methods.forEach { 
+			it.instructions?.forEachIndexed { index, instruction ->
+				
+				// creating the object
+				if (instruction.opcode == Opcodes.NEW) {
+					instruction as org.objectweb.asm.tree.TypeInsnNode
+					if(instruction.desc in matchExceptions) {
+						instruction.desc = "java/lang/IllegalStateException"
+					}
+				}
+				
+				// calling <init>
+				if(instruction.opcode == Opcodes.INVOKESPECIAL) {
+					instruction as org.objectweb.asm.tree.MethodInsnNode
+					if(instruction.owner in matchExceptions && instruction.name == "<init>") {
+						instruction.owner = "java/lang/IllegalStateException"
+					}
+				}
+			}
+		}
+	})
 
-	process(EntryProcessors.minifyClass {
+	process(EntryProcessors.removeAnnotations {
 		it.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
 	})
 
