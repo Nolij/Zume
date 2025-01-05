@@ -1,6 +1,8 @@
 package dev.nolij.zumegradle.smoketest
 
 import org.gradle.api.Project
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import xyz.wagyourtail.unimined.util.cachingDownload
 import java.io.File
 import kotlin.math.max
@@ -119,16 +121,13 @@ class SmokeTest(
 			modFile.copyTo(modsPath.resolve(modFile.name), overwrite = true)
 
 			val extraArgs = mutableListOf<String>()
-
-			val jvmVersionMap = mapOf(
-				17 to "java-runtime-gamma",
-				21 to "java-runtime-delta",
-				8 to "jre-legacy"
-			)
-			if (config.jvmVersion != null) {
-				val vmName = jvmVersionMap[config.jvmVersion] ?: error("Invalid JVM version: ${config.jvmVersion}")
-				extraArgs.add("--jvm=${mainDir}/jvm/${vmName}/bin/java")
-			}
+			
+			val jvmVersion = config.jvmVersion ?: MojangMetaApi.getJavaVersion(config.mcVersion)
+			val javaVm = project.extensions.getByType(JavaToolchainService::class.java).launcherFor { 
+				languageVersion.set(JavaLanguageVersion.of(jvmVersion))
+			}.orNull ?: error("Could not find JVM for version $jvmVersion\n")
+			
+			extraArgs.add("--jvm=${javaVm.executablePath}")
 
 			extraArgs.addAll(config.extraArgs)
 
