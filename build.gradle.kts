@@ -218,7 +218,7 @@ allprojects {
 				// jvmdg stubs System.getProperty("native.encoding") but we don't use it so its fine
 				"--skipStub", "Lxyz/wagyourtail/jvmdg/j18/stub/java_base/J_L_System;", 
 				"downgrade",
-				"--classVersion ${Opcodes.V1_8}", // downgrade to Java 8
+				"--classVersion ${Opcodes.V1_8.major()}", // downgrade to Java 8
 			)
 			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jvmdg ${jvmdgOptions.joinToString(" ")}"))
 		}
@@ -599,7 +599,7 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 
 	configs(
 		Config("fabric", "snapshot", dependencies = setOf(
-			"maven.modrinth:fabric-api:0.111.0+1.21.4",
+			"maven.modrinth:fabric-api:+",
 		)),
 		Config("fabric", "release", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.111.0+1.21.4",
