@@ -16,14 +16,11 @@ repositories {
 }
 
 kotlin {
-	jvmToolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+	jvmToolchain(21)
 }
 
-fun DependencyHandler.plugin(id: String, version: String) {
+fun DependencyHandler.plugin(id: String, version: String) = 
 	this.implementation(group = id, name = "$id.gradle.plugin", version = version)
-}
 
 val gradleProperties = Properties().apply {
 	load(rootDir.parentFile.resolve("gradle.properties").inputStream())

@@ -25,6 +25,7 @@ import org.objectweb.asm.tree.ClassNode
 import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
+import xyz.wagyourtail.unimined.util.capitalized
 import java.nio.file.Files
 import java.time.ZonedDateTime
 import kotlin.math.max
@@ -221,6 +222,17 @@ allprojects {
 				"--classVersion ${Opcodes.V1_8.major()}", // downgrade to Java 8
 			)
 			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jvmdg ${jvmdgOptions.joinToString(" ")}"))
+			
+			tasks.register<JvmdgStubCheckTask>("jvmdgCheck${this.name.capitalized()}") {
+				val compile = this@withType
+				classesRoot(compile.destinationDirectory)
+				this.mustRunAfter(compile)
+				compile.finalizedBy(this)
+				
+				allowedStubs.addAll(
+					"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException", // we remove manually later
+				)
+			}
 		}
 	}
 	
@@ -519,15 +531,13 @@ val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 	}
 	
 	process(EntryProcessors.modifyClass { 
-		// look for references to xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException or java/lang/MatchException
-		// and replace with java/lang/IllegalStateException
 		val matchExceptions = setOf(
 			"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException",
 			"java/lang/MatchException"
 		)
 		
 		it.methods.forEach { 
-			it.instructions?.forEachIndexed { index, instruction ->
+			it.instructions?.forEach { instruction ->
 				
 				// creating the object
 				if (instruction.opcode == Opcodes.NEW) {

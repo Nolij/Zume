@@ -1,8 +1,8 @@
 package dev.nolij.zumegradle
 
-import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+import xyz.wagyourtail.unimined.util.capitalized
 
-enum class DeflateAlgorithm(val id: Int?) {
+enum class DeflateAlgorithm(val id: Int) {
 	
 	/**
 	 * Entries are stored without compression
@@ -29,5 +29,5 @@ enum class DeflateAlgorithm(val id: Int?) {
 	 */
 	INSANE(4);
 
-	override fun toString() = name.lowercase().uppercaseFirstChar()
+	override fun toString() = name.lowercase().capitalized()
 }
