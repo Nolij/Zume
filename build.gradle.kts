@@ -215,9 +215,8 @@ allprojects {
 			
 			val jvmdgOptions = listOf(
 				"debug",
-				// skip all stubs
-				*(Opcodes.V1_1.major()..Opcodes.V21.major())
-					.flatMap { listOf("--skipStubs", "$it") }.toTypedArray(),
+				// jvmdg stubs System.getProperty("native.encoding") but we don't use it so its fine
+				"--skipStub", "Lxyz/wagyourtail/jvmdg/j18/stub/java_base/J_L_System;", 
 				"downgrade",
 				"--classVersion ${Opcodes.V1_8}", // downgrade to Java 8
 			)
