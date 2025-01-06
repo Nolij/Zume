@@ -45,9 +45,9 @@ object EntryProcessors {
 			
 			val result = JsonOutput.toJson(json)
 			if (prettyPrinted) {
-				result.toByteArray()
-			} else {
 				JsonOutput.prettyPrint(result).toByteArray()
+			} else {
+				result.toByteArray()
 			}
 		} else if (name.endsWith(".class")) {
 			val classNode = ClassNode(bytes)
