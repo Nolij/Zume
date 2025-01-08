@@ -10,6 +10,7 @@ import java.io.File
 
 import dev.nolij.zumegradle.util.toBytes
 import dev.nolij.zumegradle.util.ClassNode
+import org.objectweb.asm.tree.ClassNode
 
 typealias EntryProcessor = (String, ByteArray) -> ByteArray
 
@@ -18,9 +19,7 @@ object EntryProcessors {
 	
 	fun jsonMinifier(shouldRun: (String) -> Boolean = { it.endsWith(".json") }): EntryProcessor = { name, bytes ->
 		if (shouldRun(name)) {
-			val json = String(bytes)
-			val minified = JsonSlurper().parseText(json).toString()
-			minified.toByteArray()
+			JsonOutput.toJson(JsonSlurper().parse(bytes)).toByteArray()
 		} else {
 			bytes
 		}
@@ -38,12 +37,18 @@ object EntryProcessors {
 	fun obfuscationFixer(mappingsFile: File, format: MappingFormat = MappingFormat.PROGUARD): EntryProcessor = { name, bytes ->
 		val mappings = mappings(mappingsFile, format)
 		if (name.endsWith("mixins.json")) {
+			val prettyPrinted = String(bytes).contains("\n") // probably
 			val json = (JsonSlurper().parse(bytes) as Map<String, Any>).toMutableMap()
 			json["plugin"] = mappings.map(json["plugin"] as String)
 
 			json["package"] = "zume.mixin" // TODO: make this configurable
-
-			JsonOutput.toJson(json).toByteArray()
+			
+			val result = JsonOutput.toJson(json)
+			if (prettyPrinted) {
+				JsonOutput.prettyPrint(result).toByteArray()
+			} else {
+				result.toByteArray()
+			}
 		} else if (name.endsWith(".class")) {
 			val classNode = ClassNode(bytes)
 
@@ -65,11 +70,15 @@ object EntryProcessors {
 		}
 	}
 	
-	fun minifyClass(runOnEverything: Boolean = false, extraAnnotationsToStrip: (AnnotationNode) -> Boolean): EntryProcessor = a@{ name, bytes ->
-		if(!name.endsWith(".class") && !runOnEverything) {
+	fun modifyClass(modifier: (ClassNode) -> Unit): EntryProcessor = a@ { name, bytes ->
+		if (!name.endsWith(".class")) {
 			return@a bytes
 		}
-		
+
+		ClassNode(bytes).apply(modifier).toBytes()
+	}
+	
+	fun removeAnnotations(extraAnnotationsToStrip: (AnnotationNode) -> Boolean): EntryProcessor = modifyClass { classNode ->
 		val shouldStripAnnotation: (AnnotationNode) -> Boolean = {
 			setOf(
 				"Lorg/spongepowered/asm/mixin/Dynamic;",
@@ -79,7 +88,6 @@ object EntryProcessors {
 				|| it.desc.startsWith("Lorg/jetbrains/annotations/")
 				|| extraAnnotationsToStrip(it)
 		}
-		val classNode = ClassNode(bytes)
 		
 		classNode.invisibleAnnotations?.removeIf(shouldStripAnnotation)
 		classNode.visibleAnnotations?.removeIf(shouldStripAnnotation)
@@ -112,7 +120,5 @@ object EntryProcessors {
 			// 3 instructions are ALOAD + call to super() + RETURN
 			classNode.methods.removeAll { it.name == "<init>" && it.instructions.size() <= 3 }
 		}
-		
-		classNode.toBytes()
 	}
 }

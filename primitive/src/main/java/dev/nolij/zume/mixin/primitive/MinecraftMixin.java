@@ -1,6 +1,6 @@
 package dev.nolij.zume.mixin.primitive;
 
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import dev.nolij.zume.impl.Zume;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;

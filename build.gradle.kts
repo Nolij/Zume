@@ -20,10 +20,12 @@ import okhttp3.internal.immutableListOf
 import org.ajoberstar.grgit.Tag
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
+import xyz.wagyourtail.unimined.util.capitalized
 import java.nio.file.Files
 import java.time.ZonedDateTime
 import kotlin.math.max
@@ -31,7 +33,7 @@ import kotlin.math.max
 plugins {
     id("java")
 	id("maven-publish")
-	id("com.github.johnrengelman.shadow")
+	id("com.gradleup.shadow")
 	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
 	id("org.ajoberstar.grgit")
@@ -182,6 +184,8 @@ allprojects {
 	apply(plugin = "maven-publish")
 
 	repositories {
+		maven("https://maven.wagyourtail.xyz/snapshots")
+		maven("https://maven.wagyourtail.xyz/releases")
 		maven("https://repo.spongepowered.org/maven")
 		maven("https://jitpack.io/")
 		exclusiveContent { 
@@ -203,20 +207,39 @@ allprojects {
 	tasks.withType<JavaCompile> {
 		if (name !in arrayOf("compileMcLauncherJava", "compilePatchedMcJava")) {
 			options.encoding = "UTF-8"
-			sourceCompatibility = "21"
-			options.release = 8
 			javaCompiler = javaToolchains.compilerFor {
 				languageVersion = JavaLanguageVersion.of(21)
 			}
-			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jabel"))
-			options.forkOptions.jvmArgs?.add("-XX:+EnableDynamicAgentLoading")
+			
+			// 16 least significant bits are the major version
+			fun Int.major() = this and 0xFFFF
+			
+			val jvmdgOptions = listOf(
+				"debug",
+				// jvmdg stubs System.getProperty("native.encoding") but we don't use it so its fine
+				"--skipStub", "Lxyz/wagyourtail/jvmdg/j18/stub/java_base/J_L_System;", 
+				"downgrade",
+				"--classVersion ${Opcodes.V1_8.major()}", // downgrade to Java 8
+			)
+			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jvmdg ${jvmdgOptions.joinToString(" ")}"))
+			
+			tasks.register<JvmdgStubCheckTask>("jvmdgCheck${this.name.capitalized()}") {
+				val compile = this@withType
+				classesRoot(compile.destinationDirectory)
+				this.mustRunAfter(compile)
+				compile.finalizedBy(this)
+				
+				allowedStubs.addAll(
+					"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException", // we remove manually later
+				)
+			}
 		}
 	}
 	
 	dependencies {
 		compileOnly("org.jetbrains:annotations:${"jetbrains_annotations_version"()}")
 		
-		annotationProcessor("com.pkware.jabel:jabel-javac-plugin:${"jabel_version"()}")
+		annotationProcessor("xyz.wagyourtail.jvmdowngrader:jvmdowngrader:${"jvmdg_version"()}:all")
 
 		compileOnly("systems.manifold:manifold-rt:${"manifold_version"()}")
 		annotationProcessor("systems.manifold:manifold-exceptions:${"manifold_version"()}")
@@ -263,7 +286,7 @@ subprojects {
 
 	if (implName in uniminedImpls) {
 		apply(plugin = "xyz.wagyourtail.unimined")
-		apply(plugin = "com.github.johnrengelman.shadow")
+		apply(plugin = "com.gradleup.shadow")
 		
 		unimined.footgunChecks = false
 		
@@ -506,8 +529,38 @@ val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 	json(releaseChannel.json) {
 		it.endsWith(".json") || it.endsWith(".mcmeta") || it == "mcmod.info"
 	}
+	
+	process(EntryProcessors.modifyClass { 
+		val matchExceptions = setOf(
+			"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException",
+			"java/lang/MatchException"
+		)
+		
+		it.methods.forEach { 
+			it.instructions?.forEach { instruction ->
+				
+				// creating the object
+				if (instruction.opcode == Opcodes.NEW) {
+					instruction as org.objectweb.asm.tree.TypeInsnNode
+					if(instruction.desc in matchExceptions) {
+						instruction.desc = "java/lang/IllegalStateException"
+					}
+				}
+				
+				// calling <init>
+				if(instruction.opcode == Opcodes.INVOKESPECIAL) {
+					instruction as org.objectweb.asm.tree.MethodInsnNode
+					if(instruction.owner in matchExceptions && instruction.name == "<init>") {
+						instruction.owner = "java/lang/IllegalStateException"
+					}
+				}
+			}
+		}
+	})
 
-	process(EntryProcessors.minifyClass { it.desc.startsWith("Ldev/nolij/zumegradle/proguard/") })
+	process(EntryProcessors.removeAnnotations {
+		it.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
+	})
 
 	if (releaseChannel.proguard) {
 		process(EntryProcessors.obfuscationFixer(proguardJar.get().mappingsFile.get().asFile))
@@ -541,6 +594,7 @@ python {
 	scope = PythonExtension.Scope.VIRTUALENV
 	envPath = "${project.rootDir}/.gradle/python"
 	pip("portablemc:${"portablemc_version"()}")
+	pip("certifi:2024.12.14")
 }
 
 val smokeTest by tasks.registering(SmokeTestTask::class) {
@@ -555,7 +609,7 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 
 	configs(
 		Config("fabric", "snapshot", dependencies = setOf(
-			"maven.modrinth:fabric-api:0.111.0+1.21.4",
+			"maven.modrinth:fabric-api:+",
 		)),
 		Config("fabric", "release", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.111.0+1.21.4",

@@ -16,14 +16,11 @@ repositories {
 }
 
 kotlin {
-	jvmToolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+	jvmToolchain(21)
 }
 
-fun DependencyHandler.plugin(id: String, version: String) {
+fun DependencyHandler.plugin(id: String, version: String) = 
 	this.implementation(group = id, name = "$id.gradle.plugin", version = version)
-}
 
 val gradleProperties = Properties().apply {
 	load(rootDir.parentFile.resolve("gradle.properties").inputStream())
@@ -37,7 +34,7 @@ dependencies {
 	implementation("org.apache.ant:ant:${"shadow_ant_version"()}")
 	implementation("com.guardsquare:proguard-base:${"proguard_version"()}")
 	
-	plugin(id = "com.github.johnrengelman.shadow", version = "shadow_version"())
+	plugin(id = "com.gradleup.shadow", version = "shadow_version"())
 	plugin(id = "xyz.wagyourtail.unimined", version = "unimined_version"())
 	plugin(id = "com.github.gmazzo.buildconfig", version = "buildconfig_version"())
 	plugin(id = "org.ajoberstar.grgit", version = "grgit_version"())
