@@ -193,7 +193,8 @@ public class ZumeConfigImpl {
 			return new File(CONFIG_PATH_OVERRIDE);
 		}
 		
-		if (instanceFile != null && instanceFile.exists()) {
+		if ((globalFile == null || !globalFile.canWrite()) ||
+			(instanceFile != null && instanceFile.exists())) {
 			return instanceFile;
 		}
 		
@@ -237,4 +238,5 @@ public class ZumeConfigImpl {
 			Zume.LOGGER.error("Failed to create file watcher", e);
 		}
 	}
+	
 }
