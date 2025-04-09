@@ -183,6 +183,8 @@ public class ZumeConfigImpl {
 			case LINUX, UNKNOWN -> Paths.get(System.getProperty("user.home"), ".minecraft");
 			case WINDOWS -> Paths.get(System.getenv("APPDATA"), ".minecraft");
 			case MAC_OS -> Paths.get(System.getProperty("user.home"), "Library", "Application Support", "minecraft");
+			//noinspection UnnecessaryDefault
+			default -> null;
 		};
 		
 		GLOBAL_CONFIG_PATH = dotMinecraft.resolve("global");
