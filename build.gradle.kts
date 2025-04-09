@@ -266,6 +266,10 @@ allprojects {
 		isPreserveFileTimestamps = false
 		isReproducibleFileOrder = true
 		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+		
+		// TODO: yell at wyt to fix Unimined
+		includeEmptyDirs = false
+		exclude("assets/minecraft/textures/**")
 	}
 }
 
