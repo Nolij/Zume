@@ -622,8 +622,8 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 			"maven.modrinth:fabric-api:+",
 		)),
 		Config("fabric", "release", dependencies = setOf(
-			"maven.modrinth:fabric-api:0.111.0+1.21.4",
-			"maven.modrinth:modmenu:11.0.3",
+			"maven.modrinth:fabric-api:0.119.9+1.21.5",
+			"maven.modrinth:modmenu:14.0.0-rc.2",
 		)),
 		Config("fabric", "1.21.1", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.107.0+1.21.1",
