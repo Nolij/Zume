@@ -133,17 +133,28 @@ class SmokeTest(
 
 			command = arrayOf(
 				portableMCBinary,
+				"-v",
 				"--main-dir", mainDir,
 				"--work-dir", instancePath.absolutePath,
 				"start", config.versionString,
 				*extraArgs.toTypedArray(),
 				"--jvm-args=-DzumeGradle.auditAndExit=true -Xmx1G",
 			)
-
-			if (ProcessBuilder(*command, "--dry")
-				.redirectOutput(setupLogFile)
-				.start()
-				.waitFor() != 0) {
+			
+			var setupExitCode: Int = -1
+			for (i in 0..2) {
+				sleep(i * 1000L)
+				
+				setupExitCode = ProcessBuilder(*command, "--dry")
+					.redirectOutput(setupLogFile)
+					.start()
+					.waitFor()
+				
+				if (setupExitCode == 0)
+					break
+			}
+			
+			if (setupExitCode != 0) {
 				failureReason = FailureReason.SETUP_NONZERO_EXIT_CODE
 			}
 		}
