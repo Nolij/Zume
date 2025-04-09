@@ -1,7 +1,13 @@
-import java.util.*
+import java.util.Properties
 
 plugins {
+	id("idea")
 	`kotlin-dsl`
+}
+
+idea.module {
+	isDownloadJavadoc = true
+	isDownloadSources = true
 }
 
 repositories {
@@ -16,7 +22,9 @@ repositories {
 }
 
 kotlin {
-	jvmToolchain(21)
+	jvmToolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 fun DependencyHandler.plugin(id: String, version: String) = 

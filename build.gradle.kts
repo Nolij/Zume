@@ -181,7 +181,13 @@ val uniminedImpls = arrayOf(
 
 allprojects {	
 	apply(plugin = "java")
+	apply(plugin = "idea")
 	apply(plugin = "maven-publish")
+
+	idea.module {
+		isDownloadJavadoc = true
+		isDownloadSources = true
+	}
 
 	repositories {
 		maven("https://maven.wagyourtail.xyz/snapshots")
