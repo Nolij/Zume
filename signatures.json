@@ -15,6 +15,14 @@
       "created_at": "2024-05-28T21:00:14Z",
       "repoId": 710018934,
       "pullRequestNo": 18
+    },
+    {
+      "name": "rikzun",
+      "id": 60903586,
+      "comment_id": 3146579127,
+      "created_at": "2025-08-02T15:52:00Z",
+      "repoId": 710018934,
+      "pullRequestNo": 34
     }
   ]
 }
