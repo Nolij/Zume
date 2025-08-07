@@ -18,6 +18,7 @@ pluginManagement {
 		id("org.taumc.gradle.versioning") version(property("taugradle_version"))
 		id("org.taumc.gradle.publishing") version(property("taugradle_version"))
 		id("com.gradleup.shadow") version(property("shadow_version"))
+		id("xyz.wagyourtail.jvmdowngrader") version(property("jvmdg_version"))
 		id("xyz.wagyourtail.unimined") version(property("unimined_version"))
 		id("com.github.gmazzo.buildconfig") version(property("buildconfig_version"))
 		id("ru.vyarus.use-python") version(property("use_python_version"))

@@ -31,6 +31,7 @@ plugins {
 	id("org.taumc.gradle.versioning")
 	id("org.taumc.gradle.publishing")
 	id("com.gradleup.shadow")
+	id("xyz.wagyourtail.jvmdowngrader")
 	id("xyz.wagyourtail.unimined")
 	id("ru.vyarus.use-python")
 }
@@ -135,28 +136,7 @@ allprojects {
 				languageVersion = JavaLanguageVersion.of(21)
 			}
 			
-			// 16 least significant bits are the major version
-			fun Int.major() = this and 0xFFFF
-			
-			val jvmdgOptions = listOf(
-				"debug",
-				// jvmdg stubs System.getProperty("native.encoding") but we don't use it so its fine
-				"--skipStub", "Lxyz/wagyourtail/jvmdg/j18/stub/java_base/J_L_System;", 
-				"downgrade",
-				"--classVersion ${Opcodes.V1_8.major()}", // downgrade to Java 8
-			)
-			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap", "-Xplugin:jvmdg ${jvmdgOptions.joinToString(" ")}"))
-			
-			tasks.register<JvmdgStubCheckTask>("jvmdgCheck${this.name.capitalized()}") {
-				val compile = this@withType
-				classesRoot(compile.destinationDirectory)
-				this.mustRunAfter(compile)
-				compile.finalizedBy(this)
-				
-				allowedStubs.addAll(
-					"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException", // we remove manually later
-				)
-			}
+			options.compilerArgs.addAll(arrayOf("-Xplugin:Manifold no-bootstrap"))
 		}
 	}
 	
@@ -411,11 +391,37 @@ tasks.shadowJar {
 	}
 }
 
+jvmdg.defaultShadeTask {
+	enabled = false
+}
+
+jvmdg.defaultTask {
+	dependsOn(tasks.shadowJar)
+	
+	inputFile = provider { tasks.shadowJar.get().archiveFile.get() }
+	downgradeTo = JavaVersion.VERSION_1_8
+	
+	// jvmdg stubs System.getProperty("native.encoding") but we don't use it so it's fine
+	debugSkipStub.add("Lxyz/wagyourtail/jvmdg/j18/stub/java_base/J_L_System;")
+	debugSkipStub.add("Lxyz/wagyourtail/jvmdg/j18/stub/java_base/J_L_System;getProperty;(Ljava/lang/String;)Ljava/lang/String;")
+}
+
+// TODO: fix
+//tasks.register<JvmdgStubCheckTask>("jvmdgCheck${this.name.capitalized()}") {
+//	classesRoot(compile.destinationDirectory)
+//	this.mustRunAfter(compile)
+//	compile.finalizedBy(this)
+//
+//	allowedStubs.addAll(
+//		"xyz/wagyourtail/jvmdg/j21/stub/java_base/J_L_MatchException", // we remove manually later
+//	)
+//}
+
 //region compressJar
 val cjTempDir = layout.buildDirectory.dir("compressJar")
 val proguardJar by tasks.registering(ProguardTask::class) {
-	dependsOn(tasks.shadowJar)
-	inputJar = tasks.shadowJar.get().archiveFile
+	dependsOn(jvmdg.defaultTask)
+	inputJar = jvmdg.defaultTask.get().archiveFile
 	destinationDirectory = cjTempDir
 	run = buildChannel.proguard
 	
