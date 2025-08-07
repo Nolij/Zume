@@ -1,4 +1,5 @@
 plugins {
+	id("org.taumc.gradle.versioning")
 	id("com.github.gmazzo.buildconfig")
 }
 
@@ -12,7 +13,7 @@ buildConfig {
 
 	// the below errors shown by IntelliJ can be safely ignored; Jabel works around this
 	buildConfigField("MOD_ID", "mod_id"())
-	buildConfigField("MOD_VERSION", Zume.version)
+	buildConfigField("MOD_VERSION", rootProject.tau.versioning.version)
 	buildConfigField("MOD_NAME", "mod_name"())
 	buildConfigField("ARCHAIC_VERSION_RANGE", "archaic_minecraft_range"())
 	buildConfigField("VINTAGE_VERSION_RANGE", "vintage_minecraft_range"())

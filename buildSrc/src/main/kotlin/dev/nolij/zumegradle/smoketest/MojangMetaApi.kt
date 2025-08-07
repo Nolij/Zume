@@ -52,6 +52,7 @@ object MojangMetaApi {
 	private fun requestImpl(url: String): InputStream {
 		val connection = URI(url).toURL().openConnection() as HttpURLConnection
 		connection.requestMethod = "GET"
+		@Suppress("DEPRECATION")
 		connection.setRequestProperty("User-Agent", "ZumeGradle/${Zume.version} (https://github.com/Nolij/Zume)")
 		connection.connectTimeout = TimeUnit.SECONDS.toMillis(10).toInt()
 		connection.readTimeout = TimeUnit.SECONDS.toMillis(5).toInt()

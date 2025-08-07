@@ -44,8 +44,4 @@ dependencies {
 	
 	plugin(id = "com.gradleup.shadow", version = "shadow_version"())
 	plugin(id = "xyz.wagyourtail.unimined", version = "unimined_version"())
-	plugin(id = "com.github.gmazzo.buildconfig", version = "buildconfig_version"())
-	plugin(id = "org.ajoberstar.grgit", version = "grgit_version"())
-	plugin(id = "me.modmuss50.mod-publish-plugin", version = "mod_publish_version"())
-	plugin(id = "ru.vyarus.use-python", version = "use_python_version"())
 }

@@ -5,38 +5,33 @@ import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
 import dev.nolij.zumegradle.entryprocessing.EntryProcessors
 import dev.nolij.zumegradle.smoketest.SmokeTest.Config
-import dev.nolij.zumegradle.task.*
-import kotlinx.serialization.encodeToString
-import me.modmuss50.mpp.HttpUtils
-import me.modmuss50.mpp.PublishModTask
-import me.modmuss50.mpp.ReleaseType
-import me.modmuss50.mpp.platforms.curseforge.CurseforgeApi
-import me.modmuss50.mpp.platforms.discord.DiscordAPI
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
+import dev.nolij.zumegradle.task.AdvzipTask
+import dev.nolij.zumegradle.task.CopyJarTask
+import dev.nolij.zumegradle.task.JarEntryModificationTask
+import dev.nolij.zumegradle.task.JvmdgStubCheckTask
+import dev.nolij.zumegradle.task.ProguardTask
+import dev.nolij.zumegradle.task.SmokeTestTask
 import okhttp3.internal.immutableListOf
-import org.ajoberstar.grgit.Tag
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
+import org.taumc.gradle.minecraft.ModEnvironment
+import org.taumc.gradle.minecraft.ModLoader
+import org.taumc.gradle.publishing.api.PublishChannel
 import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
 import xyz.wagyourtail.unimined.util.capitalized
-import java.nio.file.Files
-import java.time.ZonedDateTime
 import kotlin.math.max
 
 plugins {
     id("java")
 	id("maven-publish")
+	id("org.taumc.gradle.versioning")
+	id("org.taumc.gradle.publishing")
 	id("com.gradleup.shadow")
-	id("me.modmuss50.mod-publish-plugin")
 	id("xyz.wagyourtail.unimined")
-	id("org.ajoberstar.grgit")
 	id("ru.vyarus.use-python")
 }
 
@@ -44,104 +39,27 @@ operator fun String.invoke(): String = rootProject.properties[this] as? String ?
 
 Zume.auditAndExitEnabled = (rootProject.properties["withAuditAndExit"] as String?).toBoolean()
 
-enum class ReleaseChannel(
-    val suffix: String? = null,
-    val releaseType: ReleaseType? = null,
-    val deflation: DeflateAlgorithm = DeflateAlgorithm.INSANE,
-    val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
-    val proguard: Boolean = true,
+enum class BuildChannel(
+	val deflation: DeflateAlgorithm = DeflateAlgorithm.INSANE,
+	val json: JsonShrinkingType = JsonShrinkingType.MINIFY,
+	val proguard: Boolean = true,
 	) {
 	DEV_BUILD(
-		suffix = "dev",
 		deflation = DeflateAlgorithm.EXTRA,
 		json = JsonShrinkingType.PRETTY_PRINT
 	),
-	PRE_RELEASE("pre"),
-	RELEASE_CANDIDATE("rc"),
-	RELEASE(releaseType = ReleaseType.STABLE),
+	PRE_RELEASE,
+	RELEASE_CANDIDATE,
+	RELEASE,
 }
 
-//region Git Versioning
+Zume.version = tau.versioning.version("mod_version"(), project.properties["release_channel"])
+println("Zume Version: ${tau.versioning.version}")
 
-val headDateTime: ZonedDateTime = grgit.head().dateTime
-
-val branchName = grgit.branch.current().name!!
-val releaseTagPrefix = "release/"
-
-val releaseTags = grgit.tag.list()
-	.filter { tag -> tag.name.startsWith(releaseTagPrefix) }
-	.sortedWith { tag1, tag2 -> 
-		if (tag1.commit.dateTime == tag2.commit.dateTime)
-			if (tag1.name.length != tag2.name.length)
-				return@sortedWith tag1.name.length.compareTo(tag2.name.length)
-			else
-				return@sortedWith tag1.name.compareTo(tag2.name)
-		else
-			return@sortedWith tag2.commit.dateTime.compareTo(tag1.commit.dateTime)
-	}
-	.dropWhile { tag -> tag.commit.dateTime > headDateTime }
-
-val isExternalCI = (rootProject.properties["external_publish"] as String?).toBoolean()
-val isRelease = rootProject.hasProperty("release_channel") || isExternalCI
-val releaseIncrement = if (isExternalCI) 0 else 1
-val releaseChannel: ReleaseChannel = 
-	if (isExternalCI) {
-		val tagName = releaseTags.first().name
-		val suffix = """\-(\w+)\.\d+$""".toRegex().find(tagName)?.groupValues?.get(1)
-		if (suffix != null)
-			ReleaseChannel.values().find { channel -> channel.suffix == suffix }!!
-		else
-			ReleaseChannel.RELEASE
-	} else {
-		if (isRelease)
-			ReleaseChannel.valueOf("release_channel"())
-		else
-			ReleaseChannel.DEV_BUILD
-	}
-
-println("Release Channel: $releaseChannel")
-
-val minorVersion = "mod_version"()
-val minorTagPrefix = "${releaseTagPrefix}${minorVersion}."
-
-val patchHistory = releaseTags
-	.map { tag -> tag.name }
-	.filter { name -> name.startsWith(minorTagPrefix) }
-	.map { name -> name.substring(minorTagPrefix.length) }
-
-val maxPatch = patchHistory.maxOfOrNull { it.substringBefore('-').toInt() }
-val patch =
-	maxPatch?.plus(
-		if (patchHistory.contains(maxPatch.toString()))
-			releaseIncrement
-		else
-			0
-	) ?: 0
-var patchAndSuffix = patch.toString()
-
-if (releaseChannel.suffix != null) {
-	patchAndSuffix += "-${releaseChannel.suffix}"
-	
-	if (isRelease) {
-		patchAndSuffix += "."
-		
-		val maxBuild = patchHistory
-			.filter { it.startsWith(patchAndSuffix) }
-			.mapNotNull { it.substring(patchAndSuffix.length).toIntOrNull() }
-			.maxOrNull()
-		
-		val build = (maxBuild?.plus(releaseIncrement)) ?: 1
-		patchAndSuffix += build.toString()
-	}
-}
-
-//endregion
-
-Zume.version = "${minorVersion}.${patchAndSuffix}"
-println("Zume Version: ${Zume.version}")
+val buildChannel = BuildChannel.valueOf(tau.versioning.releaseChannel.name)
 
 rootProject.group = "maven_group"()
-rootProject.version = Zume.version
+rootProject.version = tau.versioning.version
 
 base {
 	archivesName = "mod_id"()
@@ -253,7 +171,7 @@ allprojects {
 
 	tasks.processResources {
 		inputs.file(rootDir.resolve("gradle.properties"))
-		inputs.property("version", Zume.version)
+		inputs.property("version", rootProject.tau.versioning.version)
 
 		filteringCharset = "UTF-8"
 
@@ -261,7 +179,7 @@ allprojects {
 		props.putAll(rootProject.properties
 			.filterValues { value -> value is String }
 			.mapValues { entry -> entry.value as String })
-		props["mod_version"] = Zume.version
+		props["mod_version"] = rootProject.tau.versioning.version
 
 		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
 			expand(props)
@@ -284,7 +202,7 @@ subprojects {
 	val implName = subProject.name
 	
 	group = "maven_group"()
-	version = Zume.version
+	version = rootProject.tau.versioning.version
 	
 	base {
 		archivesName = "${"mod_id"()}-${subProject.name}"
@@ -413,7 +331,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 		rename { "${it}_${"mod_id"()}" }
 	}
 	
-	if (releaseChannel.proguard) {
+	if (buildChannel.proguard) {
 		dependsOn(proguardJar)
 		from(proguardJar.get().mappingsFile) {
 			rename { "mappings.txt" }
@@ -478,7 +396,7 @@ tasks.shadowJar {
 	
 	relocate("dev.nolij.zson", "dev.nolij.zume.zson")
 	relocate("dev.nolij.libnolij", "dev.nolij.zume.libnolij")
-	if (releaseChannel.proguard) {
+	if (buildChannel.proguard) {
 		relocate("dev.nolij.zume.mixin", "zume.mixin")
 	}
 	
@@ -499,7 +417,7 @@ val proguardJar by tasks.registering(ProguardTask::class) {
 	dependsOn(tasks.shadowJar)
 	inputJar = tasks.shadowJar.get().archiveFile
 	destinationDirectory = cjTempDir
-	run = releaseChannel.proguard
+	run = buildChannel.proguard
 	
 	config(file("proguard.pro"))
 	
@@ -536,7 +454,7 @@ val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 	destinationDirectory = cjTempDir
 
 	archiveClassifier = "minified"
-	json(releaseChannel.json) {
+	json(buildChannel.json) {
 		it.endsWith(".json") || it.endsWith(".mcmeta") || it == "mcmod.info"
 	}
 	
@@ -572,7 +490,7 @@ val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 		it.desc.startsWith("Ldev/nolij/zumegradle/proguard/")
 	})
 
-	if (releaseChannel.proguard) {
+	if (buildChannel.proguard) {
 		process(EntryProcessors.obfuscationFixer(proguardJar.get().mappingsFile.get().asFile))
 	}
 }
@@ -583,7 +501,7 @@ val advzip by tasks.registering(AdvzipTask::class) {
 	destinationDirectory = cjTempDir
 	
 	archiveClassifier = "advzip"
-	level = releaseChannel.deflation
+	level = buildChannel.deflation
 }
 
 val compressJar by tasks.registering(CopyJarTask::class) {
@@ -697,195 +615,80 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 }
 //endregion
 
-afterEvaluate {
-	publishing {
-		repositories {
-			if (!System.getenv("local_maven_url").isNullOrEmpty())
-				maven(System.getenv("local_maven_url"))
-		}
-		
-		publications {
-			create<MavenPublication>("mod_id"()) {
-				artifact(compressJar.get().archiveFile)
-				artifact(sourcesJar)
-			}
-		}
+publishing {
+	repositories {
+		if (!System.getenv("local_maven_url").isNullOrEmpty())
+			maven(System.getenv("local_maven_url"))
 	}
 
-	tasks.withType<AbstractPublishToMaven> {
-		dependsOn(compressJar, sourcesJar)
+	publications {
+		create<MavenPublication>("mod_id"()) {
+			artifact(provider { compressJar.get().archiveFile })
+			artifact(provider { sourcesJar.get().archiveFile })
+		}
+	}
+}
+
+tau.publishing.publish {
+	dependsOn(compressJar, sourcesJar)
+	
+	useTauGradleVersioning()
+	changelog = file("CHANGELOG.md").readText()
+	
+	modArtifact { 
+		files(provider { compressJar.get().archiveFile }, provider { sourcesJar.get().archiveFile })
+		
+		version = tau.versioning.version
+		
+		minecraftVersionRange = "minecraft_version_range"()
+		supportsSnapshots = true
+		javaVersions.addAll(JavaVersion.values().filter { it.ordinal >= JavaVersion.VERSION_1_8.ordinal })
+		
+		environment = ModEnvironment.CLIENT_ONLY
+		modLoaders.addAll(ModLoader.FABRIC, ModLoader.LEXFORGE, ModLoader.NEOFORGE)
 	}
 	
-	fun getChangelog(): String {
-		return file("CHANGELOG.md").readText()
+	github { 
+		supportAllChannels()
+		
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = "Nolij/Zume"
+		tagName = tau.versioning.releaseTag
 	}
 	
-	publishMods {
-		file = compressJar.get().archiveFile
-		additionalFiles.from(sourcesJar.get().archiveFile)
-		type = releaseChannel.releaseType ?: ALPHA
-		displayName = Zume.version
-		version = Zume.version
-		changelog = getChangelog()
+	modrinth {
+		supportChannels(PublishChannel.RELEASE)
 		
-		modLoaders.addAll("fabric", "forge", "neoforge")
-		dryRun = !isRelease
-		
-		github {
-			accessToken = providers.environmentVariable("GITHUB_TOKEN")
-			repository = "Nolij/Zume"
-			commitish = branchName
-			tagName = releaseTagPrefix + Zume.version
-		}
-		
-		if (dryRun.get() || releaseChannel.releaseType != null) {
-			modrinth {
-				accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-				projectId = "o6qsdrrQ"
-
-				minecraftVersionRange {
-					start = "1.14.4"
-					end = "latest"
-
-					includeSnapshots = true
-				}
-
-				minecraftVersionRange {
-					start = "1.6.4"
-					end = "1.12.2"
-
-					includeSnapshots = true
-				}
-
-				minecraftVersions.add("b1.7.3")
-				
-				optional("embeddium")
-			}
-
-			curseforge {
-				val cfAccessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-				accessToken = cfAccessToken
-				projectId = "927564"
-				projectSlug = "zume"
-
-				minecraftVersionRange {
-					start = "1.14.4"
-					end = "latest"
-				}
-
-				minecraftVersionRange {
-					start = "1.6.4"
-					end = "1.12.2"
-				}
-				
-				minecraftVersions.add("Beta 1.7.3")
-				
-				val snapshots: Set<String>
-				if (cfAccessToken.orNull != null) {
-					val cfAPI = CurseforgeApi(cfAccessToken.get(), apiEndpoint.get())
-
-					val mcVersions = minecraftVersions.get().map {
-						"${it}-Snapshot"
-					}.toHashSet()
-
-					snapshots = 
-						cfAPI.getGameVersions().map {
-							it.name
-						}.filter {
-							it.endsWith("-Snapshot")
-						}.filter { cfVersion ->
-							mcVersions.contains(cfVersion)
-						}.toHashSet()
-				} else {
-					snapshots = HashSet()
-				}
-				
-				minecraftVersions.addAll(snapshots)
-
-				optional("embeddium")
-			}
-
-			discord {
-				webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK").orElse("")
-
-				username = "Zume Releases"
-
-				avatarUrl = "https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
-
-				content = changelog.map { changelog ->
-					"# Zume ${Zume.version} has been released!\nChangelog: ```md\n${changelog}\n```"
-				}
-
-				setPlatforms(platforms["modrinth"], platforms["github"], platforms["curseforge"])
-			}
-		}
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		projectID = "o6qsdrrQ"
+		projectSlug = "zume"
 	}
 	
-	tasks.withType<PublishModTask> {
-		dependsOn(compressJar, sourcesJar)
+	curseforge {
+		supportChannels(PublishChannel.RELEASE)
+		
+		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		projectID = 927564
+		projectSlug = "zume"
 	}
+	
+	val iconURL = "https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
+	
+	discord {
+		supportAllChannelsExcluding(PublishChannel.RELEASE)
+		
+		webhookURL = providers.environmentVariable("DISCORD_WEBHOOK")
+		avatarURL = iconURL
 
-	tasks.publishMods {
-		if (!publishMods.dryRun.get() && releaseChannel.releaseType == null) {
-			doLast {
-				val http = HttpUtils()
-
-				val currentTag: Tag? = releaseTags.getOrNull(0)
-				val buildChangeLog =
-					grgit.log {
-						if (currentTag != null)
-							excludes = listOf(currentTag.name)
-						includes = listOf("HEAD")
-					}.joinToString("\n") { commit ->
-						val id = commit.abbreviatedId
-						val message = commit.fullMessage.substringBefore('\n').trim()
-						val author = commit.author.name
-						"- [${id}] $message (${author})"
-					}
-
-				val compareStart = currentTag?.name ?: grgit.log().minBy { it.dateTime }.id
-				val compareEnd = releaseTagPrefix + Zume.version
-				val compareLink = "https://github.com/Nolij/Zume/compare/${compareStart}...${compareEnd}"
-				
-				val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
-				val releaseChangeLog = getChangelog()
-				val file = publishMods.file.asFile.get()
-				
-				var content = "# [Zume Test Build ${Zume.version}]" +
-					"(<https://github.com/Nolij/Zume/releases/tag/${releaseTagPrefix}${Zume.version}>) has been released!\n" +
-					"Changes since last build: <${compareLink}>"
-				
-				if (buildChangeLog.isNotBlank())
-					content += " ```\n${buildChangeLog}\n```"
-				content += "\nChanges since last release: ```md\n${releaseChangeLog}\n```"
-
-				val webhook = DiscordAPI.Webhook(
-					content,
-					"Zume Test Builds",
-					"https://github.com/Nolij/Zume/raw/master/icon_padded_large.png"
-				)
-
-				val bodyBuilder = MultipartBody.Builder()
-					.setType(MultipartBody.FORM)
-					.addFormDataPart("payload_json", http.json.encodeToString(webhook))
-					.addFormDataPart("files[0]", file.name, file.asRequestBody("application/java-archive".toMediaTypeOrNull()))
-				
-				var fileIndex = 1
-				for (additionalFile in publishMods.additionalFiles) {
-					bodyBuilder.addFormDataPart(
-						"files[${fileIndex++}]", 
-						additionalFile.name, 
-						additionalFile.asRequestBody(Files.probeContentType(additionalFile.toPath()).toMediaTypeOrNull())
-					)
-				}
-
-				val requestBuilder = Request.Builder()
-					.url(webhookUrl.get())
-					.post(bodyBuilder.build())
-					.header("Content-Type", "multipart/form-data")
-
-				http.httpClient.newCall(requestBuilder.build()).execute().close()
-			}
-		}
+		testBuildPreset(modName = "Zume", repoURL = "https://github.com/Nolij/Zume")
+	}
+	
+	discord {
+		supportChannels(PublishChannel.RELEASE)
+		
+		webhookURL = providers.environmentVariable("DISCORD_WEBHOOK")
+		avatarURL = iconURL
+		
+		releasePreset(modName = "Zume")
 	}
 }
