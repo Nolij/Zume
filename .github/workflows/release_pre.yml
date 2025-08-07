@@ -20,8 +20,8 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache-read-only: true
-      - name: :publishMods
-        run: ./gradlew publishMods -Prelease_channel=PRE_RELEASE --no-daemon
+      - name: Publish
+        run: ./gradlew taugradle_publish -Prelease_channel=PRE_RELEASE --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEV_WEBHOOK }}
