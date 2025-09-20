@@ -160,7 +160,7 @@ public class Zume {
 	}
 	
 	public static boolean cinematicCameraEnabledHook(final boolean original) {
-		if (Zume.config.enableCinematicZoom && isActive())
+		if (Zume.config.enableCinematicZoom && isActive() && shouldUseFirstPersonZoom())
 			return true;
 		
 		return original;
