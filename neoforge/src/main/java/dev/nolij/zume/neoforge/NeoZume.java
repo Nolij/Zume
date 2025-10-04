@@ -67,8 +67,19 @@ public class NeoZume implements IZumeImplementation {
 	private static final Class<?> RENDER_FRAME_EVENT = METHOD_HANDLE_HELPER.getClassOrNull(
 		"net.neoforged.neoforge.client.event.RenderFrameEvent$Pre");
 	
+	public static boolean isClient() {
+		var getDistMethod = METHOD_HANDLE_HELPER.getMethodOrNull(FMLEnvironment.class, "getDist");
+		Dist dist;
+		if (getDistMethod != null) {
+			dist = (Dist)getDistMethod.invoke();
+		} else {
+			dist = FMLEnvironment.dist;
+		}
+		return dist.isClient();
+	}
+	
 	public NeoZume(IEventBus modEventBus, ModContainer modContainer) {
-		if (!FMLEnvironment.dist.isClient())
+		if (!isClient())
 			return;
 		
 		Zume.LOGGER.info("Loading NeoZume...");

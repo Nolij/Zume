@@ -78,6 +78,11 @@ public class MethodHandleHelper {
 	}
 	
 	public @Nullable MethodHandle getConstructorOrNull(@Nullable final Class<?> clazz,
+	                                                   @NotNull final MethodType methodType) {
+		return getConstructorOrNull(clazz, methodType, methodType.parameterArray());
+	}
+	
+	public @Nullable MethodHandle getConstructorOrNull(@Nullable final Class<?> clazz,
 	                                                   @NotNull final MethodType methodType,
 	                                                   @Nullable Class<?>... parameterTypes) {
 		if (clazz == null || Arrays.stream(parameterTypes).anyMatch(Objects::isNull))
