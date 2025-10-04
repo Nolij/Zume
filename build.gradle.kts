@@ -400,7 +400,7 @@ tasks.shadowJar {
 	
 	configurations = immutableListOf(shade)
 
-	archiveClassifier = "deobfuscated"
+	archiveClassifier = null
 	isPreserveFileTimestamps = false
 	isReproducibleFileOrder = true
 	
