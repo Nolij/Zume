@@ -19,7 +19,7 @@ public abstract class CameraMixin {
 	
 	@Dynamic
 	@Group(name = "zume$thirdPersonCameraHook", min = 1, max = 1)
-	@ModifyArg(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_4184;method_19318(F)F", remap = false), require = 0)
+	@ModifyArg(method = "method_19321*", remap = false, at = @At(value = "INVOKE", target = "Lnet/minecraft/class_4184;method_19318(F)F", remap = false), require = 0)
 	public float zume$update$clipToSpace(float original) {
         return (float) Zume.thirdPersonCameraHook(original);
 	}

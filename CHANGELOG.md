@@ -1,3 +1,2 @@
-- fix config bug
-- support 1.21.9+
+- fix Fabric 21.11
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
