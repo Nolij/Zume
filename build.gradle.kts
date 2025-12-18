@@ -528,7 +528,7 @@ python {
 	scope = PythonExtension.Scope.VIRTUALENV
 	envPath = "${project.rootDir}/.gradle/python"
 	pip("portablemc:${"portablemc_version"()}")
-	pip("certifi:2024.12.14")
+	pip("certifi:2025.11.12")
 }
 
 val smokeTest by tasks.registering(SmokeTestTask::class) {
