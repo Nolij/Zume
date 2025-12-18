@@ -1,12 +1,12 @@
 package dev.nolij.zume.neoforge.integration.embeddium;
 
-import dev.nolij.zume.api.config.v1.ZumeConfig;
-import dev.nolij.zume.api.config.v1.ZumeConfigAPI;
+import dev.nolij.zume.impl.Zume;
 import dev.nolij.zume.impl.ZumeConstants;
+import dev.nolij.zume.impl.config.ZumeConfigImpl;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
 import org.embeddedt.embeddium.api.options.structure.OptionStorage;
 
-public final class ZumeOptionsStorage implements OptionStorage<ZumeConfig> {
+public final class ZumeOptionsStorage implements OptionStorage<ZumeConfigImpl> {
 	
 	//region Pages
 	public static final OptionIdentifier<Void> GENERAL =
@@ -60,16 +60,16 @@ public final class ZumeOptionsStorage implements OptionStorage<ZumeConfig> {
 		OptionIdentifier.create(ZumeConstants.MOD_ID, "disable", boolean.class);
 	//endregion
 	
-	private final ZumeConfig storage = ZumeConfigAPI.getSnapshot();
+	private final ZumeConfigImpl storage = Zume.config.clone();
 	
 	@Override
-	public ZumeConfig getData() {
+	public ZumeConfigImpl getData() {
 		return storage;
 	}
 	
 	@Override
 	public void save() {
-		ZumeConfigAPI.replaceConfig(storage);
+		ZumeConfigImpl.replace(storage);
 	}
 	
 }

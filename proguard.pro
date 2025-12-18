@@ -8,7 +8,6 @@
 -repackageclasses zume
 -keepattributes Runtime*Annotations,AnnotationDefault # keep annotations
 
--keep public class dev.nolij.zume.api.** { public *; } # public APIs
 -keepclassmembers class dev.nolij.zume.impl.config.ZumeConfigImpl { public <fields>; } # dont rename config fields
 -keepclassmembers,allowoptimization class dev.nolij.zume.ZumeMixinPlugin {
     public *;

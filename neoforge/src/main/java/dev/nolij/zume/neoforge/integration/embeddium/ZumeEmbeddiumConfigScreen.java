@@ -60,15 +60,15 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 				.setId(ENABLE_ZOOM_SCROLLING)
 				.setControl(TickBoxControl::new)
 				.setBinding(
-					(config, value) -> config.isZoomScrollingEnabled = value,
-					config -> config.isZoomScrollingEnabled)
+					(config, value) -> config.enableZoomScrolling = value,
+					config -> config.enableZoomScrolling)
 				.build())
 			.add(OptionImpl.createBuilder(boolean.class, storage)
 				.setId(ENABLE_CINEMATIC_ZOOM)
 				.setControl(TickBoxControl::new)
 				.setBinding(
-					(config, value) -> config.isCinematicZoomEnabled = value,
-					config -> config.isCinematicZoomEnabled)
+					(config, value) -> config.enableCinematicZoom = value,
+					config -> config.enableCinematicZoom)
 				.build())
 			.add(OptionImpl.createBuilder(int.class, storage)
 				.setId(MOUSE_SENSITIVITY_FLOOR)
@@ -88,15 +88,15 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 				.setId(FIRST_PERSON_TOGGLE_MODE)
 				.setControl(TickBoxControl::new)
 				.setBinding(
-					(config, value) -> config.isFirstPersonToggleModeEnabled = value,
-					config -> config.isFirstPersonToggleModeEnabled)
+					(config, value) -> config.toggleMode = value,
+					config -> config.toggleMode)
 				.build())
 			.add(OptionImpl.createBuilder(boolean.class, storage)
 				.setId(THIRD_PERSON_TOGGLE_MODE)
 				.setControl(TickBoxControl::new)
 				.setBinding(
-					(config, value) -> config.isThirdPersonToggleModeEnabled = value,
-					config -> config.isThirdPersonToggleModeEnabled)
+					(config, value) -> config.thirdPersonToggleMode = value,
+					config -> config.thirdPersonToggleMode)
 				.build())
 			.build());
 		generalGroups.add(OptionGroup.createBuilder()
@@ -109,8 +109,8 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 						     ? Component.literal(v + "ms")
 						     : Component.translatable("zume.instant")))
 				.setBinding(
-					(config, value) -> config.zoomSmoothnessMilliseconds = value.shortValue(),
-					config -> (int) config.zoomSmoothnessMilliseconds)
+					(config, value) -> config.zoomSmoothnessMs = value.shortValue(),
+					config -> (int) config.zoomSmoothnessMs)
 				.build())
 			.build());
 		generalGroups.add(OptionGroup.createBuilder()
@@ -123,8 +123,8 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 						     ? Component.translatable("zume.blocks", v)
 						     : Component.translatable("zume.disabled")))
 				.setBinding(
-					(config, value) -> config.maximumThirdPersonZoomBlocks = value,
-					config -> (int) config.maximumThirdPersonZoomBlocks)
+					(config, value) -> config.maxThirdPersonZoomDistance = value,
+					config -> (int) config.maxThirdPersonZoomDistance)
 				.build())
 			.add(OptionImpl.createBuilder(int.class, storage)
 				.setId(MIN_THIRD_PERSON_ZOOM_BLOCKS)
@@ -132,8 +132,8 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 					new SliderControl(option, 0, 10, 1,
 						v -> Component.translatable("zume.blocks", v > 0 ? v : 0.5)))
 				.setBinding(
-					(config, value) -> config.minimumThirdPersonZoomBlocks = value > 0 ? value : 0.5,
-					config -> (int) config.minimumThirdPersonZoomBlocks)
+					(config, value) -> config.minThirdPersonZoomDistance = value > 0 ? value : 0.5,
+					config -> (int) config.minThirdPersonZoomDistance)
 				.build())
 			.build());
 		
@@ -162,15 +162,15 @@ public class ZumeEmbeddiumConfigScreen implements EventHandlerRegistrar.Handler<
 					new SliderControl(option, -2, 1, 1,
 						v -> Component.literal(String.valueOf(Math.pow(10, v)))))
 				.setBinding(
-					(config, value) -> config.minimumFOV = Math.pow(10, value),
-					config -> (int) Math.log10(config.minimumFOV))
+					(config, value) -> config.minFOV = Math.pow(10, value),
+					config -> (int) Math.log10(config.minFOV))
 				.build())
 			.add(OptionImpl.createBuilder(boolean.class, storage)
 				.setId(DISABLE)
 				.setControl(TickBoxControl::new)
 				.setBinding(
-					(config, value) -> config.isDisabled = value,
-					config -> config.isDisabled)
+					(config, value) -> config.disable = value,
+					config -> config.disable)
 				.setFlags(OptionFlag.REQUIRES_GAME_RESTART)
 				.build())
 			.build());

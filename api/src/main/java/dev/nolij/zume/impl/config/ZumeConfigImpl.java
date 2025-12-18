@@ -4,13 +4,16 @@ import dev.nolij.zson.Zson;
 import dev.nolij.zson.ZsonField;
 import dev.nolij.zume.impl.Zume;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
-public class ZumeConfigImpl {
+public class ZumeConfigImpl implements Cloneable {
 	
 	@ZsonField(comment = """
 		Enable Cinematic Camera while zooming.
@@ -157,6 +160,11 @@ public class ZumeConfigImpl {
 		} catch (IOException e) {
 			Zume.LOGGER.error("Failed to write config file", e);
 		}
+	}
+	
+	@Override
+	public ZumeConfigImpl clone() {
+		return (ZumeConfigImpl) super.clone();
 	}
 	
 	private static Consumer<ZumeConfigImpl> consumer;
