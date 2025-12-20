@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
-public class ZumeConfigImpl implements Cloneable {
+public class ZumeConfig implements Cloneable {
 	
 	@ZsonField(comment = """
 		Enable Cinematic Camera while zooming.
@@ -104,7 +104,7 @@ public class ZumeConfigImpl implements Cloneable {
 	private static final int MAX_RETRIES = 5;
 	private static final Zson ZSON = new Zson();
 	
-	private static ZumeConfigImpl readFromFile(final File configFile) {
+	private static ZumeConfig readFromFile(final File configFile) {
 		if (configFile == null || !configFile.exists())
 			return null;
 		
@@ -112,7 +112,7 @@ public class ZumeConfigImpl implements Cloneable {
 		while (true) {
 			try {
 				//noinspection DataFlowIssue
-				return Zson.map2Obj(Zson.parse(new FileReader(configFile)), ZumeConfigImpl.class);
+				return Zson.map2Obj(Zson.parse(new FileReader(configFile)), ZumeConfig.class);
             } catch (IllegalArgumentException | AssertionError e) {
 				if (++i < MAX_RETRIES) {
                     try {
@@ -132,11 +132,11 @@ public class ZumeConfigImpl implements Cloneable {
         }
 	}
 	
-	private static ZumeConfigImpl readConfigFile() {
-		ZumeConfigImpl result = readFromFile(getConfigFile());
+	private static ZumeConfig readConfigFile() {
+		ZumeConfig result = readFromFile(getConfigFile());
 		
 		if (result == null)
-			result = new ZumeConfigImpl();
+			result = new ZumeConfig();
 		
 		return result;
 	}
@@ -163,16 +163,16 @@ public class ZumeConfigImpl implements Cloneable {
 	}
 	
 	@Override
-	public ZumeConfigImpl clone() {
-		return (ZumeConfigImpl) super.clone();
+	public ZumeConfig clone() {
+		return (ZumeConfig) super.clone();
 	}
 	
-	private static Consumer<ZumeConfigImpl> consumer;
+	private static Consumer<ZumeConfig> consumer;
 	private static IFileWatcher configWatcher;
 	private static File instanceFile = null;
 	private static File globalFile = null;
 	
-	public static void replace(final ZumeConfigImpl newConfig) throws InterruptedException {
+	public static void replace(final ZumeConfig newConfig) throws InterruptedException {
 		try {
 			configWatcher.lock();
 			newConfig.writeToFile(getConfigFile());
@@ -214,12 +214,12 @@ public class ZumeConfigImpl implements Cloneable {
 	public static void reloadConfig() {
 		Zume.LOGGER.info("Reloading config...");
 		
-		final ZumeConfigImpl newConfig = readConfigFile();
+		final ZumeConfig newConfig = readConfigFile();
 		
 		consumer.accept(newConfig);
 	}
 	
-	public static void init(final Path instanceConfigPath, final String fileName, final Consumer<ZumeConfigImpl> configConsumer) {
+	public static void init(final Path instanceConfigPath, final String fileName, final Consumer<ZumeConfig> configConsumer) {
 		if (consumer != null)
 			throw new AssertionError("Config already initialized!");
 		
@@ -229,7 +229,7 @@ public class ZumeConfigImpl implements Cloneable {
 			globalFile = GLOBAL_CONFIG_PATH.resolve(fileName).toFile();
 		}
 		
-		ZumeConfigImpl config = readConfigFile();
+		ZumeConfig config = readConfigFile();
 		
 		// write new options and comment updates to disk
 		config.writeToFile(getConfigFile());
@@ -242,7 +242,7 @@ public class ZumeConfigImpl implements Cloneable {
 			if (config.disable) {
 				configWatcher = nullWatcher;
 			} else {
-				configWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfigImpl::reloadConfig);
+				configWatcher = FileWatcher.onFileChange(getConfigFile().toPath(), ZumeConfig::reloadConfig);
 			}
 		} catch (IOException e) {
 			Zume.LOGGER.error("Failed to create file watcher", e);

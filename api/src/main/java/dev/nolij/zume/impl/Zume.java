@@ -4,7 +4,7 @@ import dev.nolij.libnolij.util.EasingUtil;
 import dev.nolij.libnolij.util.MathUtil;
 import dev.nolij.libnolij.util.MixinUtil;
 import dev.nolij.libnolij.util.UnsafeUtil;
-import dev.nolij.zume.impl.config.ZumeConfigImpl;
+import dev.nolij.zume.impl.config.ZumeConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +40,7 @@ public class Zume {
 	
 	//region Public Members
 	public static IZumeImplementation implementation;
-	public static ZumeConfigImpl config;
+	public static ZumeConfig config;
 	public static boolean disabled = false;
 	//endregion
 	
@@ -60,7 +60,7 @@ public class Zume {
 		
 		Zume.implementation = implementation;
 		
-		ZumeConfigImpl.init(instanceConfigPath, CONFIG_FILE_NAME, config -> {
+		ZumeConfig.init(instanceConfigPath, CONFIG_FILE_NAME, config -> {
 			Zume.config = config;
 			zoom.update(config.zoomSmoothnessMs, config.animationEasingExponent);
 		});
@@ -130,7 +130,7 @@ public class Zume {
 	
 	//region API Methods
 	public static void openConfigFile() {
-		final File configFile = ZumeConfigImpl.getConfigFile();
+		final File configFile = ZumeConfig.getConfigFile();
 		try {
 			final String CONFIG_PATH = configFile.getCanonicalPath();
 			
@@ -170,7 +170,7 @@ public class Zume {
 		if (!isActive() || !shouldUseFirstPersonZoom())
 			return original;
 		
-		return original * EasingUtil.out(config.mouseSensitivityFloor, 1D, getZoom(), 1);
+		return original * EasingUtil.linear(config.mouseSensitivityFloor, 1D, getZoom());
 	}
 	
 	public static boolean isMouseScrollHookActive() {
