@@ -11,7 +11,6 @@ buildConfig {
 
 	useJavaOutput()
 
-	// the below errors shown by IntelliJ can be safely ignored; Jabel works around this
 	buildConfigField("MOD_ID", "mod_id"())
 	buildConfigField("MOD_VERSION", rootProject.tau.versioning.version)
 	buildConfigField("MOD_NAME", "mod_name"())
