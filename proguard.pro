@@ -5,6 +5,7 @@
 -allowaccessmodification
 #noinspection ShrinkerInvalidFlags
 -optimizeaggressively
+-overloadaggressively
 -repackageclasses zume
 -keepattributes Runtime*Annotations,AnnotationDefault # keep annotations
 
