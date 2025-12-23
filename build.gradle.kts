@@ -1,34 +1,32 @@
 @file:Suppress("UnstableApiUsage")
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.nolij.zumegradle.DeflateAlgorithm
-import dev.nolij.zumegradle.JsonShrinkingType
 import dev.nolij.zumegradle.MixinConfigMergingTransformer
 import dev.nolij.zumegradle.entryprocessing.EntryProcessors
 import dev.nolij.zumegradle.smoketest.SmokeTest.Config
-import dev.nolij.zumegradle.task.AdvzipTask
-import dev.nolij.zumegradle.task.CopyJarTask
-import dev.nolij.zumegradle.task.JarEntryModificationTask
-import dev.nolij.zumegradle.task.JvmdgStubCheckTask
-import dev.nolij.zumegradle.task.ProguardTask
 import dev.nolij.zumegradle.task.SmokeTestTask
-import okhttp3.internal.immutableListOf
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
+import org.taumc.gradle.compression.DeflateAlgorithm
+import org.taumc.gradle.compression.JsonShrinkingType
+import org.taumc.gradle.compression.task.AdvzipTask
+import org.taumc.gradle.compression.task.CopyJarTask
+import org.taumc.gradle.compression.task.JarEntryModificationTask
+import org.taumc.gradle.compression.task.ProguardTask
 import org.taumc.gradle.minecraft.ModEnvironment
 import org.taumc.gradle.minecraft.ModLoader
 import org.taumc.gradle.publishing.api.PublishChannel
 import ru.vyarus.gradle.plugin.python.PythonExtension
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
-import xyz.wagyourtail.unimined.util.capitalized
 import kotlin.math.max
 
 plugins {
     id("java")
 	id("maven-publish")
 	id("org.taumc.gradle.versioning")
+	id("org.taumc.gradle.compression")
 	id("org.taumc.gradle.publishing")
 	id("com.gradleup.shadow")
 	id("xyz.wagyourtail.jvmdowngrader")
@@ -127,6 +125,7 @@ allprojects {
 		}
 		maven("https://maven.blamejared.com")
 		maven("https://maven.taumc.org/releases")
+		mavenLocal()
 	}
 	
 	tasks.withType<JavaCompile> {
@@ -161,7 +160,7 @@ allprojects {
 			.mapValues { entry -> entry.value as String })
 		props["mod_version"] = rootProject.tau.versioning.version
 
-		filesMatching(immutableListOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
+		filesMatching(listOf("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")) {
 			expand(props)
 		}
 	}
@@ -343,7 +342,7 @@ tasks.shadowJar {
 	exclude("LICENSE_zson")
 	exclude("LICENSE_libnolij")
 	
-	configurations = immutableListOf(shade)
+	configurations = listOf(shade)
 	archiveClassifier = "deobfuscated"
 	
 	val apiJar = project(":api").tasks.jar
@@ -356,7 +355,7 @@ tasks.shadowJar {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 			exclude("fabric.mod.json", "mcmod.info", "META-INF/mods.toml", "pack.mcmeta")
 
-			filesMatching(immutableListOf(
+			filesMatching(listOf(
 				"dev/nolij/zume/lexforge/LexZume.class",
 				"dev/nolij/zume/lexforge18/LexZume18.class",
 				"dev/nolij/zume/lexforge16/LexZume16.class",
@@ -433,7 +432,7 @@ val proguardJar by tasks.registering(ProguardTask::class) {
 	jmod("java.base")
 	jmod("java.desktop")
 
-	classpath.addAll(
+	classpath.from(
 		uniminedImpls.flatMap { implName -> project(":$implName").unimined.minecrafts.values }.flatMap { minecraftConfig ->
 			val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
 
@@ -453,6 +452,37 @@ val proguardJar by tasks.registering(ProguardTask::class) {
 	
 	archiveClassifier = "proguard"
 }
+
+//subprojects {
+//	val subProject = this
+//	val implName = subProject.name
+//	
+//	if (implName in uniminedImpls) {
+//		proguardJar {
+//			classpath.from(
+//				provider {
+//					subProject.unimined.minecrafts.values
+//						.flatMap { minecraftConfig ->
+//							val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
+//							
+//							val minecrafts = listOf(
+//								minecraftConfig.sourceSet.compileClasspath.files,
+//								minecraftConfig.sourceSet.runtimeClasspath.files
+//							)
+//								.flatten()
+//								.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
+//								.toHashSet()
+//							
+//							return@flatMap minecraftConfig.mods
+//								.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
+//								.filter { it.extension == "jar" && !it.name.startsWith("zume") }
+//								.plus(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile())
+//						}
+//				}
+//			)
+//		}
+//	}
+//}
 
 val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 	dependsOn(proguardJar)

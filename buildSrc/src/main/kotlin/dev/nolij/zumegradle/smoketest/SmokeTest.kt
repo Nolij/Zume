@@ -123,8 +123,8 @@ class SmokeTest(
 			val extraArgs = mutableListOf<String>()
 			
 			val jvmVersion = config.jvmVersion ?: MojangMetaApi.getJavaVersion(config.mcVersion)
-			val javaVm = project.extensions.getByType(JavaToolchainService::class.java).launcherFor { 
-				languageVersion.set(JavaLanguageVersion.of(jvmVersion))
+			val javaVm = project.extensions.getByType(JavaToolchainService::class.java).launcherFor {
+				it.languageVersion.set(JavaLanguageVersion.of(jvmVersion))
 			}.orNull ?: error("Could not find JVM for version $jvmVersion\n")
 			
 			extraArgs.add("--jvm=${javaVm.executablePath}")

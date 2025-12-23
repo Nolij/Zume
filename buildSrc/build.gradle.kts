@@ -2,7 +2,7 @@ import java.util.Properties
 
 plugins {
 	id("idea")
-	`kotlin-dsl`
+	kotlin("jvm") version("2.3.0")
 }
 
 idea.module {

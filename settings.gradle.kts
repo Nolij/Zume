@@ -16,6 +16,7 @@ pluginManagement {
 
 		id("org.gradle.toolchains.foojay-resolver-convention") version(property("foojay_resolver_convention_version"))
 		id("org.taumc.gradle.versioning") version(property("taugradle_version"))
+		id("org.taumc.gradle.compression") version(property("taugradle_version"))
 		id("org.taumc.gradle.publishing") version(property("taugradle_version"))
 		id("com.gradleup.shadow") version(property("shadow_version"))
 		id("xyz.wagyourtail.jvmdowngrader") version(property("jvmdg_version"))

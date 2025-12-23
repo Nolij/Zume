@@ -51,7 +51,7 @@ unimined.minecraft {
 repositories {
 	maven("https://maven.glass-launcher.net/releases")
 	maven("https://maven.glass-launcher.net/snapshots")
-	maven("https://nexus.velocitypowered.com/repository/maven-public/")
+	maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
