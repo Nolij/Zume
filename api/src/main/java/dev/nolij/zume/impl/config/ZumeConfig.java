@@ -123,7 +123,9 @@ public class ZumeConfig implements Cloneable {
                         return null;
                     }
                 }
-				Zume.LOGGER.error("Error parsing config after {} retries: ", i, e);
+				// The two-arg variant of Logger.error() does not exist in old log4j versions, like 1.7.10's
+				//noinspection StringConcatenationArgumentToLogCall
+				Zume.LOGGER.error("Error parsing config after " + i + " retries: ", e);
 				return null;
 			} catch (IOException e) {
 				Zume.LOGGER.error("Error reading config: ", e);
