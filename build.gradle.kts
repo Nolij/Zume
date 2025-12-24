@@ -557,7 +557,7 @@ tasks.assemble {
 python {
 	scope = PythonExtension.Scope.VIRTUALENV
 	envPath = "${project.rootDir}/.gradle/python"
-	pip("portablemc:${"portablemc_version"()}")
+	pip("git+https://github.com/TauMC/portablemc.git@${"portablemc_commit"()}#egg=portablemc-${"portablemc_version"()}")
 	pip("certifi:2025.11.12")
 }
 
