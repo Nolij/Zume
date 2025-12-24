@@ -453,36 +453,36 @@ val proguardJar by tasks.registering(ProguardTask::class) {
 	archiveClassifier = "proguard"
 }
 
-//subprojects {
-//	val subProject = this
-//	val implName = subProject.name
-//	
-//	if (implName in uniminedImpls) {
-//		proguardJar {
-//			classpath.from(
-//				provider {
-//					subProject.unimined.minecrafts.values
-//						.flatMap { minecraftConfig ->
-//							val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
-//							
-//							val minecrafts = listOf(
-//								minecraftConfig.sourceSet.compileClasspath.files,
-//								minecraftConfig.sourceSet.runtimeClasspath.files
-//							)
-//								.flatten()
-//								.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
-//								.toHashSet()
-//							
-//							return@flatMap minecraftConfig.mods
-//								.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
-//								.filter { it.extension == "jar" && !it.name.startsWith("zume") }
-//								.plus(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile())
-//						}
-//				}
-//			)
-//		}
-//	}
-//}
+subprojects {
+	val subProject = this
+	val implName = subProject.name
+
+	if (implName in uniminedImpls) {
+		proguardJar {
+			classpath.from(
+				provider {
+					subProject.unimined.minecrafts.values
+						.flatMap { minecraftConfig ->
+							val prodNamespace = minecraftConfig.mcPatcher.prodNamespace
+
+							val minecrafts = listOf(
+								minecraftConfig.sourceSet.compileClasspath.files,
+								minecraftConfig.sourceSet.runtimeClasspath.files
+							)
+								.flatten()
+								.filter { !minecraftConfig.isMinecraftJar(it.toPath()) }
+								.toHashSet()
+
+							return@flatMap minecraftConfig.mods
+								.getClasspathAs(prodNamespace, prodNamespace, minecrafts)
+								.filter { it.extension == "jar" && !it.name.startsWith("zume") }
+								.plus(minecraftConfig.getMinecraft(prodNamespace, prodNamespace).toFile())
+						}
+				}
+			)
+		}
+	}
+}
 
 val minifyJar by tasks.registering(JarEntryModificationTask::class) {
 	dependsOn(proguardJar)
