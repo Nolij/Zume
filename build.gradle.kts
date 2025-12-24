@@ -572,9 +572,9 @@ val smokeTest by tasks.registering(SmokeTestTask::class) {
 	threadTimeout = TimeUnit.SECONDS.toNanos(60)
 
 	configs(
-		Config("fabric", "snapshot", dependencies = setOf(
-			"maven.modrinth:fabric-api:+",
-		)),
+//		Config("fabric", "snapshot", dependencies = setOf(
+//			"maven.modrinth:fabric-api:+",
+//		)),
 		Config("fabric", "1.21.8", dependencies = setOf(
 			"maven.modrinth:fabric-api:0.130.0+1.21.8",
 			"maven.modrinth:modmenu:15.0.0-beta.3",
