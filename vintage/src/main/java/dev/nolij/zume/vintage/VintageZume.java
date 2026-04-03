@@ -32,6 +32,8 @@ import static dev.nolij.zume.impl.ZumeConstants.*;
 	guiFactory = "dev.nolij.zume.vintage.VintageConfigProvider")
 public class VintageZume implements IZumeImplementation {
 	
+	private double lastFOV = -1;
+	
 	public VintageZume() {
 		if (!FMLLaunchHandler.side().isClient())
 			return;
@@ -79,8 +81,14 @@ public class VintageZume implements IZumeImplementation {
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
 		if (Zume.isFOVHookActive()) {
-			event.setFOV((float) Zume.fovHook(event.getFOV()));
-			Minecraft.getMinecraft().renderGlobal.setDisplayListEntitiesDirty();
+			double newFOV = Zume.fovHook(event.getFOV());
+			event.setFOV((float) newFOV);
+			
+			if (newFOV != lastFOV) {
+				Minecraft.getMinecraft().renderGlobal.setDisplayListEntitiesDirty();
+				lastFOV = newFOV;
+			}
+			
 		}
 	}
 	
