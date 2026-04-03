@@ -80,6 +80,7 @@ public class VintageZume implements IZumeImplementation {
 	public void calculateFOV(EntityViewRenderEvent.FOVModifier event) {
 		if (Zume.isFOVHookActive()) {
 			event.setFOV((float) Zume.fovHook(event.getFOV()));
+			Minecraft.getMinecraft().renderGlobal.setDisplayListEntitiesDirty();
 		}
 	}
 	
