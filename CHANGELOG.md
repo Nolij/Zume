@@ -1,2 +1,2 @@
-- fix Fabric 21.11
+- fix crash when mods do foolish things like adding camera types -_-
 - further improvements to overall system stability and other minor adjustments have been made to enhance the user experience
