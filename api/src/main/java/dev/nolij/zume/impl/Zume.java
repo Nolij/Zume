@@ -111,10 +111,15 @@ public class Zume {
 			final double from = getThirdPersonStartZoom();
 			final double target;
 			
-			if (implementation.getCameraPerspective() == CameraPerspective.THIRD_PERSON)
-				target = EasingUtil.linear(1D, from, config.defaultZoom);
-			else
-				target = EasingUtil.linear(from, 0D, config.defaultZoom);
+			switch (implementation.getCameraPerspective()) {
+				case THIRD_PERSON:
+				case SUB_LEVEL_VIEW:
+				case SUB_LEVEL_VIEW_UNLOCKED: {
+					target = EasingUtil.linear(1D, from, config.defaultZoom);
+					break;
+				}
+				default: target = EasingUtil.linear(from, 0D, config.defaultZoom);
+			}
 			
 			setZoom(from, target);
 		}
