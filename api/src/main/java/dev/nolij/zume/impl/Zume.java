@@ -111,6 +111,7 @@ public class Zume {
 			final double from = getThirdPersonStartZoom();
 			final double target;
 			
+			// SUB_LEVEL_VIEW and SUB_LEVEL_VIEW_UNLOCKED is for Create Aeronautics compatibility
 			switch (implementation.getCameraPerspective()) {
 				case THIRD_PERSON:
 				case SUB_LEVEL_VIEW:
