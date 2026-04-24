@@ -146,7 +146,14 @@ public class NeoZume implements IZumeImplementation {
 	
 	@Override
 	public CameraPerspective getCameraPerspective() {
-		return CameraPerspective.values()[Minecraft.getInstance().options.getCameraType().ordinal()];
+		final var cameraType = Minecraft.getInstance().options.getCameraType();
+		
+		if (cameraType.isFirstPerson())
+			return CameraPerspective.FIRST_PERSON;
+		else if (cameraType.isMirrored())
+			return CameraPerspective.THIRD_PERSON_FLIPPED;
+		
+		return CameraPerspective.THIRD_PERSON;
 	}
 	
 	private void registerKeyBindings(RegisterKeyMappingsEvent event) {
